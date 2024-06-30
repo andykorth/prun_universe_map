@@ -1,0 +1,82 @@
+/* UniverseMap.css */
+#map-container {
+  width: 100%;
+  height: 100vh; /* Full viewport height */
+  overflow: hidden;
+  position: relative;
+}
+
+#map-container svg {
+  width: 100%;
+  height: 100%;
+}
+
+.info-panel {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 10;
+  font-family: Arial, sans-serif;
+  max-width: 400px;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+.info-panel h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  padding-bottom: 5px;
+}
+
+.planet-list {
+  list-style-type: none;
+  padding-left: 0;
+  margin-top: 5px;
+}
+
+.planet-list li {
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+
+.planet-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.planet-name-tier {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 70%;
+}
+
+.planet-name {
+  flex-grow: 1;
+  margin-right: 10px;
+}
+
+.planet-tier {
+  color: gold;
+  white-space: nowrap;
+  margin-right: 20px;
+}
+
+.facility-indicators {
+  display: flex;
+  align-items: center;
+}
+
+.facility-indicators span {
+  margin-left: 1px;
+}
+
+.cogc-program {
+  margin-bottom: 10px;
+  padding-left: 10px;
+}

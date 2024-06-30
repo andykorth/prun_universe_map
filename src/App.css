@@ -1,0 +1,183 @@
+/* App.css */
+
+body {
+  background-color: #222222;
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  color: white;
+}
+
+.App-header {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: #222222;
+  flex-wrap: wrap; /* Allow wrapping if screen is too narrow */
+}
+
+.App-logo {
+  width: 50px;
+  height: 50px;
+  margin-right: 10px;
+  border-radius: 50%;
+}
+
+.App-header h1 {
+  font-size: 24px;
+  margin: 0;
+  white-space: nowrap; /* Prevent title from wrapping */
+}
+
+.icon-placeholder {
+  width: 50px;
+  height: 50px;
+  background-color: #444444;
+  margin-right: 10px;
+  border-radius: 50%;
+}
+
+.main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+#map-container {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.sidebar {
+  width: 20%;
+  background-color: #333333;
+  transition: width 0.3s ease;
+  position: relative;
+  z-index: 10;
+}
+
+.sidebar.collapsed {
+  width: 30px;
+}
+
+.toggle-btn {
+  position: absolute;
+  top: 10px;
+  left: -30px;
+  background-color: #444444;
+  border: none;
+  color: white;
+  padding: 5px;
+  cursor: pointer;
+}
+
+.sidebar-content {
+  padding: 20px;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.sidebar-content svg {
+  display: inline-block;
+  vertical-align: middle;
+  width: 18px;
+  height: 18px;
+}
+
+.planet-info-sb {
+  margin-bottom: 20px;
+}
+
+.resource-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.concentration-bar-container {
+  width: 100px;
+  background-color: #ddd;
+  height: 10px;
+  margin-left: 5px;
+}
+
+.concentration-bar {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.pathfinding-toggle label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.pathfinding-toggle input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  flex-wrap: wrap; /* Allow wrapping if screen is too narrow */
+}
+
+.search-field {
+  margin-right: 20px;
+  position: relative;
+  flex-grow: 1; /* Allow search field to grow */
+  max-width: 300px; /* Limit maximum width */
+}
+
+.search-field form {
+  display: flex;
+}
+
+.search-field input {
+  flex-grow: 1;
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px 0 0 4px;
+}
+
+.search-field button {
+  padding: 5px 10px;
+  background-color: #f7a600;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.search-field button[type="submit"] {
+  border-radius: 0 4px 4px 0;
+}
+
+.search-field button[type="button"] {
+  border-radius: 4px;
+  margin-left: 5px;
+}
+
+.pathfinding-toggle {
+  white-space: nowrap; /* Prevent checkbox label from wrapping */
+}
+
+.search-notification {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #ff6b6b;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  margin-top: 5px;
+  font-size: 12px;
+  z-index: 10;
+}
