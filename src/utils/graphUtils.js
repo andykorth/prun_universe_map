@@ -29,9 +29,10 @@ export const findShortestPath = (graph, system1, system2, highlightPath) => {
 export const resetGraphState = (nextSelectedSystem) => {
   // Reset all system nodes color and stroke except the background rect and current selection
   d3.selectAll('rect').each(function() {
-    const systemId = d3.select(this).attr('id');
-    if (systemId !== 'rect1' && systemId !== nextSelectedSystem) {
-      d3.select(this)
+    const node = d3.select(this);
+    const systemId = node.attr('id');
+    if (systemId !== 'rect1' && systemId !== nextSelectedSystem && !node.classed('search-highlight')) {
+      node
         .attr('fill', colors.resetSystemFill)
         .attr('fill-opacity', colors.resetSystemFillOpacity)
         .attr('stroke', colors.resetSystemStroke)
@@ -54,9 +55,12 @@ export const highlightPath = (path, systemSelected) => {
 
   // Highlight systems in the path
   path.forEach(system => {
-    d3.select(`#${CSS.escape(system)}`)
-      .attr('fill', colors.systemFill)
-      .attr('stroke', colors.systemStroke);
+  const systemNode = d3.select(`#${CSS.escape(system)}`);
+    if (!systemNode.classed('search-highlight')) {
+      systemNode
+        .attr('fill', colors.systemFill)
+        .attr('stroke', colors.systemStroke);
+    }
   });
 
   // Highlight paths in the path
@@ -88,7 +92,7 @@ export const highlightSelectedSystem = (prevSelectedSystem, nextSelectedSystem, 
   // Reset previous system if it's not part of pathfinding selection
   if (prevSelectedSystem && !pathfindingSelection.includes(prevSelectedSystem)) {
     const prevSystemNode = d3.select(`#${CSS.escape(prevSelectedSystem)}`);
-    if (!prevSystemNode.empty()) {
+    if (!prevSystemNode.empty() && !prevSystemNode.classed('search-highlight')) {
       prevSystemNode
         .attr('fill', colors.resetSystemFill)
         .attr('fill-opacity', colors.resetSystemFillOpacity)
@@ -100,7 +104,7 @@ export const highlightSelectedSystem = (prevSelectedSystem, nextSelectedSystem, 
   // Highlight new system
   if (nextSelectedSystem) {
     const nextSystemNode = d3.select(`#${CSS.escape(nextSelectedSystem)}`);
-    if (!nextSystemNode.empty()) {
+    if (!nextSystemNode.empty() && !nextSystemNode.classed('search-highlight')) {
       nextSystemNode
         .attr('fill', colors.systemFill)
         .attr('stroke', colors.systemStroke)

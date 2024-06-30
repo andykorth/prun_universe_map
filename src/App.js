@@ -3,6 +3,7 @@ import UniverseMap from './components/UniverseMap';
 import Sidebar from './components/Sidebar';
 import PathfindingToggle from './components/PathfindingToggle';
 import SearchField from './components/SearchField';
+import InfoTooltip from './components/InfoTooltip';
 import { GraphProvider } from './contexts/GraphContext';
 import { SelectionProvider } from './contexts/SelectionContext';
 import { SearchProvider } from './contexts/SearchContext';
@@ -20,7 +21,12 @@ const App = () => {
               <h1>Taiyi's Prosperous Universe Map</h1>
               <div className="controls">
                 <SearchField />
-                <PathfindingToggle />
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <PathfindingToggle />
+                  <div style={{ marginLeft: '10px' }}>
+                    <InfoTooltip />
+                  </div>
+                </div>
               </div>
             </header>
             <div className="main-content">

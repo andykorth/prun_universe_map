@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { ChevronRight, ChevronLeft, Earth, Cloud } from 'lucide-react';
 import { GraphContext } from '../contexts/GraphContext';
+import { SearchContext } from '../contexts/SearchContext';
 import { SelectionContext } from '../contexts/SelectionContext';
 
 const ResourceIcon = ({ type }) => {
@@ -66,6 +67,7 @@ const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { universeData, planetData, materials } = useContext(GraphContext);
   const { selectedSystem } = useContext(SelectionContext);
+  const { searchMaterial } = useContext(SearchContext);
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -86,6 +88,10 @@ const Sidebar = () => {
   // Sort planets by PlanetNaturalId
   const sortedPlanets = planets ? [...planets].sort((a, b) => a.PlanetNaturalId.localeCompare(b.PlanetNaturalId)) : null;
 
+  const isHighlighted = (materialId) => {
+    return searchMaterial && searchMaterial === materialId;
+  };
+
   return (
     <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
       <button className="toggle-btn" onClick={toggleSidebar}>
@@ -102,7 +108,20 @@ const Sidebar = () => {
               </h3>
               <ul>
                 {planet.Resources.map((resource, idx) => (
-                  <li key={idx} className="resource-item" style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
+                  <li
+                    key={idx}
+                    className="resource-item"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      marginBottom: '5px',
+                      fontWeight: isHighlighted(resource.MaterialId) ? 'bold' : 'normal',
+                      color: isHighlighted(resource.MaterialId) ? '#4a90e2' : 'inherit',
+                      backgroundColor: isHighlighted(resource.MaterialId) ? 'rgba(74, 144, 226, 0.1)' : 'transparent',
+                      padding: '2px 5px',
+                      borderRadius: '3px'
+                    }}
+                  >
                     <ResourceIcon type={resource.ResourceType} />
                     <span style={{ marginLeft: '5px', minWidth: '50px' }}>{materialsMap[resource.MaterialId]?.Ticker || 'Unknown'}</span>
                     <ConcentrationBar concentration={resource.Factor} />

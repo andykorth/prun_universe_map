@@ -80,8 +80,10 @@ body {
 
 .sidebar-content {
   padding: 20px;
+  padding-bottom: 20px; /* Increase this value for more bottom margin */
   overflow-y: auto;
   height: 100%;
+  box-sizing: border-box; /* This ensures padding is included in the height calculation */
 }
 
 .sidebar-content svg {
@@ -180,4 +182,50 @@ body {
   margin-top: 5px;
   font-size: 12px;
   z-index: 10;
+}
+
+.info-tooltip-container {
+  margin-left: 10px;
+}
+
+.tooltip {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.tooltip h4 {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.tooltip ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+.tooltip li {
+  margin-bottom: 4px;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+}
+
+.search-highlight {
+  /*animation: pulse 1.5s ease-in-out infinite;
+  This is to resource heavy when there is more than a couple search results  */
+  transform-box: fill-box;
+  transform-origin: center;
 }

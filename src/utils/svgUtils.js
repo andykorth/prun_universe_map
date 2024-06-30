@@ -37,18 +37,6 @@ const fetchData = async () => {
 // Call this function when the application initializes
 fetchData();
 
-// Function to normalize the style attribute
-export const normalizeElementStyles = (element) => {
-  const style = element.attrib.get('style', '');
-  const styleDict = Object.fromEntries(style.split(';').filter(Boolean).map(item => item.split(':').map(str => str.trim())));
-
-  for (const [key, value] of Object.entries(styleDict)) {
-    element.setAttribute(key, value);
-  }
-
-  element.removeAttribute('style');
-};
-
 // Function to create facility indicator
 const createFacilityIndicator = (hasFeature, IconComponent) => {
   const color = hasFeature ? '#f7a600' : '#3d3846';
