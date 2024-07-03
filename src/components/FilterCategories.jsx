@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { SearchContext } from '../contexts/SearchContext';
 
 const FilterCategory = ({ title, options, mouseoverText, selectedOptions, onChange }) => (
   <div className="filter-category">
@@ -8,7 +9,7 @@ const FilterCategory = ({ title, options, mouseoverText, selectedOptions, onChan
         <label
           key={option}
           className="checkbox-label"
-          title={mouseoverText[index] || option}
+          data-tooltip={mouseoverText[index] || option}
         >
           <input
             type="checkbox"
@@ -22,14 +23,17 @@ const FilterCategory = ({ title, options, mouseoverText, selectedOptions, onChan
   </div>
 );
 
-const FilterCategories = ({ filters, setFilters }) => {
+const FilterCategories = () => {
+  const { filters, updateFilters } = useContext(SearchContext);
+
   const handleChange = (category, option) => {
-    setFilters(prevFilters => ({
-      ...prevFilters,
-      [category]: prevFilters[category].includes(option)
-        ? prevFilters[category].filter(item => item !== option)
-        : [...prevFilters[category], option]
-    }));
+    const newFilters = {
+      ...filters,
+      [category]: filters[category].includes(option)
+        ? filters[category].filter(item => item !== option)
+        : [...filters[category], option]
+    };
+    updateFilters(newFilters);
   };
 
   return (

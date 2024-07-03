@@ -27,8 +27,9 @@ export const findShortestPath = (graph, system1, system2, highlightPath) => {
 
 // Function to reset all nodes and paths
 export const resetGraphState = (nextSelectedSystem) => {
+  const svg = d3.select('#map-container svg');
   // Reset all system nodes color and stroke except the background rect and current selection
-  d3.selectAll('rect').each(function() {
+  svg.selectAll('rect').each(function() {
     const node = d3.select(this);
     const systemId = node.attr('id');
     if (systemId !== 'rect1' && systemId !== nextSelectedSystem && !node.classed('search-highlight')) {
@@ -41,7 +42,7 @@ export const resetGraphState = (nextSelectedSystem) => {
   });
 
   // Reset all paths color and stroke
-  d3.selectAll('path').each(function() {
+  svg.selectAll('path').each(function() {
     d3.select(this)
       .attr('stroke', colors.resetPathStroke)
       .attr('stroke-width', colors.resetPathStrokeWidth);

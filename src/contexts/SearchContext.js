@@ -27,9 +27,56 @@ export const SearchProvider = ({ children }) => {
   const [searchResults, setSearchResults] = useState([]);
   const { universeData, planetData, materials } = useContext(GraphContext);
   const [searchMaterial, setSearchMaterial] = useState([]);
-  const [searchMaterialConcentration, setSearchMaterialConcentration] = useState([]);
+  const [searchMaterialConcentrationLiquid, setSearchMaterialConcentrationLiquid] = useState([]);
+  const [searchMaterialConcentrationGaseous, setSearchMaterialConcentrationGaseous] = useState([]);
+  const [searchMaterialConcentrationMineral, setSearchMaterialConcentrationMineral] = useState([]);
+  const [filters, setFilters] = useState({
+    planetType: ['Rocky', 'Gaseous'],
+    gravity: ['Low', 'High'],
+    temperature: ['Low', 'High'],
+    pressure: ['Low', 'High']
+  });
+  const [systemSearchTerm, setSystemSearchTerm] = useState('');
+  const [materialSearchTerm, setMaterialSearchTerm] = useState('');
 
-  const handleSearch = useCallback((searchTerm) => {
+
+  const handleSystemSearch = useCallback((searchTerm) => {
+    const sanitizedSearchTerm = sanitizeInput(searchTerm);
+    const results = [];
+    const terms = sanitizedSearchTerm.split(/\s+/)
+        .filter(term => term.length >= 2); // Only keep terms with 1 or more characters
+
+    terms.forEach(term => {
+      const lowerTerm = term.toLowerCase();
+
+      // Search in systems
+      Object.entries(universeData).forEach(([systemId, systemArray]) => {
+      let system = systemArray[0]
+        if (system.Name.toLowerCase().includes(term.toLowerCase()) ||
+            system.NaturalId.toLowerCase().includes(term.toLowerCase())) {
+          results.push({ type: 'system', id: systemId });
+        }
+      });
+
+      // Search in planets
+      Object.entries(planetData).forEach(([systemId, planets]) => {
+        planets.forEach(planet => {
+          if (planet.PlanetName.toLowerCase().includes(lowerTerm) ||
+              planet.PlanetNaturalId.toLowerCase().includes(lowerTerm)) {
+            results.push({ type: 'planet', id: planet.PlanetNaturalId, systemId: systemId });
+          }
+        });
+      });
+    });
+
+    console.log('Results', results);
+    setSearchResults(results);
+    highlightSearchResults(results);
+    return results;
+  }, [universeData, planetData]);
+
+
+  const handleMaterialSearch = useCallback((searchTerm) => {
     const sanitizedSearchTerm = sanitizeInput(searchTerm);
     const results = [];
     const terms = sanitizedSearchTerm.split(/\s+/)
@@ -41,27 +88,6 @@ export const SearchProvider = ({ children }) => {
 
       if (lowerTerm === 'ore') {
         return
-      }
-
-      if (lowerTerm.length >= 3) {
-        // Search in systems
-        Object.entries(universeData).forEach(([systemId, systemArray]) => {
-        let system = systemArray[0]
-          if (system.Name.toLowerCase().includes(term.toLowerCase()) ||
-              system.NaturalId.toLowerCase().includes(term.toLowerCase())) {
-            results.push({ type: 'system', id: systemId });
-          }
-        });
-
-        // Search in planets
-        Object.entries(planetData).forEach(([systemId, planets]) => {
-          planets.forEach(planet => {
-            if (planet.PlanetName.toLowerCase().includes(lowerTerm) ||
-                planet.PlanetNaturalId.toLowerCase().includes(lowerTerm)) {
-              results.push({ type: 'planet', id: planet.PlanetNaturalId, systemId: systemId });
-            }
-          });
-        });
       }
 
       // Search in materials
@@ -91,23 +117,79 @@ export const SearchProvider = ({ children }) => {
       });
     });
 
+    const filteredResults = results.filter(result => {
+      const planet = planetData[result.systemId].find(p => p.PlanetNaturalId === result.planetId);
+
+      if (!planet) {
+        console.warn(`Planet not found for result:`, result);
+        return false;
+      }
+
+      const planetTypeCondition =
+        (filters.planetType.includes('Rocky') && planet.Surface) ||
+        (filters.planetType.includes('Gaseous') && !planet.Surface);
+
+      const gravityCondition =
+        (filters.gravity.includes('Low') && (planet.Gravity < 0.25)) ||
+        (filters.gravity.includes('High') && (planet.Gravity >= 2.5)) ||
+        ((0.25 <= planet.Gravity) && (planet.Gravity <= 2.5));
+
+      const temperatureCondition =
+        (filters.temperature.includes('Low') && (planet.Temperature < -25.0)) ||
+        (filters.temperature.includes('High') && (planet.Temperature >= 75.0)) ||
+        ((-25.0 <= planet.Temperature) && (planet.Temperature <= 75.0));
+
+      const pressureCondition =
+        (filters.pressure.includes('Low') && (planet.Pressure < 0.25)) ||
+        (filters.pressure.includes('High') && (planet.Pressure >= 2.0)) ||
+        ((0.25 <= planet.Pressure) && (planet.Pressure <= 2.0));
+
+      return planetTypeCondition && gravityCondition && temperatureCondition && pressureCondition;
+    });
+
     // Remove duplicates
-    const uniqueResults = Array.from(new Set(results.map(JSON.stringify))).map(JSON.parse);
+    const uniqueResults = Array.from(new Set(filteredResults.map(JSON.stringify))).map(JSON.parse);
     // Obtain the highest concentration
-    const highestFactor = uniqueResults
-      .filter(result => result.type === 'material') // Filter only materials
+    const highestFactorLiquid = uniqueResults
+      .filter(result => result.resourceType === 'LIQUID')
       .reduce((max, item) => item.factor > max ? item.factor : max, -Infinity);
-    setSearchMaterialConcentration(highestFactor)
+    setSearchMaterialConcentrationLiquid(highestFactorLiquid)
+    const highestFactorGaseous = uniqueResults
+      .filter(result => result.resourceType === 'GASEOUS')
+      .reduce((max, item) => item.factor > max ? item.factor : max, -Infinity);
+    setSearchMaterialConcentrationGaseous(highestFactorGaseous)
+    const highestFactorMineral = uniqueResults
+      .filter(result => result.resourceType === 'MINERAL')
+      .reduce((max, item) => item.factor > max ? item.factor : max, -Infinity);
+    setSearchMaterialConcentrationMineral(highestFactorMineral)
 
     console.log('Results', uniqueResults);
     setSearchResults(uniqueResults);
-    highlightSearchResults(uniqueResults, highestFactor);
+    highlightSearchResults(uniqueResults, highestFactorLiquid, highestFactorGaseous, highestFactorMineral);
     return uniqueResults;
-  }, [universeData, planetData, materials]);
+  }, [planetData, materials, filters]);
 
   const clearSearch = useCallback(() => {
     setSearchResults([]);
+    setSystemSearchTerm('');
+    setMaterialSearchTerm('');
+    setSearchMaterial([]);
+    setSearchMaterialConcentrationLiquid([]);
+    setSearchMaterialConcentrationGaseous([]);
+    setSearchMaterialConcentrationMineral([]);
     clearHighlights();
+  }, []);
+
+  const updateFilters = useCallback((newFilters) => {
+    setFilters(newFilters);
+  }, []);
+
+  const updateSystemSearchTerm = useCallback((term) => {
+    setSystemSearchTerm(term);
+  }, []);
+
+  const updateMaterialSearchTerm = useCallback((term) => {
+    setMaterialSearchTerm(term);
   }, []);
 
   return (
@@ -115,9 +197,18 @@ export const SearchProvider = ({ children }) => {
       value={{
         searchResults,
         searchMaterial,
-        searchMaterialConcentration,
-        handleSearch,
+        searchMaterialConcentrationLiquid,
+        searchMaterialConcentrationMineral,
+        searchMaterialConcentrationGaseous,
+        handleSystemSearch,
+        handleMaterialSearch,
         clearSearch,
+        filters,
+        updateFilters,
+        systemSearchTerm,
+        materialSearchTerm,
+        updateSystemSearchTerm,
+        updateMaterialSearchTerm,
       }}
     >
       {children}

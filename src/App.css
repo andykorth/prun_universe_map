@@ -87,6 +87,7 @@ body {
 }
 
 .checkbox-label {
+  position: relative;
   display: flex;
   align-items: center;
   margin-bottom: 3px;
@@ -276,16 +277,21 @@ search-container {
 }
 
 .search-notification {
-  position: relative;
-  display: inline-block;
-  background-color: #ff6b6b;
+  position: fixed;
+  top: 85px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
   color: white;
-  padding: 5px 10px;
-  border-radius: 4px;
-  margin-left: 10px;
-  font-size: 12px;
-  z-index: 10;
-  vertical-align: middle;
+  padding: 10px 20px;
+  border-radius: 5px;
+  z-index: 1000;
+  animation: fadeInOut 3s ease-in-out;
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0; }
+  10%, 90% { opacity: 1; }
 }
 
 .clear-button {
@@ -299,12 +305,8 @@ search-container {
   margin-left: 5px;
 }
 
-.checkbox-label {
-  position: relative;
-}
-
 .checkbox-label:hover::after {
-  content: attr(title);
+  content: attr(data-tooltip);
   position: absolute;
   background-color: #333;
   color: #fff;
@@ -322,4 +324,26 @@ search-container {
   .search-container {
     margin-bottom: 10px;
   }
+}
+
+.planet-condition-icon {
+  position: relative;
+  display: inline-block;
+  margin-left: 5px;
+  cursor: help;
+}
+
+.planet-condition-icon .tooltip {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  padding: 5px;
+  border-radius: 3px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
+  pointer-events: none;
 }

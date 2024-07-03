@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import UniverseMap from './components/UniverseMap';
 import Sidebar from './components/Sidebar';
 import PathfindingToggle from './components/PathfindingToggle';
@@ -13,12 +13,6 @@ import './App.css';
 import logo from './logo.png';
 
 const App = () => {
-  const [filters, setFilters] = useState({
-    planetType: ['Rocky', 'Gaseous'],
-    gravity: ['Low', 'High'],
-    temperature: ['Low', 'High'],
-    pressure: ['Low', 'High']
-  });
   const [showFilters, setShowFilters] = useState(true);
 
   return (
@@ -26,8 +20,6 @@ const App = () => {
       <SelectionProvider>
         <SearchProvider>
           <AppContent
-            filters={filters}
-            setFilters={setFilters}
             showFilters={showFilters}
             setShowFilters={setShowFilters}
           />
@@ -37,8 +29,8 @@ const App = () => {
   );
 };
 
-const AppContent = ({ filters, setFilters, showFilters, setShowFilters }) => {
-  const { clearSearch } = useContext(SearchContext);
+const AppContent = ({ showFilters, setShowFilters }) => {
+  const { clearSearch } = React.useContext(SearchContext);
 
   return (
     <div className="App">
@@ -54,7 +46,7 @@ const AppContent = ({ filters, setFilters, showFilters, setShowFilters }) => {
           >
             {showFilters ? 'Hide Filters' : 'Show Filters'}
           </button>
-          {showFilters && <FilterCategories filters={filters} setFilters={setFilters} />}
+          {showFilters && <FilterCategories />}
         </div>
         <div className="header-right">
           <MaterialSearchField />

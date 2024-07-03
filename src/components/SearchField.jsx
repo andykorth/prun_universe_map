@@ -2,13 +2,12 @@ import React, { useState, useContext } from 'react';
 import { SearchContext } from '../contexts/SearchContext';
 
 const SearchField = () => {
-  const [searchTerm, setSearchTerm] = useState('');
   const [notification, setNotification] = useState('');
-  const { handleSearch } = useContext(SearchContext);
+  const { handleSystemSearch, systemSearchTerm, updateSystemSearchTerm } = useContext(SearchContext);
 
   const onSearch = (e) => {
     e.preventDefault();
-    const result = handleSearch(searchTerm);
+    const result = handleSystemSearch(systemSearchTerm);
     if (result.length === 0) {
       setNotification('No matches found');
       setTimeout(() => setNotification(''), 3000); // Clear notification after 3 seconds
@@ -22,13 +21,13 @@ const SearchField = () => {
       <form onSubmit={onSearch}>
         <input
           type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          value={systemSearchTerm}
+          onChange={(e) => updateSystemSearchTerm(e.target.value)}
           placeholder="Search system, planet..."
         />
         <button type="submit" className="search-button system-search">Search</button>
       </form>
-      <span>{notification && <div className="search-notification">{notification}</div>}</span>
+      {notification && <div className="search-notification">{notification}</div>}
     </div>
   );
 };

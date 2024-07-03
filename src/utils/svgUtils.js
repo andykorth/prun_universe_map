@@ -50,23 +50,25 @@ const createFacilityIndicator = (hasFeature, IconComponent) => {
   return ReactDOMServer.renderToString(iconElement);
 };
 
- const determinePlanetTier = (buildRequirements) => {
+const determinePlanetTier = (buildRequirements) => {
   const tier4 = ['TSH'];
   const tier3 = ['MGC', 'BL', 'HSE', 'INS'];
   const tier2 = ['SEA'];
 
+  let highestTier = 1; // Start with the lowest tier
+
   for (const requirement of buildRequirements) {
     const ticker = requirement.MaterialTicker;
     if (tier4.includes(ticker)) {
-      return 4;
-    } else if (tier3.includes(ticker)) {
-      return 3;
-    } else if (tier2.includes(ticker)) {
-      return 2;
+      return 4; // If we find a Tier 4 material, we can return immediately as it's the highest
+    } else if (tier3.includes(ticker) && highestTier < 3) {
+      highestTier = 3;
+    } else if (tier2.includes(ticker) && highestTier < 2) {
+      highestTier = 2;
     }
   }
 
-  return 1; // Default to tier 1 if no matches
+  return highestTier;
 };
 
 

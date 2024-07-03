@@ -1,6 +1,6 @@
 // Color palette and configuration constants
 export const colors = {
-  searchSystemFill: '#ff3333',
+  searchSystemFill: '#f7a600',
   searchSystemStroke: '#000000',
   searchSystemStrokeWidth: '1px',
   searchSystemFillLowLiquid: '#fcb6b6',

@@ -12,16 +12,17 @@ export const clearHighlights = () => {
   resetGraphState();
 };
 
-export const highlightSearchResults = (searchResults, highestFactor) => {
+export const highlightSearchResults = (searchResults, highestFactorLiquid, highestFactorGaseous, highestFactorMineral) => {
+  console.log(highestFactorLiquid, highestFactorGaseous, highestFactorMineral)
   // Define color scales
   const colorScaleLiquid = d3.scaleLinear()
-    .domain([0, highestFactor])
+    .domain([0, highestFactorLiquid])
     .range([colors.searchSystemFillLowLiquid, colors.searchSystemFillLiquid]);
   const colorScaleGaseous = d3.scaleLinear()
-    .domain([0, highestFactor])
+    .domain([0, highestFactorGaseous])
     .range([colors.searchSystemFillLowGaseous, colors.searchSystemFillGaseous]);
   const colorScaleMineral = d3.scaleLinear()
-    .domain([0, highestFactor])
+    .domain([0, highestFactorMineral])
     .range([colors.searchSystemFillLowMineral, colors.searchSystemFillMineral]);
 
   if (searchResults.length > 0) {
@@ -39,13 +40,8 @@ export const highlightSearchResults = (searchResults, highestFactor) => {
           systemBestResource[systemId] = result;
         } else {
           const current = systemBestResource[systemId];
-
-          // Prefer liquid if it's within 0.2 absolute concentration of the highest
-          if (result.resourceType === 'LIQUID' && (result.factor >= current.factor - 0.2)) {
-            systemBestResource[systemId] = result;
-          } else if (result.factor > current.factor &&
-                     (result.resourceType !== 'LIQUID' || result.factor > current.factor + 0.2)) {
-            // For non-liquid resources, or if liquid is more than 0.2 higher, keep the highest concentration
+          // Simply keep the resource with the highest concentration
+          if (result.factor > current.factor) {
             systemBestResource[systemId] = result;
           }
         }
