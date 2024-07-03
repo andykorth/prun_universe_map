@@ -125,7 +125,7 @@ const Sidebar = () => {
                     <ResourceIcon type={resource.ResourceType} />
                     <span style={{ marginLeft: '5px', minWidth: '50px' }}>{materialsMap[resource.MaterialId]?.Ticker || 'Unknown'}</span>
                     <ConcentrationBar concentration={resource.Factor} />
-                    <span style={{ marginLeft: '5px' }}>{(resource.Factor * 100).toFixed(2)}%</span>
+                    <span className="resource-percentage">{(resource.Factor * 100).toFixed(2)}%</span>
                   </li>
                 ))}
               </ul>

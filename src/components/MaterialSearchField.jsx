@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { SearchContext } from '../contexts/SearchContext';
 
-const SearchField = () => {
+const MaterialSearchField = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [notification, setNotification] = useState('');
   const { handleSearch } = useContext(SearchContext);
@@ -18,19 +18,19 @@ const SearchField = () => {
   };
 
   return (
-    <div className="search-field">
+    <div className="material-search-field">
       <form onSubmit={onSearch}>
         <input
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search system, planet..."
+          placeholder="Search materials"
         />
-        <button type="submit" className="search-button system-search">Search</button>
+        <button type="submit" className="search-button material-search">Search</button>
       </form>
       <span>{notification && <div className="search-notification">{notification}</div>}</span>
     </div>
   );
 };
 
-export default SearchField;
+export default MaterialSearchField;

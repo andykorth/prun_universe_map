@@ -13,44 +13,82 @@ export const clearHighlights = () => {
 };
 
 export const highlightSearchResults = (searchResults, highestFactor) => {
-  // Define a color scale
+  // Define color scales
   const colorScaleLiquid = d3.scaleLinear()
-    .domain([0, highestFactor])  // Domain from 0 to the highest factor
-    .range([colors.resetSystemFill, colors.searchSystemFillLiquid]);  // Range from faint to intense color
+    .domain([0, highestFactor])
+    .range([colors.searchSystemFillLowLiquid, colors.searchSystemFillLiquid]);
   const colorScaleGaseous = d3.scaleLinear()
-    .domain([0, highestFactor])  // Domain from 0 to the highest factor
-    .range([colors.resetSystemFill, colors.searchSystemFillGaseous]);  // Range from faint to intense color
+    .domain([0, highestFactor])
+    .range([colors.searchSystemFillLowGaseous, colors.searchSystemFillGaseous]);
   const colorScaleMineral = d3.scaleLinear()
-    .domain([0, highestFactor])  // Domain from 0 to the highest factor
-    .range([colors.resetSystemFill, colors.searchSystemFillMineral]);  // Range from faint to intense color
+    .domain([0, highestFactor])
+    .range([colors.searchSystemFillLowMineral, colors.searchSystemFillMineral]);
 
   if (searchResults.length > 0) {
     // Reset all systems to default state
     clearHighlights();
 
-    // Highlight systems from search results
+    // Track the best resource for each system
+    const systemBestResource = {};
+
+    // First pass: determine the best resource to highlight for each system
+    searchResults.forEach(result => {
+      if (result.type === 'material') {
+        const systemId = result.systemId;
+        if (!systemBestResource[systemId]) {
+          systemBestResource[systemId] = result;
+        } else {
+          const current = systemBestResource[systemId];
+
+          // Prefer liquid if it's within 0.2 absolute concentration of the highest
+          if (result.resourceType === 'LIQUID' && (result.factor >= current.factor - 0.2)) {
+            systemBestResource[systemId] = result;
+          } else if (result.factor > current.factor &&
+                     (result.resourceType !== 'LIQUID' || result.factor > current.factor + 0.2)) {
+            // For non-liquid resources, or if liquid is more than 0.2 higher, keep the highest concentration
+            systemBestResource[systemId] = result;
+          }
+        }
+      }
+    });
+
+    // Second pass: highlight systems based on the best resource
     searchResults.forEach(result => {
       let highlightSystemNode = {};
-      var fillColor = colors.searchSystemFill
+      let fillColor = colors.searchSystemFill;
+      let systemId;
+
       if (result.type === 'system') {
-        highlightSystemNode = d3.select(`#${CSS.escape(result.id)}`);
+        systemId = result.id;
+        highlightSystemNode = d3.select(`#${CSS.escape(systemId)}`);
       } else if (result.type === 'planet') {
-        highlightSystemNode = d3.select(`#${CSS.escape(result.systemId)}`);
+        systemId = result.systemId;
+        highlightSystemNode = d3.select(`#${CSS.escape(systemId)}`);
       } else if (result.type === 'material') {
-        if( result.resourceType === 'LIQUID') {
-          fillColor = colorScaleLiquid(result.factor);
-        } else if (result.resourceType === 'GASEOUS') {
-          fillColor = colorScaleGaseous(result.factor);
+        systemId = result.systemId;
+        const bestForSystem = systemBestResource[systemId];
+
+        if (result === bestForSystem) {
+          if (result.resourceType === 'LIQUID') {
+            fillColor = colorScaleLiquid(result.factor);
+          } else if (result.resourceType === 'GASEOUS') {
+            fillColor = colorScaleGaseous(result.factor);
+          } else {
+            fillColor = colorScaleMineral(result.factor);
+          }
+          highlightSystemNode = d3.select(`#${CSS.escape(systemId)}`);
         } else {
-          fillColor = colorScaleMineral(result.factor);
+          // Skip this result as it's not the best for the system
+          return;
         }
-        highlightSystemNode = d3.select(`#${CSS.escape(result.systemId)}`);
       }
+
       if (!highlightSystemNode.empty()) {
         highlightSystemNode
           .attr('fill', fillColor)
           .attr('stroke', colors.searchSystemStroke)
           .attr('stroke-width', colors.searchSystemStrokeWidth)
+          .attr('fill-opacity', 1.0)
           .classed('search-highlight', true);
       }
     });

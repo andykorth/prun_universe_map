@@ -15,10 +15,31 @@ body {
 
 .App-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
   padding: 10px;
   background-color: #222222;
-  flex-wrap: wrap; /* Allow wrapping if screen is too narrow */
+}
+
+.header-left, .header-center, .header-right {
+  display: flex;
+  align-items: center;
+}
+
+.header-left {
+  flex: 0 0 auto;
+}
+
+.header-center {
+  flex: 1 1 auto;
+  justify-content: center;
+  margin: 0 20px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .App-logo {
@@ -29,17 +50,72 @@ body {
 }
 
 .App-header h1 {
-  font-size: 24px;
+  font-size: 18px;
   margin: 0;
-  white-space: nowrap; /* Prevent title from wrapping */
+  white-space: nowrap;
 }
 
-.icon-placeholder {
-  width: 50px;
-  height: 50px;
-  background-color: #444444;
+.filter-toggle {
+  background-color: #f7a600;
+  border: none;
+  color: white;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 4px;
   margin-right: 10px;
-  border-radius: 50%;
+}
+
+.filter-categories {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+
+.filter-category {
+  margin: 0 10px;
+}
+
+.filter-category h4 {
+  margin: 0 0 5px 0;
+  color: #f7a600;
+  font-size: 14px;
+}
+
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 3px;
+  color: #fff;
+  font-size: 12px;
+}
+
+.checkbox-label input {
+  margin-right: 5px;
+}
+
+.material-search-field input,
+.search-field input {
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px 0 0 4px;
+  background-color: #333;
+  color: #fff;
+  margin-left: 5px;
+}
+
+.search-controls button {
+  padding: 5px 10px;
+  background-color: #f7a600;
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-right: 5px;
 }
 
 .main-content {
@@ -56,7 +132,7 @@ body {
 }
 
 .sidebar {
-  width: 20%;
+  width: max(20%, 250px);
   background-color: #333333;
   transition: width 0.3s ease;
   position: relative;
@@ -64,7 +140,7 @@ body {
 }
 
 .sidebar.collapsed {
-  width: 30px;
+  width: 20px;
 }
 
 .toggle-btn {
@@ -80,10 +156,10 @@ body {
 
 .sidebar-content {
   padding: 20px;
-  padding-bottom: 20px; /* Increase this value for more bottom margin */
+  padding-bottom: 20px;
   overflow-y: auto;
   height: 100%;
-  box-sizing: border-box; /* This ensures padding is included in the height calculation */
+  box-sizing: border-box;
 }
 
 .sidebar-content svg {
@@ -115,6 +191,13 @@ body {
   transition: width 0.3s ease;
 }
 
+.resource-percentage {
+  display: inline-block;
+  min-width: 50px;
+  text-align: right;
+  margin-left: 5px;
+}
+
 .pathfinding-toggle label {
   display: flex;
   align-items: center;
@@ -123,65 +206,6 @@ body {
 
 .pathfinding-toggle input[type="checkbox"] {
   margin-right: 8px;
-}
-
-.controls {
-  display: flex;
-  align-items: center;
-  margin-left: auto;
-  flex-wrap: wrap; /* Allow wrapping if screen is too narrow */
-}
-
-.search-field {
-  margin-right: 20px;
-  position: relative;
-  flex-grow: 1; /* Allow search field to grow */
-  max-width: 300px; /* Limit maximum width */
-}
-
-.search-field form {
-  display: flex;
-}
-
-.search-field input {
-  flex-grow: 1;
-  padding: 5px 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px 0 0 4px;
-}
-
-.search-field button {
-  padding: 5px 10px;
-  background-color: #f7a600;
-  border: none;
-  color: white;
-  cursor: pointer;
-}
-
-.search-field button[type="submit"] {
-  border-radius: 0 4px 4px 0;
-}
-
-.search-field button[type="button"] {
-  border-radius: 4px;
-  margin-left: 5px;
-}
-
-.pathfinding-toggle {
-  white-space: nowrap; /* Prevent checkbox label from wrapping */
-}
-
-.search-notification {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  background-color: #ff6b6b;
-  color: white;
-  padding: 5px 10px;
-  border-radius: 4px;
-  margin-top: 5px;
-  font-size: 12px;
-  z-index: 10;
 }
 
 .info-tooltip-container {
@@ -208,24 +232,94 @@ body {
   margin-bottom: 4px;
 }
 
-@keyframes pulse {
-  0% {
-    opacity: 0.7;
-    transform: scale(1);
+.search-highlight {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@media (max-width: 1200px) {
+  .App-header {
+    flex-direction: column;
+    align-items: flex-start;
   }
-  50% {
-    opacity: 1;
-    transform: scale(1.2);
+
+  .header-center {
+    margin: 10px 0;
   }
-  100% {
-    opacity: 0.7;
-    transform: scale(1);
+
+  .header-right {
+    flex-wrap: wrap;
+  }
+
+  .filter-categories {
+    flex-direction: column;
+  }
+
+  .filter-category {
+    margin: 5px 0;
   }
 }
 
-.search-highlight {
-  /*animation: pulse 1.5s ease-in-out infinite;
-  This is to resource heavy when there is more than a couple search results  */
-  transform-box: fill-box;
-  transform-origin: center;
+search-container {
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.search-button {
+  background-color: #f7a600;
+  border: none;
+  color: white;
+  padding: 6px 5px;
+  cursor: pointer;
+  border-radius: 0 4px 4px 0;
+}
+
+.search-notification {
+  position: relative;
+  display: inline-block;
+  background-color: #ff6b6b;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  margin-left: 10px;
+  font-size: 12px;
+  z-index: 10;
+  vertical-align: middle;
+}
+
+.clear-button {
+  background-color: #6c757d;
+  border: none;
+  color: white;
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-right: 10px;
+  margin-left: 5px;
+}
+
+.checkbox-label {
+  position: relative;
+}
+
+.checkbox-label:hover::after {
+  content: attr(title);
+  position: absolute;
+  background-color: #333;
+  color: #fff;
+  padding: 5px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
+  bottom: 0;
+  left: -15px;
+  transform: translateX(-50%);
+}
+
+@media (max-width: 1200px) {
+  .search-container {
+    margin-bottom: 10px;
+  }
 }

@@ -176,7 +176,7 @@ export const addMouseEvents = (g) => {
         .attr('height', originalSize.height)
         .attr('x', originalPos.x)
         .attr('y', originalPos.y)
-        .attr('fill-opacity', colors.resetSystemFillOpacity);
+        .attr('fill-opacity', rect.classed('search-highlight') ? 1 : colors.resetSystemFillOpacity);
 
       // Clear timer and hide info panel
       clearTimeout(hoverTimer);
