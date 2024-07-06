@@ -123,7 +123,7 @@ const PlanetConditionIcon = ({ condition, value, ticker }) => {
 };
 
 const Sidebar = () => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(window.innerWidth < 768);
   const { universeData, planetData, materials } = useContext(GraphContext);
   const { selectedSystem } = useContext(SelectionContext);
   const { searchMaterial, searchResults } = useContext(SearchContext);

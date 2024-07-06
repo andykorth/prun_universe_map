@@ -13,7 +13,7 @@ import './App.css';
 import logo from './logo.png';
 
 const App = () => {
-  const [showFilters, setShowFilters] = useState(true);
+  const [showFilters, setShowFilters] = useState(window.innerWidth > 768);
 
   return (
     <GraphProvider>
@@ -51,9 +51,13 @@ const AppContent = ({ showFilters, setShowFilters }) => {
         <div className="header-right">
           <MaterialSearchField />
           <SearchField />
+        </div>
+        <div className="header-info">
           <button className="clear-button" onClick={clearSearch}>Clear</button>
-          <PathfindingToggle />
           <InfoTooltip />
+          <div className="pathfinding-toggle-container">
+            <PathfindingToggle />
+          </div>
         </div>
       </header>
       <div className="main-content">

@@ -15,31 +15,48 @@ body {
 
 .App-header {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   padding: 10px;
   background-color: #222222;
 }
 
+.header-right {
+    flex-direction: column;
+}
+
 .header-left, .header-center, .header-right {
   display: flex;
   align-items: center;
-}
-
-.header-left {
-  flex: 0 0 auto;
+  flex: 1 1 auto;
+  margin-bottom: 2px;
 }
 
 .header-center {
-  flex: 1 1 auto;
-  justify-content: center;
-  margin: 0 20px;
+  justify-content: start;
 }
 
 .header-right {
-  display: flex;
-  align-items: center;
+  align-items: end;
+  justify-content: center;
   flex-wrap: wrap;
+}
+
+.header-info {
+  display: flex;
+  flex: 0 1 auto;
+  margin-bottom: 2px;
+  flex-flow: row wrap;
+  align-items: start;
+  justify-content: center;
+}
+
+.material-search-field,
+.search-field,
+.clear-button,
+.pathfinding-toggle-container {
+  margin: 5px;
 }
 
 .App-logo {
@@ -203,14 +220,18 @@ body {
   display: flex;
   align-items: center;
   cursor: pointer;
+  font-size: 14px;
 }
 
 .pathfinding-toggle input[type="checkbox"] {
+  margin-top: 5px;
   margin-right: 8px;
 }
 
 .info-tooltip-container {
-  margin-left: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  margin-right: 5px;
 }
 
 .tooltip {
@@ -236,29 +257,6 @@ body {
 .search-highlight {
   transform-box: fill-box;
   transform-origin: center;
-}
-
-@media (max-width: 1200px) {
-  .App-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .header-center {
-    margin: 10px 0;
-  }
-
-  .header-right {
-    flex-wrap: wrap;
-  }
-
-  .filter-categories {
-    flex-direction: column;
-  }
-
-  .filter-category {
-    margin: 5px 0;
-  }
 }
 
 search-container {
@@ -320,12 +318,6 @@ search-container {
   transform: translateX(-50%);
 }
 
-@media (max-width: 1200px) {
-  .search-container {
-    margin-bottom: 10px;
-  }
-}
-
 .planet-condition-icon {
   position: relative;
   display: inline-block;
@@ -346,4 +338,95 @@ search-container {
   white-space: nowrap;
   z-index: 1000;
   pointer-events: none;
+}
+
+/* Adjusted css for small screen sizes */
+
+
+@media (max-width: 820px) {
+  .App-header {
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 5px;
+  }
+
+  .header-left {
+    display: none; /* This hides the logo and title */
+  }
+
+  .header-right, .header-info {
+    flex-direction: column;
+  }
+
+  .header-left, .header-center, .header-right, .header-info {
+    flex: 0 1 auto;
+  }
+
+  .filter-toggle {
+    padding: 3px 6px;
+    font-size: 12px;
+  }
+
+  .filter-categories {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .filter-category {
+    margin: 3px;
+  }
+
+  .filter-category h4 {
+    font-size: 11px;
+  }
+
+  .checkbox-label {
+    font-size: 10px;
+  }
+
+  .material-search-field input,
+  .search-field input {
+    padding: 3px 5px;
+    font-size: 12px;
+  }
+
+  .search-button {
+    padding: 4px 5px;
+    font-size: 12px;
+  }
+
+  .clear-button {
+    padding: 4px 5px;
+    font-size: 12px;
+    margin-right: 5px;
+    margin-bottom: 10px;
+  }
+
+  .pathfinding-toggle-container {
+    display: none;
+  }
+
+  .info-tooltip-container {
+    margin-top: 0px;
+    margin-left: 5px;
+  }
+
+  .sidebar {
+    width: max(20%, 250px);
+  }
+
+  .sidebar.collapsed {
+    width: 10px;
+  }
+
+  .sidebar-content {
+    padding: 10px;
+    padding-bottom: 5px;
+  }
+
+  .sidebar-content svg {
+    width: 18px;
+    height: 18px;
+  }
 }
