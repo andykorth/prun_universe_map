@@ -23,7 +23,7 @@ const MaterialSearchField = () => {
           type="text"
           value={materialSearchTerm}
           onChange={(e) => updateMaterialSearchTerm(e.target.value)}
-          placeholder="Search resource, ticker..."
+          placeholder="Search resource, filters..."
         />
         <button type="submit" className="search-button material-search">Search</button>
       </form>

@@ -74,7 +74,7 @@ const determinePlanetTier = (buildRequirements) => {
 
 // Function to convert COGC program type to readable format
 const formatCOGCProgram = (programType) => {
-  if (!programType) return 'Unknown Program';
+  if (!programType) return 'No active Program';
   return programType.split('_').map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(' ');
 };
 
@@ -127,8 +127,11 @@ const showInfoPanel = (rect, x, y) => {
           ${createFacilityIndicator(planet.HasShipyard, Anchor)}
         </div>
       </div>`;
-    if (planet.COGCProgramStatus === "ACTIVE" && planet.COGCPrograms && planet.COGCPrograms.length > 0) {
-      const programType = planet.COGCPrograms[0].ProgramType;
+    if (planet.HasChamberOfCommerce) {
+      let programType
+      if (planet.COGCPrograms.length > 0) {
+        programType = planet.COGCPrograms[0].ProgramType;
+      }
       const formattedProgram = formatCOGCProgram(programType);
       content += `<div class="cogc-program">CoGC: ${formattedProgram}</div>`;
     }

@@ -32,23 +32,27 @@ const FilterCategory = ({ title, options, mouseoverText, selectedOptions, onChan
 const CoGCFilter = ({ active, program, onToggle, onProgramChange }) => (
   <div className="filter-category">
     <h4>CoGC Program</h4>
-    <ToggleToken
-      label="CoGC"
-      active={active}
-      onClick={onToggle}
-      tooltip="Toggle CoGC Program filter"
-    />
-    {active && (
-      <select value={program} onChange={(e) => onProgramChange(e.target.value)}>
+    <div className="cogc-filter-controls">
+      <ToggleToken
+        label="CoGC"
+        active={active}
+        onClick={onToggle}
+        tooltip="Toggle CoGC Program filter, dropdown activates an overlay"
+      />
+      <select
+        value={program}
+        onChange={(e) => onProgramChange(e.target.value)}
+      >
         {cogcPrograms.map((program) => (
           <option key={program.value} value={program.value}>
             {program.display}
           </option>
         ))}
       </select>
-    )}
+    </div>
   </div>
 );
+
 
 const FilterCategories = () => {
   const { filters, updateFilters } = useContext(SearchContext);

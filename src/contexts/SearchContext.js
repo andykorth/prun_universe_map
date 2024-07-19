@@ -1,6 +1,7 @@
 import React, { createContext, useState, useCallback, useContext } from 'react';
 import { GraphContext } from './GraphContext';
 import { highlightSearchResults, clearHighlights } from '../utils/searchUtils';
+import { cogcPrograms } from '../constants/cogcPrograms';
 
 
 export const SearchContext = createContext();
@@ -168,14 +169,22 @@ export const SearchProvider = ({ children }) => {
         (filters.pressure.includes('High') && (planet.Pressure >= 2.0)) ||
         ((0.25 <= planet.Pressure) && (planet.Pressure <= 2.0));
 
-      const cogcCondition =
-        filters.cogcProgram.length === 0 ||
-        (planet.HasChamberOfCommerce && filters.cogcProgram.some(programValue => {
-          const latestProgram = planet.COGCPrograms && planet.COGCPrograms.length > 0
-            ? planet.COGCPrograms[planet.COGCPrograms.length - 1]
-            : null;
-          return latestProgram && latestProgram.ProgramType === programValue;
-        }));
+      const cogcCondition = filters.cogcProgram.length === 0 ||
+        (planet.HasChamberOfCommerce && (
+          filters.cogcProgram.includes('ALL') ||
+          filters.cogcProgram.some(selectedProgram => {
+            const latestProgram = planet.COGCPrograms && planet.COGCPrograms.length > 0
+              ? planet.COGCPrograms[planet.COGCPrograms.length - 1]
+              : null;
+
+            if (selectedProgram === null) {
+              return !latestProgram || latestProgram.ProgramType === null;
+            }
+
+            return latestProgram && latestProgram.ProgramType === selectedProgram;
+          })
+        )
+      );
 
       return planetTypeCondition && gravityCondition && temperatureCondition &&
              pressureCondition && cogcCondition;
