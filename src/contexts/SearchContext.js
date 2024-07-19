@@ -2,6 +2,7 @@ import React, { createContext, useState, useCallback, useContext } from 'react';
 import { GraphContext } from './GraphContext';
 import { highlightSearchResults, clearHighlights } from '../utils/searchUtils';
 
+
 export const SearchContext = createContext();
 
 const sanitizeInput = (input) => {
@@ -12,7 +13,7 @@ const sanitizeInput = (input) => {
   // Trim whitespace from the beginning and end
   sanitized = sanitized.trim();
   // Limit the length of the input
-  const maxLength = 200;
+  const maxLength = 500;
   sanitized = sanitized.slice(0, maxLength);
 
   return sanitized;
@@ -34,7 +35,8 @@ export const SearchProvider = ({ children }) => {
     planetType: ['Rocky', 'Gaseous'],
     gravity: ['Low', 'High'],
     temperature: ['Low', 'High'],
-    pressure: ['Low', 'High']
+    pressure: ['Low', 'High'],
+    cogcProgram: [] // Add this line
   });
   const [systemSearchTerm, setSystemSearchTerm] = useState('');
   const [materialSearchTerm, setMaterialSearchTerm] = useState('');
@@ -78,44 +80,66 @@ export const SearchProvider = ({ children }) => {
 
   const handleMaterialSearch = useCallback((searchTerm) => {
     const sanitizedSearchTerm = sanitizeInput(searchTerm);
-    const results = [];
     const terms = sanitizedSearchTerm.split(/\s+/)
         .filter(term => term.length >= 1); // Only keep terms with 1 or more characters
 
-    terms.forEach(term => {
-      const lowerTerm = term.toLowerCase();
-      const regex = new RegExp(`\\b${lowerTerm}\\b`, 'i'); // Word boundary and case insensitive
+    let results = [];
 
-      if (lowerTerm === 'ore') {
-        return
-      }
-
-      // Search in materials
-      materials.forEach(material => {
-        const splitName = splitCamelCase(material.Name);
-        if ((regex.test(splitName) || regex.test(material.Ticker.toLowerCase())) && ['ores', 'gases', 'liquids', 'minerals'].includes(material.CategoryName)) {
-          setSearchMaterial(material.MaterialId)
-          // Find systems and planets that have this material
-          Object.entries(planetData).forEach(([systemId, planets]) => {
-            planets.forEach(planet => {
-              const resource = planet.Resources.find(resource => resource.MaterialId === material.MaterialId);
-              if (resource) {
-                results.push({
-                  type: 'material',
-                  id: material.MaterialId,
-                  name: material.Name,
-                  ticker: material.Ticker,
-                  planetId: planet.PlanetNaturalId,
-                  systemId: systemId,
-                  factor: resource.Factor,
-                  resourceType: resource.ResourceType
-                });
-              }
-            });
+    if (terms.length === 0) {
+      // Return all planets if no search terms
+      Object.entries(planetData).forEach(([systemId, planets]) => {
+        planets.forEach(planet => {
+          results.push({
+            type: 'planet',
+            planetId: planet.PlanetNaturalId,
+            systemId: systemId
           });
-        }
+        });
       });
-    });
+    } else {
+      // Find materials matching the search terms
+      const matchingMaterials = terms.map(term => {
+        const lowerTerm = term.toLowerCase();
+        const regex = new RegExp(`\\b${lowerTerm}\\b`, 'i');
+        return materials.filter(material =>
+          (regex.test(splitCamelCase(material.Name)) || regex.test(material.Ticker.toLowerCase())) &&
+          ['ores', 'gases', 'liquids', 'minerals'].includes(material.CategoryName)
+        );
+      });
+
+      // Find planets that have all specified materials
+      Object.entries(planetData).forEach(([systemId, planets]) => {
+        planets.forEach(planet => {
+          const hasAllMaterials = matchingMaterials.every(materialList =>
+            materialList.some(material =>
+              planet.Resources.some(resource => resource.MaterialId === material.MaterialId)
+            )
+          );
+
+          if (hasAllMaterials) {
+            const planetResources = matchingMaterials.flatMap(materialList =>
+              materialList.filter(material =>
+                planet.Resources.some(resource => resource.MaterialId === material.MaterialId)
+              )
+            );
+
+            planetResources.forEach(material => {
+              const resource = planet.Resources.find(r => r.MaterialId === material.MaterialId);
+              results.push({
+                type: 'material',
+                id: material.MaterialId,
+                name: material.Name,
+                ticker: material.Ticker,
+                planetId: planet.PlanetNaturalId,
+                systemId: systemId,
+                factor: resource.Factor,
+                resourceType: resource.ResourceType
+              });
+            });
+          }
+        });
+      });
+    }
 
     const filteredResults = results.filter(result => {
       const planet = planetData[result.systemId].find(p => p.PlanetNaturalId === result.planetId);
@@ -144,7 +168,17 @@ export const SearchProvider = ({ children }) => {
         (filters.pressure.includes('High') && (planet.Pressure >= 2.0)) ||
         ((0.25 <= planet.Pressure) && (planet.Pressure <= 2.0));
 
-      return planetTypeCondition && gravityCondition && temperatureCondition && pressureCondition;
+      const cogcCondition =
+        filters.cogcProgram.length === 0 ||
+        (planet.HasChamberOfCommerce && filters.cogcProgram.some(programValue => {
+          const latestProgram = planet.COGCPrograms && planet.COGCPrograms.length > 0
+            ? planet.COGCPrograms[planet.COGCPrograms.length - 1]
+            : null;
+          return latestProgram && latestProgram.ProgramType === programValue;
+        }));
+
+      return planetTypeCondition && gravityCondition && temperatureCondition &&
+             pressureCondition && cogcCondition;
     });
 
     // Remove duplicates

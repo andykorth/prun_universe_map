@@ -1,0 +1,74 @@
+.toggle-token {
+  font-size: 12px;
+  padding: 5px 10px;
+  margin: 2px;
+  border: 1px solid #ccc;
+  border-radius: 15px;
+  background-color: #f0f0f0;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.toggle-token.active {
+  background-color: #f7a600;
+  color: white;
+  border-color: #f7a600;
+}
+
+.filter-category select {
+  padding: 5px 10px;
+  border-radius: 13px;
+  border: 1px solid #ccc;
+  background-color: #f0f0f0;
+  color: #333;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.filter-category select:hover {
+  border-color: #999;
+}
+
+.filter-category select:focus {
+  outline: none;
+  border-color: #f7a600;
+  box-shadow: 0 0 0 2px rgba(247, 166, 0, 0.2);
+}
+
+.toggle-group {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.toggle-token:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+@media (max-width: 820px) {
+
+  .toggle-token {
+  font-size: 10px;
+  padding: 2px 5px;
+  }
+
+  .filter-category select {
+  padding: 2px 5px;
+  border-radius: 13px;
+  font-size: 10px;
+  }
+}

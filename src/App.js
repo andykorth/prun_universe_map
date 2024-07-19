@@ -10,6 +10,7 @@ import { GraphProvider } from './contexts/GraphContext';
 import { SelectionProvider } from './contexts/SelectionContext';
 import { SearchProvider, SearchContext } from './contexts/SearchContext';
 import './App.css';
+import './components/FilterCategories.css';
 import logo from './logo.png';
 
 const App = () => {

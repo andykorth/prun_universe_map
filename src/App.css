@@ -216,15 +216,15 @@ body {
   margin-left: 5px;
 }
 
-.pathfinding-toggle label {
+.pathfinding-toggle {
   display: flex;
   align-items: center;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px;
 }
 
-.pathfinding-toggle input[type="checkbox"] {
-  margin-top: 5px;
+.pathfinding-toggle .toggle-token {
+  margin: 0px;
   margin-right: 8px;
 }
 

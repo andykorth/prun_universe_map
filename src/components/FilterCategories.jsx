@@ -1,30 +1,58 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { SearchContext } from '../contexts/SearchContext';
+import { cogcPrograms } from '../constants/cogcPrograms';
+
+const ToggleToken = ({ label, active, onClick, tooltip }) => (
+  <button
+    className={`toggle-token ${active ? 'active' : ''}`}
+    onClick={onClick}
+    data-tooltip={tooltip}
+  >
+    {label}
+  </button>
+);
 
 const FilterCategory = ({ title, options, mouseoverText, selectedOptions, onChange }) => (
   <div className="filter-category">
     <h4>{title}</h4>
-    <div className="checkbox-group">
+    <div className="toggle-group">
       {options.map((option, index) => (
-        <label
+        <ToggleToken
           key={option}
-          className="checkbox-label"
-          data-tooltip={mouseoverText[index] || option}
-        >
-          <input
-            type="checkbox"
-            checked={selectedOptions.includes(option)}
-            onChange={() => onChange(option)}
-          />
-          <span>{option}</span>
-        </label>
+          label={option}
+          active={selectedOptions.includes(option)}
+          onClick={() => onChange(option)}
+          tooltip={mouseoverText[index] || option}
+        />
       ))}
     </div>
   </div>
 );
 
+const CoGCFilter = ({ active, program, onToggle, onProgramChange }) => (
+  <div className="filter-category">
+    <h4>CoGC Program</h4>
+    <ToggleToken
+      label="CoGC"
+      active={active}
+      onClick={onToggle}
+      tooltip="Toggle CoGC Program filter"
+    />
+    {active && (
+      <select value={program} onChange={(e) => onProgramChange(e.target.value)}>
+        {cogcPrograms.map((program) => (
+          <option key={program.value} value={program.value}>
+            {program.display}
+          </option>
+        ))}
+      </select>
+    )}
+  </div>
+);
+
 const FilterCategories = () => {
   const { filters, updateFilters } = useContext(SearchContext);
+  const [cogcActive, setCogcActive] = useState(false);
 
   const handleChange = (category, option) => {
     const newFilters = {
@@ -35,6 +63,20 @@ const FilterCategories = () => {
     };
     updateFilters(newFilters);
   };
+
+  const handleCoGCToggle = () => {
+    setCogcActive(!cogcActive);
+    if (!cogcActive) {
+      updateFilters({ ...filters, cogcProgram: [cogcPrograms[0].value] });
+    } else {
+      updateFilters({ ...filters, cogcProgram: [] });
+    }
+  };
+
+  const handleCoGCProgramChange = (value) => {
+    updateFilters({ ...filters, cogcProgram: [value] });
+  };
+
 
   return (
     <div className="filter-categories">
@@ -65,6 +107,12 @@ const FilterCategories = () => {
         mouseoverText={['SEA', 'HSE']}
         selectedOptions={filters.pressure}
         onChange={option => handleChange('pressure', option)}
+      />
+      <CoGCFilter
+        active={cogcActive}
+        program={filters.cogcProgram[0] || ''}
+        onToggle={handleCoGCToggle}
+        onProgramChange={handleCoGCProgramChange}
       />
     </div>
   );
