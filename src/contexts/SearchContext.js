@@ -84,6 +84,7 @@ export const SearchProvider = ({ children }) => {
         .filter(term => term.length >= 1); // Only keep terms with 1 or more characters
 
     let results = [];
+    let matchingMaterialIds = [];
 
     if (terms.length === 0) {
       // Return all planets if no search terms
@@ -106,6 +107,8 @@ export const SearchProvider = ({ children }) => {
           ['ores', 'gases', 'liquids', 'minerals'].includes(material.CategoryName)
         );
       });
+
+      matchingMaterialIds = matchingMaterials.flat().map(material => material.MaterialId);
 
       // Find planets that have all specified materials
       Object.entries(planetData).forEach(([systemId, planets]) => {
@@ -180,7 +183,6 @@ export const SearchProvider = ({ children }) => {
               return !latestProgram || latestProgram.ProgramType === null;
             }
 
-            console.log(filters.cogcProgram, latestProgram, selectedProgram)
             return latestProgram && latestProgram.ProgramType === selectedProgram;
           })
         )
@@ -209,6 +211,7 @@ export const SearchProvider = ({ children }) => {
     console.log('Results', uniqueResults);
     setSearchResults(uniqueResults);
     highlightSearchResults(uniqueResults, highestFactorLiquid, highestFactorGaseous, highestFactorMineral);
+    setSearchMaterial(matchingMaterialIds);
     return uniqueResults;
   }, [planetData, materials, filters]);
 

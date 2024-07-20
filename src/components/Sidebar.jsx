@@ -152,7 +152,8 @@ const Sidebar = () => {
       (result.type === 'planet' && result.id === planetId) ||
       (result.type === 'material' && result.planetId === planetId)
     );
-    return searchMaterial === materialId && isPlanetInSearchResults;
+    const isMaterialInSearchMaterial = searchMaterial.includes(materialId);
+    return isMaterialInSearchMaterial && isPlanetInSearchResults;
   };
 
   const isConditionAbnormal = (condition, value) => {

@@ -105,8 +105,13 @@ const FilterCategories = () => {
   };
 
   const handleCogcProgramChange = (value) => {
-      const valueToSet = cogcPrograms.find(program => program.display === value);
-      updateFilters({ ...filters, cogcProgram: [valueToSet.value] });
+      if(cogcActive) {
+        const valueToSet = cogcPrograms.find(program => program.display === value);
+        updateFilters({ ...filters, cogcProgram: [valueToSet.value] });
+      } else {
+        updateFilters({ ...filters, cogcProgram: [] });
+      }
+
   };
 
   return (

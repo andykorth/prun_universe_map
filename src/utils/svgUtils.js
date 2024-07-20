@@ -169,7 +169,6 @@ export const addMouseEvents = (g) => {
         .attr('y', originalPos.y - originalSize.height / 2);
 
       const overlayRect = rect.property('cogcOverlayRect');
-      console.log(rect, overlayRect)
 
       if (overlayRect) {
         overlayOriginalSize = {
