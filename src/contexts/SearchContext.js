@@ -1,7 +1,6 @@
 import React, { createContext, useState, useCallback, useContext } from 'react';
 import { GraphContext } from './GraphContext';
 import { highlightSearchResults, clearHighlights } from '../utils/searchUtils';
-import { cogcPrograms } from '../constants/cogcPrograms';
 
 
 export const SearchContext = createContext();
@@ -181,6 +180,7 @@ export const SearchProvider = ({ children }) => {
               return !latestProgram || latestProgram.ProgramType === null;
             }
 
+            console.log(filters.cogcProgram, latestProgram, selectedProgram)
             return latestProgram && latestProgram.ProgramType === selectedProgram;
           })
         )

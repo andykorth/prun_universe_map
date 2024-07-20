@@ -9,6 +9,7 @@ import InfoTooltip from './components/InfoTooltip';
 import { GraphProvider } from './contexts/GraphContext';
 import { SelectionProvider } from './contexts/SelectionContext';
 import { SearchProvider, SearchContext } from './contexts/SearchContext';
+import { CogcOverlayProvider } from './contexts/CogcOverlayContext';
 import './App.css';
 import './components/FilterCategories.css';
 import logo from './logo.png';
@@ -20,10 +21,12 @@ const App = () => {
     <GraphProvider>
       <SelectionProvider>
         <SearchProvider>
-          <AppContent
-            showFilters={showFilters}
-            setShowFilters={setShowFilters}
-          />
+          <CogcOverlayProvider>
+            <AppContent
+              showFilters={showFilters}
+              setShowFilters={setShowFilters}
+            />
+          </CogcOverlayProvider>
         </SearchProvider>
       </SelectionProvider>
     </GraphProvider>

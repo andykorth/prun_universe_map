@@ -1,5 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { SearchContext } from '../contexts/SearchContext';
+import { useCogcOverlay } from '../contexts/CogcOverlayContext';
 import { cogcPrograms } from '../constants/cogcPrograms';
 
 const ToggleToken = ({ label, active, onClick, tooltip }) => (
@@ -29,34 +30,48 @@ const FilterCategory = ({ title, options, mouseoverText, selectedOptions, onChan
   </div>
 );
 
-const CoGCFilter = ({ active, program, onToggle, onProgramChange }) => (
-  <div className="filter-category">
-    <h4>CoGC Program</h4>
-    <div className="cogc-filter-controls">
-      <ToggleToken
-        label="CoGC"
-        active={active}
-        onClick={onToggle}
-        tooltip="Toggle CoGC Program filter, dropdown activates an overlay"
-      />
-      <select
-        value={program}
-        onChange={(e) => onProgramChange(e.target.value)}
-      >
-        {cogcPrograms.map((program) => (
-          <option key={program.value} value={program.value}>
-            {program.display}
-          </option>
-        ))}
-      </select>
-    </div>
-  </div>
-);
 
+const CogcFilter = ({ active, program, onToggle, onProgramChange }) => {
+  const { setOverlayProgram } = useCogcOverlay();
+
+  const handleProgramChange = (value) => {
+    onProgramChange(value);
+    if (value !== 'ALL' && value !== null) {
+      setOverlayProgram(value);
+    } else {
+      setOverlayProgram(null);
+    }
+  };
+
+  return (
+    <div className="filter-category">
+      <h4>Cogc Program</h4>
+      <div className="cogc-filter-controls">
+        <ToggleToken
+          label="Cogc"
+          active={active}
+          onClick={onToggle}
+          tooltip="Toggle Cogc Program filter, dropdown activates an overlay"
+        />
+        <select
+          value={program}
+          onChange={(e) => handleProgramChange(e.target.value)}
+        >
+          {cogcPrograms.map((program) => (
+            <option key={program.value} value={program.display}>
+              {program.display}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+};
 
 const FilterCategories = () => {
   const { filters, updateFilters } = useContext(SearchContext);
   const [cogcActive, setCogcActive] = useState(false);
+  const { overlayProgram } = useCogcOverlay();
 
   const handleChange = (category, option) => {
     const newFilters = {
@@ -68,19 +83,31 @@ const FilterCategories = () => {
     updateFilters(newFilters);
   };
 
-  const handleCoGCToggle = () => {
+  const handleCogcToggle = (value) => {
     setCogcActive(!cogcActive);
     if (!cogcActive) {
-      updateFilters({ ...filters, cogcProgram: [cogcPrograms[0].value] });
+      // Find the corresponding value for the current overlayProgram
+      const programObject = cogcPrograms.find(program => program.display === overlayProgram);
+      let programValue;
+
+      if (programObject) {
+        programValue = programObject.value;
+      } else if (overlayProgram === null || overlayProgram === undefined) {
+        programValue = 'ALL'; // Default to 'ALL' if no overlay program is set
+      } else {
+        console.warn(`No matching program found for: ${overlayProgram}`);
+        programValue = 'ALL'; // Default to 'ALL' if no match is found
+      }
+      updateFilters({ ...filters, cogcProgram: [programValue] });
     } else {
       updateFilters({ ...filters, cogcProgram: [] });
     }
   };
 
-  const handleCoGCProgramChange = (value) => {
-    updateFilters({ ...filters, cogcProgram: [value] });
+  const handleCogcProgramChange = (value) => {
+      const valueToSet = cogcPrograms.find(program => program.display === value);
+      updateFilters({ ...filters, cogcProgram: [valueToSet.value] });
   };
-
 
   return (
     <div className="filter-categories">
@@ -112,11 +139,11 @@ const FilterCategories = () => {
         selectedOptions={filters.pressure}
         onChange={option => handleChange('pressure', option)}
       />
-      <CoGCFilter
+      <CogcFilter
         active={cogcActive}
-        program={filters.cogcProgram[0] || ''}
-        onToggle={handleCoGCToggle}
-        onProgramChange={handleCoGCProgramChange}
+        //program={filters.cogcProgram[0] || ''}
+        onToggle={handleCogcToggle}
+        onProgramChange={handleCogcProgramChange}
       />
     </div>
   );

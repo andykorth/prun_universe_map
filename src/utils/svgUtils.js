@@ -154,6 +154,7 @@ export const addMouseEvents = (g) => {
     const originalSize = { width: +rect.attr('width'), height: +rect.attr('height') };
     const originalPos = { x: +rect.attr('x'), y: +rect.attr('y') };
     let hoverTimer;
+    let overlayOriginalSize, overlayOriginalPos;
 
     rect.on('mouseover', function(event) {
       if (rect.attr('id') === 'rect1') return;
@@ -166,6 +167,28 @@ export const addMouseEvents = (g) => {
         .attr('height', originalSize.height * 2)
         .attr('x', originalPos.x - originalSize.width / 2)
         .attr('y', originalPos.y - originalSize.height / 2);
+
+      const overlayRect = rect.property('cogcOverlayRect');
+      console.log(rect, overlayRect)
+
+      if (overlayRect) {
+        overlayOriginalSize = {
+          width: +overlayRect.attr('width'),
+          height: +overlayRect.attr('height')
+        };
+        overlayOriginalPos = {
+          x: +overlayRect.attr('x'),
+          y: +overlayRect.attr('y')
+        };
+
+        overlayRect
+          .transition()
+          .duration(200)
+          .attr('width', overlayOriginalSize.width + originalSize.width)
+          .attr('height', overlayOriginalSize.height + originalSize.width)
+          .attr('x', overlayOriginalPos.x - originalSize.width / 2)
+          .attr('y', overlayOriginalPos.y - originalSize.height / 2);
+      }
 
       // Set timer for info panel
       hoverTimer = setTimeout(() => {
@@ -182,6 +205,18 @@ export const addMouseEvents = (g) => {
         .attr('x', originalPos.x)
         .attr('y', originalPos.y)
         .attr('fill-opacity', rect.classed('search-highlight') ? 1 : colors.resetSystemFillOpacity);
+
+      // Reset the overlay rect if it exists
+      const overlayRect = rect.property('cogcOverlayRect');
+      if (overlayRect) {
+        overlayRect
+          .transition()
+          .duration(200)
+          .attr('width', overlayOriginalSize.width)
+          .attr('height', overlayOriginalSize.height)
+          .attr('x', overlayOriginalPos.x)
+          .attr('y', overlayOriginalPos.y);
+      }
 
       // Clear timer and hide info panel
       clearTimeout(hoverTimer);
