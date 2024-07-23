@@ -80,3 +80,44 @@
   margin-bottom: 10px;
   padding-left: 10px;
 }
+
+.highlighted-planet {
+  background-color: rgba(247, 166, 0, 0.2);
+  border-radius: 4px;
+}
+
+.highlighted-planet .planet-name {
+  font-weight: bold;
+  color: #f7a600;
+}
+
+.matching-resources {
+  margin-top: 5px;
+  padding-top: 5px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.resource-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  width: 100%; /* Ensure full width */
+}
+
+.resource-name {
+  width: 40px;
+  text-align: right;
+  margin-right: 5px;
+}
+
+.concentration-bar-container {
+  width: 100px;
+  background-color: #ddd;
+  height: 10px;
+  margin: 0 5px;
+}
+
+.resource-percentage {
+  width: 50px;
+  text-align: right;
+}

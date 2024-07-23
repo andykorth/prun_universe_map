@@ -88,7 +88,34 @@ const createPlanetTierIndicator = (tier) => {
 };
 
 // Function to create and show the info panel
-const showInfoPanel = (rect, x, y) => {
+const showInfoPanel = (rect, x, y, searchResults, materials) => {
+
+  const isPlanetInSearchResults = (planetId) => {
+    return searchResults.some(result =>
+      (result.type === 'planet' && result.id === planetId) ||
+      (result.type === 'material' && result.planetId === planetId)
+    );
+  };
+
+  const findMatchingMaterials = (planetId) => {
+    return searchResults.filter(result =>
+      result.type === 'material' && result.planetId === planetId
+    );
+  };
+
+  const createConcentrationBar = (concentration) => {
+    const percentage = concentration * 100;
+    const hue = (percentage / 100) * 120; // 0 is red, 120 is green
+    const backgroundColor = `hsl(${hue}, 100%, 50%)`;
+
+    return `
+      <div class="concentration-bar-container" style="width: 100px; background-color: #ddd; height: 10px; margin-left: 5px;">
+        <div class="concentration-bar" style="width: ${percentage}%; background-color: ${backgroundColor}; height: 100%;"></div>
+      </div>
+      <span class="resource-percentage">${percentage.toFixed(2)}%</span>
+    `;
+  };
+
   const systemId = rect.attr('id').replace('#', '');
   const system = universeData ? universeData[systemId] : null;
   const planets = planetData ? planetData[systemId] : null;
@@ -112,8 +139,10 @@ const showInfoPanel = (rect, x, y) => {
 
   sortedPlanets.forEach(planet => {
     let planetTier = determinePlanetTier(planet.BuildRequirements);
+    const isHighlighted = isPlanetInSearchResults(planet.PlanetNaturalId);
+    const matchingMaterials = findMatchingMaterials(planet.PlanetNaturalId);
 
-    content += `<li>
+    content += `<li class="${isHighlighted ? 'highlighted-planet' : ''}">
       <div class="planet-info">
         <div class="planet-name-tier">
           <span class="planet-name">${planet.PlanetName} (${planet.PlanetNaturalId})</span>
@@ -138,6 +167,22 @@ const showInfoPanel = (rect, x, y) => {
       const formattedProgram = formatCOGCProgram(programType);
       content += `<div class="cogc-program">CoGC: ${formattedProgram}</div>`;
     }
+    // Add resource bars for matching materials
+    if (matchingMaterials.length > 0) {
+      content += `<div class="matching-resources">`;
+      matchingMaterials.forEach(material => {
+        const materialInfo = materials.find(m => m.MaterialId === material.id);
+        if (materialInfo) {
+          content += `
+            <div class="resource-item" style="display: flex; align-items: center; margin-bottom: 5px;">
+              <span class="resource-name" style="margin-right: 5px;">${materialInfo.Ticker}</span>
+              ${createConcentrationBar(material.factor)}
+            </div>
+          `;
+        }
+      });
+      content += `</div>`;
+    }
     content += `</li>`;
   });
 
@@ -151,7 +196,7 @@ const hideInfoPanel = () => {
 };
 
 // Function to add mouseover and mouseout events for animation
-export const addMouseEvents = (g) => {
+export const addMouseEvents = (g, searchResults, materials) => {
   g.selectAll('rect').each(function() {
     const rect = d3.select(this);
     const originalSize = { width: +rect.attr('width'), height: +rect.attr('height') };
@@ -195,7 +240,7 @@ export const addMouseEvents = (g) => {
       // Set timer for info panel
       hoverTimer = setTimeout(() => {
         const [x, y] = d3.pointer(event);
-        showInfoPanel(rect, x, y);
+        showInfoPanel(rect, x, y, searchResults, materials);
       }, 400);
 
     }).on('mouseout', function() {

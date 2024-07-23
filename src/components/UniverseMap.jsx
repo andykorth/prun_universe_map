@@ -6,14 +6,15 @@ import { useCogcOverlay } from '../contexts/CogcOverlayContext';
 import { addMouseEvents } from '../utils/svgUtils';
 import { cogcPrograms } from '../constants/cogcPrograms';
 import './UniverseMap.css';
+import { SearchContext } from '../contexts/SearchContext';
 
 const UniverseMap = React.memo(() => {
-  const { graph, planetData } = useContext(GraphContext);
+  const { graph, planetData, materials } = useContext(GraphContext);
   const { highlightSelectedSystem } = useContext(SelectionContext);
   const { overlayProgram } = useCogcOverlay();
+  const { searchResults } = useContext(SearchContext);
   const svgRef = useRef(null);
   const graphRef = useRef(null);
-
   // Handle system click
   const handleSystemClick = useCallback((systemId) => {
     if (systemId === 'rect1') {
@@ -63,7 +64,7 @@ const UniverseMap = React.memo(() => {
 
       svg.call(zoom);
 
-      addMouseEvents(g);
+      addMouseEvents(g, searchResults, materials);
 
       // Store references for later use
       svgRef.current = svgNode;
@@ -83,7 +84,7 @@ const UniverseMap = React.memo(() => {
       }
     };
   // eslint-disable-next-line
-  }, [graph]);
+  }, [graph, searchResults, materials]);
 
   // Apply Cogc overlay
   const applyCogcOverlay = useCallback(() => {
