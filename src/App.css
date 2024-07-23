@@ -342,7 +342,6 @@ search-container {
 
 /* Adjusted css for small screen sizes */
 
-
 @media (max-width: 820px) {
   .App-header {
     flex-wrap: wrap;
