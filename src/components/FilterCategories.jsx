@@ -118,8 +118,8 @@ const FilterCategories = () => {
     <div className="filter-categories">
       <FilterCategory
         title="Planet Type"
-        options={['Rocky', 'Gaseous']}
-        mouseoverText={['MCG', 'AEF']}
+        options={['Rocky', 'Gaseous', 'Fertile']}
+        mouseoverText={['MCG', 'AEF', 'Fertile Planets']}
         selectedOptions={filters.planetType}
         onChange={option => handleChange('planetType', option)}
       />

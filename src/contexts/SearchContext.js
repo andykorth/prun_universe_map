@@ -36,7 +36,7 @@ export const SearchProvider = ({ children }) => {
     gravity: ['Low', 'High'],
     temperature: ['Low', 'High'],
     pressure: ['Low', 'High'],
-    cogcProgram: [] // Add this line
+    cogcProgram: []
   });
   const [systemSearchTerm, setSystemSearchTerm] = useState('');
   const [materialSearchTerm, setMaterialSearchTerm] = useState('');
@@ -156,6 +156,10 @@ export const SearchProvider = ({ children }) => {
         (filters.planetType.includes('Rocky') && planet.Surface) ||
         (filters.planetType.includes('Gaseous') && !planet.Surface);
 
+      const planetFertility =
+       (filters.planetType.includes('Fertile') && planet.Fertility > -1) ||
+       (!filters.planetType.includes('Fertile'));
+
       const gravityCondition =
         (filters.gravity.includes('Low') && (planet.Gravity < 0.25)) ||
         (filters.gravity.includes('High') && (planet.Gravity >= 2.5)) ||
@@ -186,7 +190,7 @@ export const SearchProvider = ({ children }) => {
           })
         ));
 
-      return planetTypeCondition && gravityCondition && temperatureCondition &&
+      return planetTypeCondition && planetFertility && gravityCondition && temperatureCondition &&
              pressureCondition && cogcCondition;
     });
 
