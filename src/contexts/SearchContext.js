@@ -175,18 +175,16 @@ export const SearchProvider = ({ children }) => {
         (planet.HasChamberOfCommerce && (
           filters.cogcProgram.includes('ALL') ||
           filters.cogcProgram.some(selectedProgram => {
-            const latestProgram = planet.COGCPrograms && planet.COGCPrograms.length > 0
-              ? planet.COGCPrograms[planet.COGCPrograms.length - 1]
-              : null;
-
+            const programs = planet.COGCPrograms || [];
+            const sortedPrograms = programs.sort((a, b) => b.StartEpochMs - a.StartEpochMs);
+            const currentProgram = sortedPrograms[1] || sortedPrograms[0] || null;
             if (selectedProgram === null) {
-              return !latestProgram || latestProgram.ProgramType === null;
+              return !currentProgram || currentProgram.ProgramType === null;
             }
 
-            return latestProgram && latestProgram.ProgramType === selectedProgram;
+            return currentProgram && currentProgram.ProgramType === selectedProgram;
           })
-        )
-      );
+        ));
 
       return planetTypeCondition && gravityCondition && temperatureCondition &&
              pressureCondition && cogcCondition;

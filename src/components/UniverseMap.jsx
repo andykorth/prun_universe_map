@@ -99,11 +99,12 @@ const UniverseMap = React.memo(() => {
       const systemId = d3.select(this).attr('id');
       const planets = planetData[systemId];
 
-      if (planets && planets.some(planet =>
-        planet.COGCPrograms &&
-        planet.COGCPrograms.length > 0 &&
-        planet.COGCPrograms[planet.COGCPrograms.length - 1].ProgramType === selectedProgramValue
-      )) {
+      if (planets && planets.some(planet => {
+        if (!planet.COGCPrograms || planet.COGCPrograms.length === 0) return false;
+        const sortedPrograms = planet.COGCPrograms.sort((a, b) => b.StartEpochMs - a.StartEpochMs);
+        const relevantProgram = sortedPrograms[1] || sortedPrograms[0];
+        return relevantProgram && relevantProgram.ProgramType === selectedProgramValue;
+      })) {
         rect.classed('cogc-overlay', true);
         const x = parseFloat(rect.attr('x'));
         const y = parseFloat(rect.attr('y'));

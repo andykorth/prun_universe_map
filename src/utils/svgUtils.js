@@ -130,7 +130,10 @@ const showInfoPanel = (rect, x, y) => {
     if (planet.HasChamberOfCommerce) {
       let programType
       if (planet.COGCPrograms.length > 0) {
-        programType = planet.COGCPrograms[0].ProgramType;
+        const programs = planet.COGCPrograms;
+        const sortedPrograms = programs.sort((a, b) => b.StartEpochMs - a.StartEpochMs);
+        const currentProgram = sortedPrograms[1] || sortedPrograms[0] || null;
+        programType = currentProgram.ProgramType;
       }
       const formattedProgram = formatCOGCProgram(programType);
       content += `<div class="cogc-program">CoGC: ${formattedProgram}</div>`;
