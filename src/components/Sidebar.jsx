@@ -50,9 +50,9 @@ const ConcentrationBar = ({ concentration }) => {
   const backgroundColor = `hsl(${hue}, 100%, 50%)`;
 
   return (
-    <div className="concentration-bar-container" style={{ width: '100px', backgroundColor: '#ddd', height: '10px', marginLeft: '5px' }}>
+    <div className="concentration-bar-container-sb" style={{ width: '100px', backgroundColor: '#ddd', height: '10px', marginLeft: '5px' }}>
       <div
-        className="concentration-bar"
+        className="concentration-bar-sb"
         style={{
           width: `${percentage}%`,
           backgroundColor,
@@ -221,7 +221,7 @@ const Sidebar = () => {
                 {planet.Resources.map((resource, idx) => (
                   <li
                     key={idx}
-                    className="resource-item"
+                    className="resource-item-sb"
                     style={{
                       display: 'flex',
                       alignItems: 'center',
