@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react';
 import { SearchContext } from '../contexts/SearchContext';
 import { useCogcOverlay } from '../contexts/CogcOverlayContext';
 import { cogcPrograms } from '../constants/cogcPrograms';
+import ResourceThresholdFilter from './ResourceThresholdFilter';
 
 const ToggleToken = ({ label, active, onClick, tooltip }) => (
   <button
@@ -146,10 +147,10 @@ const FilterCategories = () => {
       />
       <CogcFilter
         active={cogcActive}
-        //program={filters.cogcProgram[0] || ''}
         onToggle={handleCogcToggle}
         onProgramChange={handleCogcProgramChange}
       />
+      <ResourceThresholdFilter />
     </div>
   );
 };

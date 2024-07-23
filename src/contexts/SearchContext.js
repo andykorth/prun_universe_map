@@ -40,6 +40,7 @@ export const SearchProvider = ({ children }) => {
   });
   const [systemSearchTerm, setSystemSearchTerm] = useState('');
   const [materialSearchTerm, setMaterialSearchTerm] = useState('');
+  const [resourceThreshold, setResourceThreshold] = useState(0);
 
 
   const handleSystemSearch = useCallback((searchTerm) => {
@@ -152,6 +153,10 @@ export const SearchProvider = ({ children }) => {
         return false;
       }
 
+      if (result.factor < resourceThreshold) {
+        return false;
+      }
+
       const planetTypeCondition =
         (filters.planetType.includes('Rocky') && planet.Surface) ||
         (filters.planetType.includes('Gaseous') && !planet.Surface);
@@ -215,7 +220,7 @@ export const SearchProvider = ({ children }) => {
     highlightSearchResults(uniqueResults, highestFactorLiquid, highestFactorGaseous, highestFactorMineral);
     setSearchMaterial(matchingMaterialIds);
     return uniqueResults;
-  }, [planetData, materials, filters]);
+  }, [planetData, materials, filters, resourceThreshold]);
 
   const clearSearch = useCallback(() => {
     setSearchResults([]);
@@ -257,6 +262,8 @@ export const SearchProvider = ({ children }) => {
         materialSearchTerm,
         updateSystemSearchTerm,
         updateMaterialSearchTerm,
+        resourceThreshold,
+        setResourceThreshold,
       }}
     >
       {children}
