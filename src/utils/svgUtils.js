@@ -89,10 +89,10 @@ const createPlanetTierIndicator = (tier) => {
 
 // Function to create and show the info panel
 const showInfoPanel = (rect, x, y, searchResults, materials) => {
-
+  console.log(searchResults)
   const isPlanetInSearchResults = (planetId) => {
     return searchResults.some(result =>
-      (result.type === 'planet' && result.id === planetId) ||
+      (result.type === 'planet' && result.planetId === planetId) ||
       (result.type === 'material' && result.planetId === planetId)
     );
   };

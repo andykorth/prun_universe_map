@@ -7,6 +7,7 @@ import { addMouseEvents } from '../utils/svgUtils';
 import { cogcPrograms } from '../constants/cogcPrograms';
 import './UniverseMap.css';
 import { SearchContext } from '../contexts/SearchContext';
+import { useDebounce } from '../hooks/useDebounce';
 
 const UniverseMap = React.memo(() => {
   const { graph, planetData, materials } = useContext(GraphContext);
@@ -84,7 +85,20 @@ const UniverseMap = React.memo(() => {
       }
     };
   // eslint-disable-next-line
-  }, [graph, searchResults, materials]);
+  }, [graph]);
+
+  // Create a debounced version of addMouseEvents
+  const debouncedAddMouseEvents = useDebounce((g, searchResults, materials) => {
+    addMouseEvents(g, searchResults, materials);
+  }, 300);
+
+  // Update mouse events when searchResults or materials change
+  useEffect(() => {
+    if (graphRef.current) {
+      debouncedAddMouseEvents(graphRef.current.g, searchResults, materials);
+    }
+  }, [searchResults, materials, debouncedAddMouseEvents]);
+
 
   // Apply Cogc overlay
   const applyCogcOverlay = useCallback(() => {
