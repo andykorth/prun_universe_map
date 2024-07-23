@@ -19,7 +19,7 @@ const sanitizeInput = (input) => {
   return sanitized;
 };
 
-// Helper function to split camelCase into separate words
+// Helper function to split camelCase into separate words.
 const splitCamelCase = (str) => {
   return str.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase();
 };
