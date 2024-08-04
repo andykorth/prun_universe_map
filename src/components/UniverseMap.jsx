@@ -35,7 +35,7 @@ const UniverseMap = React.memo(() => {
   useEffect(() => {
     if (!graph || !graph.edges) return;
 
-    d3.xml('/PrUn_universe_map_normalized.svg').then(data => {
+    d3.xml('PrUn_universe_map_normalized.svg').then(data => {
       const svgNode = data.documentElement;
       const container = document.getElementById('map-container');
 

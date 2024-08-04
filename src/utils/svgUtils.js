@@ -11,8 +11,8 @@ let planetData = null;
 const fetchData = async () => {
   try {
     const [universeResponse, planetResponse] = await Promise.all([
-      fetch('/prun_universe_data.json'),
-      fetch('/planet_data.json')
+      fetch('prun_universe_data.json'),
+      fetch('planet_data.json')
     ]);
     const universeJson = await universeResponse.json();
     const planetJson = await planetResponse.json();
