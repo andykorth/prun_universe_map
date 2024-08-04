@@ -1,6 +1,6 @@
 .toggle-token {
   font-size: 12px;
-  padding: 5px 10px;
+  padding: 5px 9px;
   margin: 2px;
   border: 1px solid #ccc;
   border-radius: 15px;
@@ -11,6 +11,18 @@
   position: relative;
 }
 
+.toggle-token1 {
+  padding: 5px 3px 5px 9px;
+  border-radius: 15px 0px 0px 15px;
+  margin: 2px 1px 2px 2px;
+}
+
+.toggle-token2 {
+  padding: 5px 9px 5px 3px;
+  border-radius: 0px 15px 15px 0px;
+  margin: 2px 2px 2px 1px;
+}
+
 .toggle-token.active {
   background-color: #f7a600;
   color: white;
@@ -18,8 +30,9 @@
 }
 
 .filter-category select {
-  padding: 5px 10px;
-  border-radius: 13px;
+  padding: 5px 10px 5px 3px;
+  border-radius: 0px 15px 15px 0px;
+  margin: 2px 2px 2px 1px;
   border: 1px solid #ccc;
   background-color: #f0f0f0;
   color: #333;

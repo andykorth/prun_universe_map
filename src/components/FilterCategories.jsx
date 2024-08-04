@@ -4,9 +4,9 @@ import { useCogcOverlay } from '../contexts/CogcOverlayContext';
 import { cogcPrograms } from '../constants/cogcPrograms';
 import ResourceThresholdFilter from './ResourceThresholdFilter';
 
-const ToggleToken = ({ label, active, onClick, tooltip }) => (
+const ToggleToken = ({ label, active, onClick, tooltip, className }) => (
   <button
-    className={`toggle-token ${active ? 'active' : ''}`}
+    className={`toggle-token ${active ? 'active' : ''} ${className}`}
     onClick={onClick}
     data-tooltip={tooltip}
   >
@@ -25,12 +25,12 @@ const FilterCategory = ({ title, options, mouseoverText, selectedOptions, onChan
           active={selectedOptions.includes(option)}
           onClick={() => onChange(option)}
           tooltip={mouseoverText[index] || option}
+          className={`toggle-token${index + 1}`}
         />
       ))}
     </div>
   </div>
 );
-
 
 const CogcFilter = ({ active, program, onToggle, onProgramChange }) => {
   const { setOverlayProgram } = useCogcOverlay();
@@ -53,6 +53,7 @@ const CogcFilter = ({ active, program, onToggle, onProgramChange }) => {
           active={active}
           onClick={onToggle}
           tooltip="Toggle Cogc Program filter, dropdown activates an overlay"
+          className={`toggle-token1`}
         />
         <select
           value={program}
