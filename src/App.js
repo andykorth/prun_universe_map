@@ -31,13 +31,17 @@ const App = () => {
 
 const AppContent = ({ showFilters, setShowFilters }) => {
   const { clearSearch } = React.useContext(SearchContext);
+  const { showMySystems } = React.useContext(SearchContext);
 
   return (
     <div className="App">
       <header className="App-header">
         <div className="header-left">
           <img src={logo} alt="Logo" className="App-logo" />
-          <h1>Taiyi's Prosperous Universe Map</h1>
+          <div style={{margin: 0}}>
+          <h2 style={{margin: 3}}>OOG Capital Management</h2>
+          <h5 style={{margin: 3}}>Map by Taiyi</h5>
+          </div>
         </div>
         <div className="header-center">
           <button
@@ -53,7 +57,8 @@ const AppContent = ({ showFilters, setShowFilters }) => {
           <SearchField />
         </div>
         <div className="header-info">
-          <button className="clear-button" onClick={clearSearch}>Clear</button>
+        <button className="clear-button" onClick={showMySystems}>Show OOG</button>
+        <button className="clear-button" onClick={clearSearch}>Clear</button>
           <InfoTooltip />
           <div className="pathfinding-toggle-container">
             <PathfindingToggle />

@@ -1,6 +1,6 @@
 import React, { createContext, useState, useCallback, useContext } from 'react';
 import { GraphContext } from './GraphContext';
-import { highlightSearchResults, clearHighlights } from '../utils/searchUtils';
+import { highlightSearchResults, highlightSearchResultsCustomColor, clearHighlights } from '../utils/searchUtils';
 
 export const SearchContext = createContext();
 
@@ -38,6 +38,32 @@ export const SearchProvider = ({ children }) => {
   });
   const [systemSearchTerm, setSystemSearchTerm] = useState('');
   const [materialSearchTerm, setMaterialSearchTerm] = useState('');
+  
+  const showMySystems = useCallback((searchTerm) => {
+    const results = [];
+    const terms = ["Nike", "Harmonia", "Deimos", "Norwick", "Hephaestus", "Griffonstone", "Demeter", "Phobos", "Vulcan", "Etherwind", "Nascent", "Elon", "Ice Station Alpha", "ZV-759d", "Halcyon", "Malahat", "ZV-639d", "Eos", "KW-602c", "Electronica", "WU-070a", "ZV-194b", "Life", "SE-110b", "KI-840c", "Bober", "SE-110a", "Astraeus", "KI-401b", "SE-648a", "SE-648b", "SE-648c", "Proxion", "Aratora", "KI-439b", "KI-401d", "Aceland", "SE-866e", "ZV-194d", "Avalon", "QJ-382g", "Gibson", "Pyrgos", "ZV-759g", "IY-206j", "IY-206c", "SE-110d", "Promitor", "QJ-382a", "Boucher", "Jotu", "OE-568j", "KI-401a", "EW-238c", "WU-974c", "KI-401c", "KI-840d", "KI-439d", "ZV-759e", "WU-882h", "Hermes", "ZV-194c", "Helion Prime", "KW-688d", "HP-454a", "ZK-602b", "KW-976c", "HP-454g", "Katoa", "Nemesis", "XD-354g", "YP-916c", "Orm", "YI-705c", "CB-282d", "GM-498a", "OY-569c", "XG-452b", "RC-639a", "WB-947h", "KW-020d", "Verdant", "Milliways", "Umbra", "Adalina", "VH-043e", "AJ-135e", "LS-746b", "IY-206i", "Tiezendor"];
+    const myColorScale = [1, 1, 0.9780192938, 0.8597269536, 0.8075728531, 0.7801894976, 0.7801894976, 0.7801894976, 0.7518094116, 0.7518094116, 0.7223151185, 0.6915640748, 0.6915640748, 0.6593804734, 0.6593804734, 0.6255432422, 0.5897678246, 0.5516772844, 0.5516772844, 0.5516772844, 0.5107539185, 0.5107539185, 0.5107539185, 0.5107539185, 0.4662524041, 0.4662524041, 0.4662524041, 0.4662524041, 0.4170288281, 0.4170288281, 0.4170288281, 0.4170288281, 0.4170288281, 0.3611575593, 0.3611575593, 0.3611575593, 0.3611575593, 0.3611575593, 0.3611575593, 0.3611575593, 0.3611575593, 0.3611575593, 0.3611575593, 0.3611575593, 0.2948839123, 0.2948839123, 0.2948839123, 0.2948839123, 0.2948839123, 0.2948839123, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141, 0.2085144141];
+
+    terms.forEach( (term, index) => {
+      const lowerTerm = term.toLowerCase();
+      const thisColor = myColorScale[index];
+
+      // Search in planets
+      Object.entries(planetData).forEach(([systemId, planets]) => {
+        planets.forEach(planet => {
+          if (planet.PlanetName.toLowerCase().includes(lowerTerm) ||
+              planet.PlanetNaturalId.toLowerCase().includes(lowerTerm)) {
+            results.push({ type: 'planet', id: planet.PlanetNaturalId, systemId: systemId, colorScale: thisColor });
+          }
+        });
+      });
+    });
+
+    console.log('Results', results);
+    setSearchResults(results);
+    highlightSearchResultsCustomColor(results);
+    return results;
+  }, [universeData, planetData]);
 
 
   const handleSystemSearch = useCallback((searchTerm) => {
@@ -203,6 +229,7 @@ export const SearchProvider = ({ children }) => {
         handleSystemSearch,
         handleMaterialSearch,
         clearSearch,
+        showMySystems,
         filters,
         updateFilters,
         systemSearchTerm,

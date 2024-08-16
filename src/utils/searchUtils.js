@@ -12,6 +12,52 @@ export const clearHighlights = () => {
   resetGraphState();
 };
 
+
+export const highlightSearchResultsCustomColor = (searchResults) => {
+
+  // Define color scales
+  const colorScale = d3.scaleLinear()
+    .domain([0, 1])
+    .range(['#ff0000', '#00ff00']);
+
+  if (searchResults.length > 0) {
+    // Reset all systems to default state
+    clearHighlights();
+
+    let bestValuePerSystem = {};
+    searchResults.forEach(result => {
+      let highlightSystemNode = {};
+      let fillColor = colors.searchSystemFill;
+      let systemId;
+
+      if (result.type === 'system') {
+        systemId = result.id;
+        highlightSystemNode = d3.select(`#${CSS.escape(systemId)}`);
+      } else if (result.type === 'planet') {
+        systemId = result.systemId;
+
+        let prevColor = 0;
+        if(systemId in bestValuePerSystem) prevColor = bestValuePerSystem[systemId]
+        if(result.colorScale > prevColor){
+          bestValuePerSystem[systemId] = result.colorScale;
+        }
+        fillColor = colorScale(bestValuePerSystem[systemId]);
+        highlightSystemNode = d3.select(`#${CSS.escape(systemId)}`);
+
+      }
+
+      if (!highlightSystemNode.empty()) {
+        highlightSystemNode
+          .attr('fill', fillColor)
+          .attr('stroke', colors.searchSystemStroke)
+          .attr('stroke-width', colors.searchSystemStrokeWidth)
+          .attr('fill-opacity', 1.0)
+          .classed('search-highlight', true);
+      }
+    });
+  }
+}
+
 export const highlightSearchResults = (searchResults, highestFactorLiquid, highestFactorGaseous, highestFactorMineral) => {
   console.log(highestFactorLiquid, highestFactorGaseous, highestFactorMineral)
   // Define color scales
