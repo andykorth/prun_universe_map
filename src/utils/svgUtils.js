@@ -11,8 +11,8 @@ let planetData = null;
 const fetchData = async () => {
   try {
     const [universeResponse, planetResponse] = await Promise.all([
-      fetch('/prun_universe_data.json'),
-      fetch('/planet_data.json')
+      fetch('prun_universe_data.json'),
+      fetch('planet_data.json')
     ]);
     const universeJson = await universeResponse.json();
     const planetJson = await planetResponse.json();
@@ -74,7 +74,7 @@ const determinePlanetTier = (buildRequirements) => {
 
 // Function to convert COGC program type to readable format
 const formatCOGCProgram = (programType) => {
-  if (!programType) return 'Unknown Program';
+  if (!programType) return 'No active Program';
   return programType.split('_').map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(' ');
 };
 
@@ -88,7 +88,34 @@ const createPlanetTierIndicator = (tier) => {
 };
 
 // Function to create and show the info panel
-const showInfoPanel = (rect, x, y) => {
+const showInfoPanel = (rect, x, y, searchResults, materials) => {
+  console.log(searchResults)
+  const isPlanetInSearchResults = (planetId) => {
+    return searchResults.some(result =>
+      (result.type === 'planet' && result.planetId === planetId) ||
+      (result.type === 'material' && result.planetId === planetId)
+    );
+  };
+
+  const findMatchingMaterials = (planetId) => {
+    return searchResults.filter(result =>
+      result.type === 'material' && result.planetId === planetId
+    );
+  };
+
+  const createConcentrationBar = (concentration) => {
+    const percentage = concentration * 100;
+    const hue = (percentage / 100) * 120; // 0 is red, 120 is green
+    const backgroundColor = `hsl(${hue}, 100%, 50%)`;
+
+    return `
+      <div class="concentration-bar-container" style="width: 100px; background-color: #ddd; height: 10px; margin-left: 5px;">
+        <div class="concentration-bar" style="width: ${percentage}%; background-color: ${backgroundColor}; height: 100%;"></div>
+      </div>
+      <span class="resource-percentage">${percentage.toFixed(2)}%</span>
+    `;
+  };
+
   const systemId = rect.attr('id').replace('#', '');
   const system = universeData ? universeData[systemId] : null;
   const planets = planetData ? planetData[systemId] : null;
@@ -112,8 +139,10 @@ const showInfoPanel = (rect, x, y) => {
 
   sortedPlanets.forEach(planet => {
     let planetTier = determinePlanetTier(planet.BuildRequirements);
+    const isHighlighted = isPlanetInSearchResults(planet.PlanetNaturalId);
+    const matchingMaterials = findMatchingMaterials(planet.PlanetNaturalId);
 
-    content += `<li>
+    content += `<li class="${isHighlighted ? 'highlighted-planet' : ''}">
       <div class="planet-info">
         <div class="planet-name-tier">
           <span class="planet-name">${planet.PlanetName} (${planet.PlanetNaturalId})</span>
@@ -127,10 +156,32 @@ const showInfoPanel = (rect, x, y) => {
           ${createFacilityIndicator(planet.HasShipyard, Anchor)}
         </div>
       </div>`;
-    if (planet.COGCProgramStatus === "ACTIVE" && planet.COGCPrograms && planet.COGCPrograms.length > 0) {
-      const programType = planet.COGCPrograms[0].ProgramType;
+    if (planet.HasChamberOfCommerce) {
+      let programType
+      if (planet.COGCPrograms.length > 0) {
+        const programs = planet.COGCPrograms;
+        const sortedPrograms = programs.sort((a, b) => b.StartEpochMs - a.StartEpochMs);
+        const currentProgram = sortedPrograms[1] || sortedPrograms[0] || null;
+        programType = currentProgram.ProgramType;
+      }
       const formattedProgram = formatCOGCProgram(programType);
       content += `<div class="cogc-program">CoGC: ${formattedProgram}</div>`;
+    }
+    // Add resource bars for matching materials
+    if (matchingMaterials.length > 0) {
+      content += `<div class="matching-resources">`;
+      matchingMaterials.forEach(material => {
+        const materialInfo = materials.find(m => m.MaterialId === material.id);
+        if (materialInfo) {
+          content += `
+            <div class="resource-item" style="display: flex; align-items: center; margin-bottom: 5px;">
+              <span class="resource-name" style="margin-right: 5px;">${materialInfo.Ticker}</span>
+              ${createConcentrationBar(material.factor)}
+            </div>
+          `;
+        }
+      });
+      content += `</div>`;
     }
     content += `</li>`;
   });
@@ -145,12 +196,13 @@ const hideInfoPanel = () => {
 };
 
 // Function to add mouseover and mouseout events for animation
-export const addMouseEvents = (g) => {
+export const addMouseEvents = (g, searchResults, materials) => {
   g.selectAll('rect').each(function() {
     const rect = d3.select(this);
     const originalSize = { width: +rect.attr('width'), height: +rect.attr('height') };
     const originalPos = { x: +rect.attr('x'), y: +rect.attr('y') };
     let hoverTimer;
+    let overlayOriginalSize, overlayOriginalPos;
 
     rect.on('mouseover', function(event) {
       if (rect.attr('id') === 'rect1') return;
@@ -164,10 +216,31 @@ export const addMouseEvents = (g) => {
         .attr('x', originalPos.x - originalSize.width / 2)
         .attr('y', originalPos.y - originalSize.height / 2);
 
+      const overlayRect = rect.property('cogcOverlayRect');
+
+      if (overlayRect) {
+        overlayOriginalSize = {
+          width: +overlayRect.attr('width'),
+          height: +overlayRect.attr('height')
+        };
+        overlayOriginalPos = {
+          x: +overlayRect.attr('x'),
+          y: +overlayRect.attr('y')
+        };
+
+        overlayRect
+          .transition()
+          .duration(200)
+          .attr('width', overlayOriginalSize.width + originalSize.width)
+          .attr('height', overlayOriginalSize.height + originalSize.width)
+          .attr('x', overlayOriginalPos.x - originalSize.width / 2)
+          .attr('y', overlayOriginalPos.y - originalSize.height / 2);
+      }
+
       // Set timer for info panel
       hoverTimer = setTimeout(() => {
         const [x, y] = d3.pointer(event);
-        showInfoPanel(rect, x, y);
+        showInfoPanel(rect, x, y, searchResults, materials);
       }, 400);
 
     }).on('mouseout', function() {
@@ -179,6 +252,18 @@ export const addMouseEvents = (g) => {
         .attr('x', originalPos.x)
         .attr('y', originalPos.y)
         .attr('fill-opacity', rect.classed('search-highlight') ? 1 : colors.resetSystemFillOpacity);
+
+      // Reset the overlay rect if it exists
+      const overlayRect = rect.property('cogcOverlayRect');
+      if (overlayRect) {
+        overlayRect
+          .transition()
+          .duration(200)
+          .attr('width', overlayOriginalSize.width)
+          .attr('height', overlayOriginalSize.height)
+          .attr('x', overlayOriginalPos.x)
+          .attr('y', overlayOriginalPos.y);
+      }
 
       // Clear timer and hide info panel
       clearTimeout(hoverTimer);

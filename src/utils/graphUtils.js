@@ -32,7 +32,11 @@ export const resetGraphState = (nextSelectedSystem) => {
   svg.selectAll('rect').each(function() {
     const node = d3.select(this);
     const systemId = node.attr('id');
-    if (systemId !== 'rect1' && systemId !== nextSelectedSystem && !node.classed('search-highlight')) {
+    if (systemId !== 'rect1'
+      && systemId !== nextSelectedSystem
+      && !node.classed('search-highlight')
+      && !node.classed('cogc-overlay-rect')
+      ) {
       node
         .attr('fill', colors.resetSystemFill)
         .attr('fill-opacity', colors.resetSystemFillOpacity)

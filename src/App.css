@@ -191,20 +191,20 @@ body {
   margin-bottom: 20px;
 }
 
-.resource-item {
+.resource-item-sb {
   display: flex;
   align-items: center;
   margin-bottom: 5px;
 }
 
-.concentration-bar-container {
+.concentration-bar-container-sb {
   width: 100px;
   background-color: #ddd;
   height: 10px;
   margin-left: 5px;
 }
 
-.concentration-bar {
+.concentration-bar-sb {
   height: 100%;
   transition: width 0.3s ease;
 }
@@ -216,15 +216,15 @@ body {
   margin-left: 5px;
 }
 
-.pathfinding-toggle label {
+.pathfinding-toggle {
   display: flex;
   align-items: center;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px;
 }
 
-.pathfinding-toggle input[type="checkbox"] {
-  margin-top: 5px;
+.pathfinding-toggle .toggle-token {
+  margin: 0px;
   margin-right: 8px;
 }
 
@@ -342,7 +342,6 @@ search-container {
 
 /* Adjusted css for small screen sizes */
 
-
 @media (max-width: 820px) {
   .App-header {
     flex-wrap: wrap;
@@ -425,8 +424,20 @@ search-container {
     padding-bottom: 5px;
   }
 
+  .sidebar-content h3 {
+    font-size: 16px;
+  }
+
+  .sidebar-content h2 {
+    font-size: 22px;
+  }
+
   .sidebar-content svg {
     width: 18px;
     height: 18px;
+  }
+
+  .resource-item-sb {
+    font-size: 14px;
   }
 }

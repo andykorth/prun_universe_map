@@ -6,14 +6,13 @@ const PathfindingToggle = () => {
 
   return (
     <div className="pathfinding-toggle">
-      <label>
-        <input
-          type="checkbox"
-          checked={isPathfindingEnabled}
-          onChange={togglePathfinding}
-        />
-        Enable Pathfinding
-      </label>
+      <button
+        className={`toggle-token ${isPathfindingEnabled ? 'active' : ''}`}
+        onClick={togglePathfinding}
+        data-tooltip="Toggle pathfinding mode"
+      >
+        Pathfinding
+      </button>
     </div>
   );
 };

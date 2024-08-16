@@ -2,15 +2,19 @@ import React, { useEffect, useContext, useRef, useCallback } from 'react';
 import * as d3 from 'd3';
 import { GraphContext } from '../contexts/GraphContext';
 import { SelectionContext } from '../contexts/SelectionContext';
+import { useCogcOverlay } from '../contexts/CogcOverlayContext';
 import { addMouseEvents } from '../utils/svgUtils';
+import { cogcPrograms } from '../constants/cogcPrograms';
 import './UniverseMap.css';
+import { SearchContext } from '../contexts/SearchContext';
 
 const UniverseMap = React.memo(() => {
-  const { graph } = useContext(GraphContext);
+  const { graph, planetData, materials } = useContext(GraphContext);
   const { highlightSelectedSystem } = useContext(SelectionContext);
+  const { overlayProgram } = useCogcOverlay();
+  const { searchResults } = useContext(SearchContext);
   const svgRef = useRef(null);
   const graphRef = useRef(null);
-
   // Handle system click
   const handleSystemClick = useCallback((systemId) => {
     if (systemId === 'rect1') {
@@ -31,7 +35,7 @@ const UniverseMap = React.memo(() => {
   useEffect(() => {
     if (!graph || !graph.edges) return;
 
-    d3.xml('/PrUn_universe_map_normalized.svg').then(data => {
+    d3.xml('PrUn_universe_map_normalized.svg').then(data => {
       const svgNode = data.documentElement;
       const container = document.getElementById('map-container');
 
@@ -60,7 +64,7 @@ const UniverseMap = React.memo(() => {
 
       svg.call(zoom);
 
-      addMouseEvents(g);
+      addMouseEvents(g, searchResults, materials);
 
       // Store references for later use
       svgRef.current = svgNode;
@@ -81,6 +85,63 @@ const UniverseMap = React.memo(() => {
     };
   // eslint-disable-next-line
   }, [graph]);
+
+  useEffect(() => {
+    if (graphRef.current) {
+      addMouseEvents(graphRef.current.g, searchResults, materials);
+    }
+  }, [searchResults, materials]);
+
+  // Apply Cogc overlay
+  const applyCogcOverlay = useCallback(() => {
+    if (!graphRef.current || !overlayProgram) return;
+
+    const { g } = graphRef.current;
+    const selectedProgramValue = cogcPrograms.find(program => program.display === overlayProgram)?.value;
+
+    g.selectAll('.cogc-overlay-rect').remove();
+
+    g.selectAll('rect').each(function() {
+      const rect = d3.select(this);
+      const systemId = d3.select(this).attr('id');
+      const planets = planetData[systemId];
+
+      if (planets && planets.some(planet => {
+        if (!planet.COGCPrograms || planet.COGCPrograms.length === 0) return false;
+        const sortedPrograms = planet.COGCPrograms.sort((a, b) => b.StartEpochMs - a.StartEpochMs);
+        const relevantProgram = sortedPrograms[1] || sortedPrograms[0];
+        return relevantProgram && relevantProgram.ProgramType === selectedProgramValue;
+      })) {
+        rect.classed('cogc-overlay', true);
+        const x = parseFloat(rect.attr('x'));
+        const y = parseFloat(rect.attr('y'));
+        const width = parseFloat(rect.attr('width'));
+        const height = parseFloat(rect.attr('height'));
+        const scaleUp = 4;
+        // Create a new overlay rect
+        const overlayRect = g.append('rect')
+          .attr('class', 'cogc-overlay-rect')
+          .attr('x', x - scaleUp/2)
+          .attr('y', y - scaleUp/2)
+          .attr('width', width + scaleUp)
+          .attr('height', height + scaleUp)
+          .attr('fill', 'none')
+          .attr('stroke', '#56c7f7')
+          .attr('stroke-width', '3px')
+          .attr('rx', '50%')
+          .attr('ry', '50%');
+        rect.property('cogcOverlayRect', overlayRect);
+      } else {
+        rect.classed('cogc-overlay', false);
+        rect.property('cogcOverlayRect', null);
+      }
+    });
+  }, [overlayProgram, planetData]);
+
+  // Effect to apply Cogc overlay when overlayProgram changes
+  useEffect(() => {
+    applyCogcOverlay();
+  }, [applyCogcOverlay]);
 
   // Update click events when handleSystemClick changes
   useEffect(() => {

@@ -80,3 +80,109 @@
   margin-bottom: 10px;
   padding-left: 10px;
 }
+
+.highlighted-planet {
+  background-color: rgba(247, 166, 0, 0.2);
+  border-radius: 4px;
+}
+
+.highlighted-planet .planet-name {
+  font-weight: bold;
+  color: #f7a600;
+}
+
+.matching-resources {
+  margin-top: 5px;
+  padding-top: 5px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.resource-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  width: 100%; /* Ensure full width */
+}
+
+.resource-name {
+  width: 40px;
+  text-align: right;
+  margin-right: 5px;
+}
+
+.concentration-bar-container {
+  width: 100px;
+  background-color: #ddd;
+  height: 10px;
+  margin: 0 5px;
+}
+
+.resource-percentage {
+  width: 50px;
+  text-align: right;
+}
+
+/* Media queries for smaller screen sizes */
+@media (max-width: 820px) {
+  .info-panel {
+    max-width: 400px;
+    padding: 10px;
+  }
+
+  .info-panel h3 {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .planet-list li {
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  .planet-name-tier {
+    width: 100%;
+    align-items: center;
+  }
+
+  .planet-name {
+    margin-right: 5px;
+    margin-bottom: 2px;
+  }
+
+  .planet-tier {
+    margin-right: 5px;
+    font-size: 10px;
+  }
+
+  .facility-indicators {
+    margin-top: 4px;
+  }
+
+  .facility-indicators svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .cogc-program {
+    font-size: 10px;
+    margin-bottom: 6px;
+    padding-left: 5px;
+  }
+
+  .resource-item {
+    font-size: 10px;
+  }
+
+  .resource-name {
+    width: 30px;
+  }
+
+  .concentration-bar-container {
+    width: 70px;
+    height: 8px;
+  }
+
+  .resource-percentage {
+    width: 40px;
+  }
+}
