@@ -56,13 +56,6 @@ const highlightSelectedSystem = useCallback((nextSelectedSystem) => {
   }
 }, [isPathfindingEnabled, findShortestPath]);
 
-
-
-
-
-
-
-
   return (
     <SelectionContext.Provider
       value={{

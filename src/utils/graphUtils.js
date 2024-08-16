@@ -85,6 +85,54 @@ export const highlightPath = (path, systemSelected) => {
     highlightSelectedSystem(null, startSystem, [startSystem, endSystem]);
     highlightSelectedSystem(null, endSystem, [startSystem, endSystem]);
   }
+
+  // Draw Gateway Planner Path:
+  if (path.length >= 2) {
+    const startSystem = path[0];
+    const endSystem = path[path.length - 1];
+    const g = d3.select('#map-container g');
+
+    // clear any old paths and labels
+    g.selectAll('#gatewayLine').remove();
+    g.selectAll('#gatewayLineLabel').remove();
+    
+    // Retrieve the coordinates of the start and end systems
+    const startNode = d3.select(`#${CSS.escape(startSystem)}`);
+    const endNode = d3.select(`#${CSS.escape(endSystem)}`);
+
+    if (startNode.node() && endNode.node()) {
+      const startX = parseFloat(startNode.attr('x'));
+      const startY = parseFloat(startNode.attr('y'));
+      const endX = parseFloat(endNode.attr('x'));
+      const endY = parseFloat(endNode.attr('y'));
+
+      // Draw a dotted red line between start and end systems
+      g.insert('line', `:nth-child(100)`)
+        .attr('id', 'gatewayLine')
+        .attr('x1', startX+15)
+        .attr('y1', startY+15)
+        .attr('x2', endX+15)
+        .attr('y2', endY+15)
+        .attr('stroke', 'red')
+        .attr('stroke-width', 3)
+        .attr('stroke-dasharray', '4 3'); // Dotted line
+
+      const midX = (startX + endX) / 2 + 15;
+      const midY = (startY + endY) / 2 + 15;
+      const lineLength = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2)).toFixed(2);
+
+      g.append('text')
+        .attr('id', 'gatewayLineLabel')
+        .attr('x', midX)
+        .attr('y', midY)
+        .attr('fill', '#ff6666')
+        .attr('font-size', '12px')
+        .attr('text-anchor', 'middle')
+        .attr('style', 'text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.3);')
+        .attr('dy', -15) // Adjusts the position of the text slightly above the line
+        .text(`${lineLength} parsecs`);
+    }
+  }
 };
 
 export const highlightSelectedSystem = (prevSelectedSystem, nextSelectedSystem, pathfindingSelection, isPathfindingEnabled) => {
