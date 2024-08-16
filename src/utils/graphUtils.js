@@ -1,6 +1,8 @@
 import * as d3 from 'd3';
 import { find_path } from 'dijkstrajs';
 import { colors } from '../config/config';
+import React, { useContext } from 'react';
+import { GraphContext } from '../contexts/GraphContext';
 
 export const findShortestPath = (graph, system1, system2, highlightPath) => {
   if (system1 === 'rect1' || system2 === 'rect1') {
@@ -20,6 +22,7 @@ export const findShortestPath = (graph, system1, system2, highlightPath) => {
     const path = find_path(graphNodes, system1, system2);
     console.log('Found Path:', path)
     highlightPath(path, system2);
+    DrawGatewayPlanner(path);
   } catch (error) {
     console.error('Error finding path:', error);
   }
@@ -85,6 +88,11 @@ export const highlightPath = (path, systemSelected) => {
     highlightSelectedSystem(null, startSystem, [startSystem, endSystem]);
     highlightSelectedSystem(null, endSystem, [startSystem, endSystem]);
   }
+}
+
+export const DrawGatewayPlanner = (path) => {
+
+  const { universeData } = useContext(GraphContext);
 
   // Draw Gateway Planner Path:
   if (path.length >= 2) {
@@ -107,7 +115,7 @@ export const highlightPath = (path, systemSelected) => {
       const endY = parseFloat(endNode.attr('y'));
 
       // Draw a dotted red line between start and end systems
-      g.insert('line', `:nth-child(100)`)
+      g.insert('line', `:nth-child(100)`) // gross hack to get it under the planets but above the universe region polygons
         .attr('id', 'gatewayLine')
         .attr('x1', startX+15)
         .attr('y1', startY+15)
@@ -117,9 +125,21 @@ export const highlightPath = (path, systemSelected) => {
         .attr('stroke-width', 3)
         .attr('stroke-dasharray', '4 3'); // Dotted line
 
+        // need to pull real X,Y,Z data from universe, not the nice map X,Y display values
+        const startSystemData = universeData ? universeData[startSystem] : null;
+        const endSystemData = universeData ? universeData[endSystem] : null;
+
       const midX = (startX + endX) / 2 + 15;
       const midY = (startY + endY) / 2 + 15;
       const lineLength = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2)).toFixed(2);
+
+      // see https://rest.fnar.net/global/simulationdata for the ParsecLength
+      const parsecConstant = 12;
+      const parsecDistance = Math.sqrt(
+        Math.pow(startSystemData[0]["PositionX"]  - endSystemData[0]["PositionX"], 2) + 
+        Math.pow(startSystemData[0]["PositionY"]  - endSystemData[0]["PositionY"], 2) + 
+        Math.pow(startSystemData[0]["PositionZ"]  - endSystemData[0]["PositionZ"], 2)
+      ) / parsecConstant;
 
       g.append('text')
         .attr('id', 'gatewayLineLabel')
@@ -130,7 +150,7 @@ export const highlightPath = (path, systemSelected) => {
         .attr('text-anchor', 'middle')
         .attr('style', 'text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.3);')
         .attr('dy', -15) // Adjusts the position of the text slightly above the line
-        .text(`${lineLength} parsecs`);
+        .text(`${parsecDistance.toFixed(1)} parsecs`);
     }
   }
 };

@@ -166,7 +166,7 @@ const UniverseMap = React.memo(() => {
         const overlayText = g.append('text')
           .attr('class', 'namesText')
           .attr('x', x + width / 2) // Center text horizontally
-          .attr('y', y + height + 15) // Position text below the rect
+          .attr('y', y + height + 10) // Position text below the rect
           .attr('text-anchor', 'middle')
           .attr('fill', '#56c7f7')
           .attr('font-size', '9px')
