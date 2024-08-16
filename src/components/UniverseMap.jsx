@@ -9,7 +9,7 @@ import './UniverseMap.css';
 import { SearchContext } from '../contexts/SearchContext';
 
 const UniverseMap = React.memo(() => {
-  const { graph, planetData, materials } = useContext(GraphContext);
+  const { graph, planetData, materials, universeData } = useContext(GraphContext);
   const { highlightSelectedSystem } = useContext(SelectionContext);
   const { overlayProgram } = useCogcOverlay();
   const { searchResults } = useContext(SearchContext);
@@ -143,6 +143,55 @@ const UniverseMap = React.memo(() => {
     applyCogcOverlay();
   }, [applyCogcOverlay]);
 
+
+  const applyNames = useCallback(() => {
+    if (!graphRef.current) return;
+
+    const { g } = graphRef.current;
+    const selectedProgramValue = cogcPrograms.find(program => program.display === overlayProgram)?.value;
+
+    g.selectAll('.namesText').remove();
+
+    g.selectAll('rect').each(function() {
+      const rect = d3.select(this);
+      const systemId = d3.select(this).attr('id');
+      const planets = planetData[systemId];
+      const system = universeData ? universeData[systemId] : null;
+
+      if (planets && planets.some(planet => {
+        if (!planet.COGCPrograms || planet.COGCPrograms.length === 0) return false;
+        const sortedPrograms = planet.COGCPrograms.sort((a, b) => b.StartEpochMs - a.StartEpochMs);
+        const relevantProgram = sortedPrograms[1] || sortedPrograms[0];
+        return relevantProgram && relevantProgram.ProgramType === selectedProgramValue;
+      })) {
+        rect.classed('cogc-overlay', true);
+        const x = parseFloat(rect.attr('x'));
+        const y = parseFloat(rect.attr('y'));
+        const width = parseFloat(rect.attr('width'));
+        const height = parseFloat(rect.attr('height'));
+
+        // Create a new overlay rect
+        // Add text label
+        const overlayText = g.append('text')
+          .attr('class', 'namesText')
+          .attr('x', x + width / 2) // Center text horizontally
+          .attr('y', y + height + 15) // Position text below the rect
+          .attr('text-anchor', 'middle')
+          .attr('fill', '#56c7f7')
+          .attr('font-size', '11px')
+          .text(system[0].Name); // Set the text to the planet's name
+        rect.property('namesText', overlayText);
+      } else {
+        rect.classed('cogc-overlay', false);
+        rect.property('namesText', null);
+      }
+    });
+  }, [overlayProgram, planetData, universeData]);
+
+  useEffect(() => {
+    applyNames();
+  }, [applyNames]);
+  
   // Update click events when handleSystemClick changes
   useEffect(() => {
     if (graphRef.current) {
