@@ -148,23 +148,14 @@ const UniverseMap = React.memo(() => {
     if (!graphRef.current) return;
 
     const { g } = graphRef.current;
-    const selectedProgramValue = cogcPrograms.find(program => program.display === overlayProgram)?.value;
 
     g.selectAll('.namesText').remove();
 
     g.selectAll('rect').each(function() {
       const rect = d3.select(this);
       const systemId = d3.select(this).attr('id');
-      const planets = planetData[systemId];
-      const system = universeData ? universeData[systemId] : null;
-
-      if (planets && planets.some(planet => {
-        if (!planet.COGCPrograms || planet.COGCPrograms.length === 0) return false;
-        const sortedPrograms = planet.COGCPrograms.sort((a, b) => b.StartEpochMs - a.StartEpochMs);
-        const relevantProgram = sortedPrograms[1] || sortedPrograms[0];
-        return relevantProgram && relevantProgram.ProgramType === selectedProgramValue;
-      })) {
-        rect.classed('cogc-overlay', true);
+      const starSystem = universeData ? universeData[systemId] : null;
+      if (starSystem != null){
         const x = parseFloat(rect.attr('x'));
         const y = parseFloat(rect.attr('y'));
         const width = parseFloat(rect.attr('width'));
@@ -178,15 +169,12 @@ const UniverseMap = React.memo(() => {
           .attr('y', y + height + 15) // Position text below the rect
           .attr('text-anchor', 'middle')
           .attr('fill', '#56c7f7')
-          .attr('font-size', '11px')
-          .text(system[0].Name); // Set the text to the planet's name
+          .attr('font-size', '9px')
+          .text(starSystem[0].Name); // Set the text to the planet's name
         rect.property('namesText', overlayText);
-      } else {
-        rect.classed('cogc-overlay', false);
-        rect.property('namesText', null);
       }
     });
-  }, [overlayProgram, planetData, universeData]);
+  }, [searchResults, universeData]);
 
   useEffect(() => {
     applyNames();
