@@ -61,10 +61,15 @@ export const SearchProvider = ({ children }) => {
       });
     });
 
-    console.log('Results', results);
+    console.log('showMySystems Results', results);
     setSearchResults(results);
     highlightSearchResultsCustomColor(results);
     return results;
+
+  }, [universeData, planetData]);
+  
+  const clearGateways = useCallback( () => {
+    console.log('clear Gateways');
   }, [universeData, planetData]);
 
   const [resourceThreshold, setResourceThreshold] = useState(0);
@@ -283,6 +288,7 @@ export const SearchProvider = ({ children }) => {
         handleMaterialSearch,
         clearSearch,
         showMySystems,
+        clearGateways,
         filters,
         updateFilters,
         systemSearchTerm,

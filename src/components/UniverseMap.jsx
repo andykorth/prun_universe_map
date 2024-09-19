@@ -15,6 +15,7 @@ const UniverseMap = React.memo(() => {
   const { searchResults } = useContext(SearchContext);
   const svgRef = useRef(null);
   const graphRef = useRef(null);
+
   // Handle system click
   const handleSystemClick = useCallback((systemId) => {
     if (systemId === 'rect1') {
@@ -60,6 +61,15 @@ const UniverseMap = React.memo(() => {
         .scaleExtent([1, 20])
         .on('zoom', (event) => {
           g.attr('transform', event.transform);
+
+          const zoomLevel = event.transform.k; 
+
+          // opacity zero at zoomLevel 5, opacity 1 when it's less than 2.
+          const opacity = (zoomLevel - 1.5) / 1.0; // Set your threshold
+
+          g.selectAll('.namesText').each(function(){
+            d3.select(this).attr("opacity", opacity);
+          });
         });
 
       svg.call(zoom);
@@ -72,6 +82,32 @@ const UniverseMap = React.memo(() => {
 
       // Attach click events here, after the SVG is fully initialized
       attachClickEvents(g);
+        
+      g.selectAll('.namesText').remove();
+
+      g.selectAll('rect').each(function() {
+        const rect = d3.select(this);
+        const systemId = d3.select(this).attr('id');
+        const starSystem = universeData ? universeData[systemId] : null;
+        if (starSystem != null){
+          const x = parseFloat(rect.attr('x'));
+          const y = parseFloat(rect.attr('y'));
+          const width = parseFloat(rect.attr('width'));
+          const height = parseFloat(rect.attr('height'));
+
+          // Create a new overlay rect
+          // Add text label
+          const overlayText = g.append('text')
+            .attr('class', 'namesText')
+            .attr('x', x + width / 2) // Center text horizontally
+            .attr('y', y + height + 10) // Position text below the rect
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#56c7f7')
+            .attr('font-size', '9px')
+            .text(starSystem[0].Name); // Set the text to the planet's name
+          rect.property('namesText', overlayText);
+        }
+      });
     });
 
     // Cleanup function
@@ -85,6 +121,13 @@ const UniverseMap = React.memo(() => {
     };
   // eslint-disable-next-line
   }, [graph]);
+
+
+  useEffect(() => {
+    if (!graphRef.current) return;
+
+  // eslint-disable-next-line
+  }, [universeData]);
 
   useEffect(() => {
     if (graphRef.current) {
@@ -143,43 +186,6 @@ const UniverseMap = React.memo(() => {
     applyCogcOverlay();
   }, [applyCogcOverlay]);
 
-
-  const applyNames = useCallback(() => {
-    if (!graphRef.current) return;
-
-    const { g } = graphRef.current;
-
-    g.selectAll('.namesText').remove();
-
-    g.selectAll('rect').each(function() {
-      const rect = d3.select(this);
-      const systemId = d3.select(this).attr('id');
-      const starSystem = universeData ? universeData[systemId] : null;
-      if (starSystem != null){
-        const x = parseFloat(rect.attr('x'));
-        const y = parseFloat(rect.attr('y'));
-        const width = parseFloat(rect.attr('width'));
-        const height = parseFloat(rect.attr('height'));
-
-        // Create a new overlay rect
-        // Add text label
-        const overlayText = g.append('text')
-          .attr('class', 'namesText')
-          .attr('x', x + width / 2) // Center text horizontally
-          .attr('y', y + height + 10) // Position text below the rect
-          .attr('text-anchor', 'middle')
-          .attr('fill', '#56c7f7')
-          .attr('font-size', '9px')
-          .text(starSystem[0].Name); // Set the text to the planet's name
-        rect.property('namesText', overlayText);
-      }
-    });
-  }, [searchResults, universeData]);
-
-  useEffect(() => {
-    applyNames();
-  }, [applyNames]);
-  
   // Update click events when handleSystemClick changes
   useEffect(() => {
     if (graphRef.current) {

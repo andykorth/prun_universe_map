@@ -36,6 +36,7 @@ const App = () => {
 const AppContent = ({ showFilters, setShowFilters }) => {
   const { clearSearch } = React.useContext(SearchContext);
   const { showMySystems } = React.useContext(SearchContext);
+  // const { clearGateways } = React.useContext();
 
   return (
     <div className="App">
@@ -61,12 +62,13 @@ const AppContent = ({ showFilters, setShowFilters }) => {
           <SearchField />
         </div>
         <div className="header-info">
-        <button className="clear-button" onClick={showMySystems}>Show OOG</button>
-        <button className="clear-button" onClick={clearSearch}>Clear</button>
+          <button className="clear-button" onClick={showMySystems}>Show OOG</button>
+          <button className="clear-button" onClick={clearSearch}>Clear Search</button>
           <InfoTooltip />
           <div className="pathfinding-toggle-container">
             <PathfindingToggle />
           </div>
+          {/* <button className="clear-button" onClick={clearGateways}>Clear Gateways</button> */}
         </div>
       </header>
       <div className="main-content">
