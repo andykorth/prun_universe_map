@@ -34,7 +34,10 @@ const UniverseMap = React.memo(() => {
 
   // Initialize D3 graph
   useEffect(() => {
-    if (!graph || !graph.edges) return;
+    if (!graph || !graph.edges) {
+      console.log("No graph!")
+      return;
+    }
 
     d3.xml('PrUn_universe_map_normalized.svg').then(data => {
       const svgNode = data.documentElement;
@@ -63,11 +66,13 @@ const UniverseMap = React.memo(() => {
           g.attr('transform', event.transform);
 
           const zoomLevel = event.transform.k; 
+          const allNames = g.selectAll('.namesText');
 
           // opacity zero at zoomLevel 5, opacity 1 when it's less than 2.
           const opacity = (zoomLevel - 1.5) / 1.0; // Set your threshold
+          console.log("Zoom to " + zoomLevel + " yields opacity " + opacity + " for   elements: " + allNames );
 
-          g.selectAll('.namesText').each(function(){
+          allNames.each(function(){
             d3.select(this).attr("opacity", opacity);
           });
         });
@@ -85,6 +90,7 @@ const UniverseMap = React.memo(() => {
         
       g.selectAll('.namesText').remove();
 
+      console.log("Add system names.")
       g.selectAll('rect').each(function() {
         const rect = d3.select(this);
         const systemId = d3.select(this).attr('id');
@@ -108,6 +114,11 @@ const UniverseMap = React.memo(() => {
           rect.property('namesText', overlayText);
         }
       });
+
+      g.selectAll('.namesText').each(function(){
+        d3.select(this).attr("opacity", 0);
+      });
+
     });
 
     // Cleanup function
