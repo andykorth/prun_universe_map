@@ -41,6 +41,8 @@ export const SearchProvider = ({ children }) => {
   const [systemSearchTerm, setSystemSearchTerm] = useState('');
   const [materialSearchTerm, setMaterialSearchTerm] = useState('');
   const [resourceThreshold, setResourceThreshold] = useState(0);
+  const [isRelativeThreshold, setIsRelativeThreshold] = useState(false);
+  const [resourceTypeFilter, setResourceTypeFilter] = useState('ALL');
 
 
   const handleSystemSearch = useCallback((searchTerm) => {
@@ -153,7 +155,30 @@ export const SearchProvider = ({ children }) => {
         return false;
       }
 
-      if (result.factor < resourceThreshold) {
+      // Apply resource type filter first
+      if (resourceTypeFilter !== 'ALL' && result.resourceType !== resourceTypeFilter) {
+        return false;
+      }
+
+      let factorCheck;
+      if (isRelativeThreshold) {
+        let maxFactor;
+        if (resourceTypeFilter === 'ALL') {
+          // Use global maximum when 'ALL' is selected
+          maxFactor = Math.max(...results.map(r => r.factor));
+        } else {
+          // Use type-specific maximum when a specific type is selected
+          maxFactor = Math.max(...results
+            .filter(r => r.resourceType === resourceTypeFilter)
+            .map(r => r.factor));
+        }
+        const relativeFactor = result.factor / maxFactor;
+        factorCheck = relativeFactor >= resourceThreshold;
+      } else {
+        factorCheck = result.factor >= resourceThreshold;
+      }
+
+      if (!factorCheck) {
         return false;
       }
 
@@ -220,7 +245,7 @@ export const SearchProvider = ({ children }) => {
     highlightSearchResults(uniqueResults, highestFactorLiquid, highestFactorGaseous, highestFactorMineral);
     setSearchMaterial(matchingMaterialIds);
     return uniqueResults;
-  }, [planetData, materials, filters, resourceThreshold]);
+  }, [planetData, materials, filters, resourceThreshold, isRelativeThreshold, resourceTypeFilter]);
 
   const clearSearch = useCallback(() => {
     setSearchResults([]);
@@ -264,6 +289,10 @@ export const SearchProvider = ({ children }) => {
         updateMaterialSearchTerm,
         resourceThreshold,
         setResourceThreshold,
+        isRelativeThreshold,
+        setIsRelativeThreshold,
+        resourceTypeFilter,
+        setResourceTypeFilter,
       }}
     >
       {children}
