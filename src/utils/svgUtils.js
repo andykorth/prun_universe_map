@@ -6,6 +6,7 @@ import { colors } from '../config/config';
 
 let universeData = null;
 let planetData = null;
+let universeMaxConcentrations = null;
 
 // Function to fetch and process the universe and planet data
 const fetchData = async () => {
@@ -28,6 +29,8 @@ const fetchData = async () => {
       return acc;
     }, {});
 
+    universeMaxConcentrations = calculateMaxConcentrations(Object.values(planetData).flat());
+
     console.log('Universe and planet data loaded');
   } catch (error) {
     console.error('Error loading data:', error);
@@ -36,6 +39,21 @@ const fetchData = async () => {
 
 // Call this function when the application initializes
 fetchData();
+
+const calculateMaxConcentrations = (planets) => {
+  const maxConc = {};
+
+  planets.forEach(planet => {
+    planet.Resources.forEach(resource => {
+      const key = `${resource.MaterialId}-${resource.ResourceType}`;
+      if (!maxConc[key] || resource.Factor > maxConc[key]) {
+        maxConc[key] = resource.Factor;
+      }
+    });
+  });
+
+  return maxConc;
+};
 
 // Function to create facility indicator
 const createFacilityIndicator = (hasFeature, IconComponent) => {
@@ -88,7 +106,7 @@ const createPlanetTierIndicator = (tier) => {
 };
 
 // Function to create and show the info panel
-const showInfoPanel = (rect, x, y, searchResults, materials) => {
+const showInfoPanel = (rect, x, y, searchResults, materials, isRelativeThreshold) => {
   console.log(searchResults)
   const isPlanetInSearchResults = (planetId) => {
     return searchResults.some(result =>
@@ -103,18 +121,21 @@ const showInfoPanel = (rect, x, y, searchResults, materials) => {
     );
   };
 
-  const createConcentrationBar = (concentration) => {
-    const percentage = concentration * 100;
+  const createConcentrationBar = (concentration, materialId, resourceType, isRelative, maxConcentrations) => {
+    const key = `${materialId}-${resourceType}`;
+    const maxConcentration = maxConcentrations[key] || concentration;
+    const percentage = isRelative ? (concentration / maxConcentration) * 100 : concentration * 100;
     const hue = (percentage / 100) * 120; // 0 is red, 120 is green
     const backgroundColor = `hsl(${hue}, 100%, 50%)`;
 
     return `
-      <div class="concentration-bar-container" style="width: 100px; background-color: #ddd; height: 10px; margin-left: 5px;">
-        <div class="concentration-bar" style="width: ${percentage}%; background-color: ${backgroundColor}; height: 100%;"></div>
-      </div>
-      <span class="resource-percentage">${percentage.toFixed(2)}%</span>
-    `;
+    <div class="concentration-bar-container" style="width: 100px; background-color: #ddd; height: 10px; margin-left: 5px;">
+      <div class="concentration-bar" style="width: ${percentage}%; background-color: ${backgroundColor}; height: 100%;"></div>
+    </div>
+    <span class="resource-percentage">${percentage.toFixed(2)}%</span>
+  `;
   };
+
 
   const systemId = rect.attr('id').replace('#', '');
   const system = universeData ? universeData[systemId] : null;
@@ -172,11 +193,18 @@ const showInfoPanel = (rect, x, y, searchResults, materials) => {
       content += `<div class="matching-resources">`;
       matchingMaterials.forEach(material => {
         const materialInfo = materials.find(m => m.MaterialId === material.id);
-        if (materialInfo) {
+        const planetResource = planet.Resources.find(r => r.MaterialId === material.id);
+        if (materialInfo && planetResource) {
           content += `
             <div class="resource-item" style="display: flex; align-items: center; margin-bottom: 5px;">
               <span class="resource-name" style="margin-right: 5px;">${materialInfo.Ticker}</span>
-              ${createConcentrationBar(material.factor)}
+              ${createConcentrationBar(
+                planetResource.Factor,
+                planetResource.MaterialId,
+                planetResource.ResourceType,
+                isRelativeThreshold,
+                universeMaxConcentrations
+              )}
             </div>
           `;
         }
@@ -196,7 +224,7 @@ const hideInfoPanel = () => {
 };
 
 // Function to add mouseover and mouseout events for animation
-export const addMouseEvents = (g, searchResults, materials) => {
+export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold) => {
   g.selectAll('rect').each(function() {
     const rect = d3.select(this);
     const originalSize = { width: +rect.attr('width'), height: +rect.attr('height') };
@@ -240,7 +268,7 @@ export const addMouseEvents = (g, searchResults, materials) => {
       // Set timer for info panel
       hoverTimer = setTimeout(() => {
         const [x, y] = d3.pointer(event);
-        showInfoPanel(rect, x, y, searchResults, materials);
+        showInfoPanel(rect, x, y, searchResults, materials, isRelativeThreshold);
       }, 400);
 
     }).on('mouseout', function() {

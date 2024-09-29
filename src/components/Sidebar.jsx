@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useMemo } from 'react';
 import { ChevronRight, ChevronLeft, Earth, Cloud, Thermometer, Gauge, Weight } from 'lucide-react';
 import { GraphContext } from '../contexts/GraphContext';
 import { SearchContext } from '../contexts/SearchContext';
@@ -41,25 +41,6 @@ const PlanetTypeIcon = ({ isRocky }) => {
         stroke: 'currentColor', // Use the color for stroke
       }}
     />
-  );
-};
-
-const ConcentrationBar = ({ concentration }) => {
-  const percentage = concentration * 100;
-  const hue = (percentage / 100) * 120; // 0 is red, 120 is green
-  const backgroundColor = `hsl(${hue}, 100%, 50%)`;
-
-  return (
-    <div className="concentration-bar-container-sb" style={{ width: '100px', backgroundColor: '#ddd', height: '10px', marginLeft: '5px' }}>
-      <div
-        className="concentration-bar-sb"
-        style={{
-          width: `${percentage}%`,
-          backgroundColor,
-          height: '100%',
-        }}
-      />
-    </div>
   );
 };
 
@@ -126,7 +107,7 @@ const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(window.innerWidth < 768);
   const { universeData, planetData, materials } = useContext(GraphContext);
   const { selectedSystem } = useContext(SelectionContext);
-  const { searchMaterial, searchResults } = useContext(SearchContext);
+  const { searchMaterial, searchResults, isRelativeThreshold } = useContext(SearchContext);
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -182,6 +163,45 @@ const Sidebar = () => {
     }
   };
 
+  // Calculate max concentrations for each combination of MaterialId and ResourceType across the entire universe
+  const maxConcentrations = useMemo(() => {
+    const maxConc = {};
+
+    Object.values(planetData).flat().forEach(planet => {
+      planet.Resources.forEach(resource => {
+        const key = `${resource.MaterialId}-${resource.ResourceType}`;
+        if (!maxConc[key] || resource.Factor > maxConc[key]) {
+          maxConc[key] = resource.Factor;
+        }
+      });
+    });
+
+    return maxConc;
+  }, [planetData]);
+
+  const ConcentrationBar = ({ concentration, materialId, resourceType }) => {
+    const key = `${materialId}-${resourceType}`;
+    const maxConcentration = maxConcentrations[key] || concentration;
+    const percentage = isRelativeThreshold
+      ? (concentration / maxConcentration) * 100
+      : concentration * 100;
+    const hue = (percentage / 100) * 120; // 0 is red, 120 is green
+    const backgroundColor = `hsl(${hue}, 100%, 50%)`;
+
+    return (
+      <div className="concentration-bar-container-sb" style={{ width: '100px', backgroundColor: '#ddd', height: '10px', marginLeft: '5px' }}>
+        <div
+          className="concentration-bar-sb"
+          style={{
+            width: `${percentage}%`,
+            backgroundColor,
+            height: '100%',
+          }}
+        />
+      </div>
+    );
+  };
+
   return (
     <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
       <button className="toggle-btn" onClick={toggleSidebar}>
@@ -218,11 +238,13 @@ const Sidebar = () => {
                 )}
               </h3>
               <ul>
-                {planet.Resources.map((resource, idx) => (
-                  <li
-                    key={idx}
-                    className="resource-item-sb"
-                    style={{
+                {planet.Resources.map((resource, idx) => {
+                  const key = `${resource.MaterialId}-${resource.ResourceType}`;
+                  return (
+                    <li
+                      key={idx}
+                      className="resource-item-sb"
+                      style={{
                       display: 'flex',
                       alignItems: 'center',
                       marginBottom: '5px',
@@ -231,14 +253,23 @@ const Sidebar = () => {
                       backgroundColor: isHighlighted(resource.MaterialId, planet.PlanetNaturalId) ? 'rgba(74, 144, 226, 0.1)' : 'transparent',
                       padding: '2px 5px',
                       borderRadius: '3px'
-                    }}
-                  >
-                    <ResourceIcon type={resource.ResourceType} />
-                    <span style={{ marginLeft: '5px', minWidth: '50px' }}>{materialsMap[resource.MaterialId]?.Ticker || 'Unknown'}</span>
-                    <ConcentrationBar concentration={resource.Factor} />
-                    <span className="resource-percentage">{(resource.Factor * 100).toFixed(2)}%</span>
-                  </li>
-                ))}
+                  }}
+                    >
+                      <ResourceIcon type={resource.ResourceType} />
+                      <span style={{ marginLeft: '5px', minWidth: '50px' }}>{materialsMap[resource.MaterialId]?.Ticker || 'Unknown'}</span>
+                      <ConcentrationBar
+                        concentration={resource.Factor}
+                        materialId={resource.MaterialId}
+                        resourceType={resource.ResourceType}
+                      />
+                      <span className="resource-percentage">
+                        {isRelativeThreshold
+                          ? ((resource.Factor / maxConcentrations[key]) * 100).toFixed(2)
+                          : (resource.Factor * 100).toFixed(2)}%
+                      </span>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}
