@@ -90,7 +90,7 @@ export const SearchProvider = ({ children }) => {
     let matchingMaterialIds = [];
 
     if (terms.length === 0) {
-      // Return all planets if no search terms
+      // Populate results with all planets if no search terms
       Object.entries(planetData).forEach(([systemId, planets]) => {
         planets.forEach(planet => {
           results.push({
@@ -155,31 +155,36 @@ export const SearchProvider = ({ children }) => {
         return false;
       }
 
-      // Apply resource type filter first
-      if (resourceTypeFilter !== 'ALL' && result.resourceType !== resourceTypeFilter) {
-        return false;
-      }
-
-      let factorCheck;
-      if (isRelativeThreshold) {
-        let maxFactor;
-        if (resourceTypeFilter === 'ALL') {
-          // Use global maximum when 'ALL' is selected
-          maxFactor = Math.max(...results.map(r => r.factor));
-        } else {
-          // Use type-specific maximum when a specific type is selected
-          maxFactor = Math.max(...results
-            .filter(r => r.resourceType === resourceTypeFilter)
-            .map(r => r.factor));
+      if (result.type === 'material') {
+        // Apply resource type filter
+        if (resourceTypeFilter !== 'ALL' && result.resourceType !== resourceTypeFilter) {
+          return false;
         }
-        const relativeFactor = result.factor / maxFactor;
-        factorCheck = relativeFactor >= resourceThreshold;
-      } else {
-        factorCheck = result.factor >= resourceThreshold;
-      }
 
-      if (!factorCheck) {
-        return false;
+        // Apply factor check
+        let factorCheck;
+        if (isRelativeThreshold) {
+          let maxFactor;
+          if (resourceTypeFilter === 'ALL') {
+            // Use global maximum when 'ALL' is selected
+            maxFactor = Math.max(...results
+              .filter(r => r.type === 'material')
+              .map(r => r.factor));
+          } else {
+            // Use type-specific maximum when a specific type is selected
+            maxFactor = Math.max(...results
+              .filter(r => r.type === 'material' && r.resourceType === resourceTypeFilter)
+              .map(r => r.factor));
+          }
+          const relativeFactor = result.factor / maxFactor;
+          factorCheck = relativeFactor >= resourceThreshold;
+        } else {
+          factorCheck = result.factor >= resourceThreshold;
+        }
+
+        if (!factorCheck) {
+          return false;
+        }
       }
 
       const planetTypeCondition =
