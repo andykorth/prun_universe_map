@@ -10,8 +10,7 @@ const SearchField = () => {
     companySearchTerm,
     updateSystemSearchTerm,
     updateCompanySearchTerm,
-    isCompanySearch,
-    toggleCompanySearch
+    isCompanySearch
   } = useContext(SearchContext);
 
   const onSearch = async (e) => {
@@ -37,14 +36,11 @@ const SearchField = () => {
           type="text"
           value={isCompanySearch ? companySearchTerm : systemSearchTerm}
           onChange={(e) => isCompanySearch ? updateCompanySearchTerm(e.target.value) : updateSystemSearchTerm(e.target.value)}
-          placeholder={isCompanySearch ? "Enter company code..." : "Search system, planet..."}
+          placeholder={isCompanySearch ? "Search company code..." : "Search system, planet..."}
         />
         <button type="submit" className="search-button system-search">Search</button>
       </form>
       {notification && <div className="search-notification">{notification}</div>}
-      <button onClick={toggleCompanySearch} className="company-search-toggle">
-        {isCompanySearch ? "System Search" : "Company Search"}
-      </button>
     </div>
   );
 };

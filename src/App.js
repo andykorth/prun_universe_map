@@ -34,7 +34,7 @@ const App = () => {
 };
 
 const AppContent = ({ showFilters, setShowFilters }) => {
-  const { clearSearch } = React.useContext(SearchContext);
+  const { clearSearch, isCompanySearch, toggleCompanySearch } = React.useContext(SearchContext);
 
   return (
     <div className="App">
@@ -56,8 +56,17 @@ const AppContent = ({ showFilters, setShowFilters }) => {
           <MaterialSearchField />
           <SearchField />
         </div>
-        <div className="header-info">
+        <div className="header-buttons">
           <button className="clear-button" onClick={clearSearch}>Clear</button>
+          <button
+            onClick={toggleCompanySearch}
+            className={`toggle-token company-search-toggle ${isCompanySearch ? 'active' : ''}`}
+            data-tooltip={"Enter company code to search base data using FIO"}
+          >
+          Company
+          </button>
+        </div>
+        <div className="header-info">
           <InfoTooltip />
           <div className="pathfinding-toggle-container">
             <PathfindingToggle />
