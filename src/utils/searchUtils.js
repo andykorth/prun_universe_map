@@ -45,6 +45,11 @@ export const highlightSearchResults = (searchResults, highestFactorLiquid, highe
             systemBestResource[systemId] = result;
           }
         }
+      } else if (result.type === 'company_base') {
+        const systemId = result.systemId;
+        if (!systemBestResource[systemId]) {
+          systemBestResource[systemId] = result;
+        }
       }
     });
 
@@ -77,6 +82,9 @@ export const highlightSearchResults = (searchResults, highestFactorLiquid, highe
           // Skip this result as it's not the best for the system
           return;
         }
+      } else if (result.type === 'company_base') {
+        systemId = result.systemId;
+        highlightSystemNode = d3.select(`#${CSS.escape(systemId)}`);
       }
 
       if (!highlightSystemNode.empty()) {

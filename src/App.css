@@ -340,6 +340,21 @@ search-container {
   pointer-events: none;
 }
 
+.company-base-indicator {
+  background-color: #f7a600;
+  color: white;
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-size: 12px;
+  margin-top: 5px;
+  display: inline-block;
+}
+
+.planet-info-sb.highlighted {
+  border-left: 3px solid #f7a600;
+  padding-left: 5px;
+}
+
 /* Adjusted css for small screen sizes */
 
 @media (max-width: 820px) {

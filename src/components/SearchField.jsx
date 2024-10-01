@@ -3,14 +3,28 @@ import { SearchContext } from '../contexts/SearchContext';
 
 const SearchField = () => {
   const [notification, setNotification] = useState('');
-  const { handleSystemSearch, systemSearchTerm, updateSystemSearchTerm } = useContext(SearchContext);
+  const {
+    handleSystemSearch,
+    handleCompanySearch,
+    systemSearchTerm,
+    companySearchTerm,
+    updateSystemSearchTerm,
+    updateCompanySearchTerm,
+    isCompanySearch,
+    toggleCompanySearch
+  } = useContext(SearchContext);
 
-  const onSearch = (e) => {
+  const onSearch = async (e) => {
     e.preventDefault();
-    const result = handleSystemSearch(systemSearchTerm);
+    let result;
+    if (isCompanySearch) {
+      result = await handleCompanySearch(companySearchTerm);
+    } else {
+      result = handleSystemSearch(systemSearchTerm);
+    }
     if (result.length === 0) {
       setNotification('No matches found');
-      setTimeout(() => setNotification(''), 3000); // Clear notification after 3 seconds
+      setTimeout(() => setNotification(''), 3000);
     } else {
       setNotification('');
     }
@@ -21,13 +35,16 @@ const SearchField = () => {
       <form onSubmit={onSearch}>
         <input
           type="text"
-          value={systemSearchTerm}
-          onChange={(e) => updateSystemSearchTerm(e.target.value)}
-          placeholder="Search system, planet..."
+          value={isCompanySearch ? companySearchTerm : systemSearchTerm}
+          onChange={(e) => isCompanySearch ? updateCompanySearchTerm(e.target.value) : updateSystemSearchTerm(e.target.value)}
+          placeholder={isCompanySearch ? "Enter company code..." : "Search system, planet..."}
         />
         <button type="submit" className="search-button system-search">Search</button>
       </form>
       {notification && <div className="search-notification">{notification}</div>}
+      <button onClick={toggleCompanySearch} className="company-search-toggle">
+        {isCompanySearch ? "System Search" : "Company Search"}
+      </button>
     </div>
   );
 };

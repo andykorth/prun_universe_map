@@ -43,6 +43,8 @@ export const SearchProvider = ({ children }) => {
   const [resourceThreshold, setResourceThreshold] = useState(0);
   const [isRelativeThreshold, setIsRelativeThreshold] = useState(false);
   const [resourceTypeFilter, setResourceTypeFilter] = useState('ALL');
+  const [companySearchTerm, setCompanySearchTerm] = useState('');
+  const [isCompanySearch, setIsCompanySearch] = useState(false);
 
 
   const handleSystemSearch = useCallback((searchTerm) => {
@@ -252,10 +254,41 @@ export const SearchProvider = ({ children }) => {
     return uniqueResults;
   }, [planetData, materials, filters, resourceThreshold, isRelativeThreshold, resourceTypeFilter]);
 
+  const handleCompanySearch = useCallback(async (companyCode) => {
+    const sanitizedCompanyCode = sanitizeInput(companyCode);
+    try {
+      const response = await fetch(`https://rest.fnar.net/company/code/${sanitizedCompanyCode}`);
+      const data = await response.json();
+
+      if (data && data.Planets) {
+        const results = data.Planets.map(planet => ({
+          type: 'company_base',
+          planetId: planet.PlanetId,
+          planetNaturalId: planet.PlanetNaturalId,
+          planetName: planet.PlanetName,
+          systemId: Object.keys(planetData).find(systemId =>
+          planetData[systemId].some(p => p.PlanetNaturalId === planet.PlanetNaturalId)
+          )
+        }));
+
+        setSearchResults(results);
+        highlightSearchResults(results);
+        return results;
+      } else {
+        return [];
+      }
+    } catch (error) {
+      console.error('Error fetching company data:', error);
+      return [];
+    }
+  }, [planetData]);
+
+
   const clearSearch = useCallback(() => {
     setSearchResults([]);
     setSystemSearchTerm('');
     setMaterialSearchTerm('');
+    setCompanySearchTerm('');
     setSearchMaterial([]);
     setSearchMaterialConcentrationLiquid([]);
     setSearchMaterialConcentrationGaseous([]);
@@ -275,6 +308,16 @@ export const SearchProvider = ({ children }) => {
     setMaterialSearchTerm(term);
   }, []);
 
+  const updateCompanySearchTerm = useCallback((term) => {
+    setCompanySearchTerm(term);
+  }, []);
+
+  const toggleCompanySearch = useCallback(() => {
+    setIsCompanySearch(prev => !prev);
+    clearSearch();
+  }, [clearSearch]);
+
+
   return (
     <SearchContext.Provider
       value={{
@@ -285,19 +328,24 @@ export const SearchProvider = ({ children }) => {
         searchMaterialConcentrationGaseous,
         handleSystemSearch,
         handleMaterialSearch,
+        handleCompanySearch,
         clearSearch,
         filters,
         updateFilters,
         systemSearchTerm,
         materialSearchTerm,
+        companySearchTerm,
         updateSystemSearchTerm,
         updateMaterialSearchTerm,
+        updateCompanySearchTerm,
         resourceThreshold,
         setResourceThreshold,
         isRelativeThreshold,
         setIsRelativeThreshold,
         resourceTypeFilter,
         setResourceTypeFilter,
+        isCompanySearch,
+        toggleCompanySearch,
       }}
     >
       {children}

@@ -107,7 +107,7 @@ const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(window.innerWidth < 768);
   const { universeData, planetData, materials } = useContext(GraphContext);
   const { selectedSystem } = useContext(SelectionContext);
-  const { searchMaterial, searchResults, isRelativeThreshold } = useContext(SearchContext);
+  const { searchMaterial, searchResults, isRelativeThreshold, isCompanySearch } = useContext(SearchContext);
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -131,10 +131,12 @@ const Sidebar = () => {
   const isHighlighted = (materialId, planetId) => {
     const isPlanetInSearchResults = searchResults.some(result =>
       (result.type === 'planet' && result.id === planetId) ||
-      (result.type === 'material' && result.planetId === planetId)
+      (result.type === 'material' && result.planetId === planetId) ||
+      (result.type === 'company_base' && result.planetNaturalId === planetId)
     );
     const isMaterialInSearchMaterial = searchMaterial.includes(materialId);
-    return isMaterialInSearchMaterial && isPlanetInSearchResults;
+    return (isMaterialInSearchMaterial && isPlanetInSearchResults) ||
+           (isCompanySearch && isPlanetInSearchResults);
   };
 
   const isConditionAbnormal = (condition, value) => {
@@ -211,7 +213,7 @@ const Sidebar = () => {
         <div className="sidebar-content">
           <h2>{selectedSystem && universeData[selectedSystem] ? universeData[selectedSystem][0].Name : 'No System Selected'}</h2>
           {sortedPlanets && sortedPlanets.map((planet, index) => (
-            <div key={planet.PlanetNaturalId} className="planet-info-sb">
+            <div key={planet.PlanetNaturalId} className={`planet-info-sb ${isHighlighted(null, planet.PlanetNaturalId) ? 'highlighted' : ''}`}>
               <h3>
                 <PlanetTypeIcon isRocky={planet.Surface} />
                 <span style={{ marginLeft: '5px' }}>{planet.PlanetName} ({planet.PlanetNaturalId})</span>
@@ -245,15 +247,15 @@ const Sidebar = () => {
                       key={idx}
                       className="resource-item-sb"
                       style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      marginBottom: '5px',
-                      fontWeight: isHighlighted(resource.MaterialId, planet.PlanetNaturalId) ? 'bold' : 'normal',
-                      color: isHighlighted(resource.MaterialId, planet.PlanetNaturalId) ? '#4a90e2' : 'inherit',
-                      backgroundColor: isHighlighted(resource.MaterialId, planet.PlanetNaturalId) ? 'rgba(74, 144, 226, 0.1)' : 'transparent',
-                      padding: '2px 5px',
-                      borderRadius: '3px'
-                  }}
+                        display: 'flex',
+                        alignItems: 'center',
+                        marginBottom: '5px',
+                        fontWeight: isHighlighted(resource.MaterialId, planet.PlanetNaturalId) ? 'bold' : 'normal',
+                        color: isHighlighted(resource.MaterialId, planet.PlanetNaturalId) ? '#4a90e2' : 'inherit',
+                        backgroundColor: isHighlighted(resource.MaterialId, planet.PlanetNaturalId) ? 'rgba(74, 144, 226, 0.1)' : 'transparent',
+                        padding: '2px 5px',
+                        borderRadius: '3px'
+                      }}
                     >
                       <ResourceIcon type={resource.ResourceType} />
                       <span style={{ marginLeft: '5px', minWidth: '50px' }}>{materialsMap[resource.MaterialId]?.Ticker || 'Unknown'}</span>
@@ -271,6 +273,9 @@ const Sidebar = () => {
                   );
                 })}
               </ul>
+              {isCompanySearch && isHighlighted(null, planet.PlanetNaturalId) && (
+                <div className="company-base-indicator">Company Base</div>
+              )}
             </div>
           ))}
         </div>
