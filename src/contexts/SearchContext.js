@@ -78,8 +78,6 @@ export const SearchProvider = ({ children }) => {
     console.log('clear Gateways');
   }, [universeData, planetData]);
 
-  const [resourceThreshold, setResourceThreshold] = useState(0);
-
   const handleSystemSearch = useCallback((searchTerm) => {
     const sanitizedSearchTerm = sanitizeInput(searchTerm);
     const results = [];
