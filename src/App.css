@@ -52,6 +52,16 @@ body {
   justify-content: center;
 }
 
+.header-buttons {
+  display: flex;
+  flex: 0 1 auto;
+  margin-bottom: 2px;
+  flex-flow: row wrap;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
 .material-search-field,
 .search-field,
 .clear-button,
@@ -340,6 +350,26 @@ search-container {
   pointer-events: none;
 }
 
+.company-base-indicator {
+  background-color: #f7a600;
+  color: white;
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-size: 12px;
+  margin-top: 5px;
+  display: inline-block;
+}
+
+.planet-info-sb.highlighted {
+  border-left: 3px solid #f7a600;
+  padding-left: 5px;
+}
+
+.company-search-toggle {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
 /* Adjusted css for small screen sizes */
 
 @media (max-width: 820px) {
@@ -353,11 +383,11 @@ search-container {
     display: none; /* This hides the logo and title */
   }
 
-  .header-right, .header-info {
+  .header-right, .header-info .header-buttons {
     flex-direction: column;
   }
 
-  .header-left, .header-center, .header-right, .header-info {
+  .header-left, .header-center, .header-right, .header-info .header-buttons {
     flex: 0 1 auto;
   }
 

@@ -87,17 +87,36 @@
   color: #f7a600;
 }
 
-@media (max-width: 820px) {
+.resource-threshold-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
+.resource-type-filter select {
+  padding: 5px;
+  border-radius: 15px;
+  border: 1px solid #ccc;
+  background-color: #333;
+  color: #fff;
+  font-size: 12px;
+}
+
+@media (max-width: 820px) {
   .toggle-token {
-  font-size: 10px;
-  padding: 2px 5px;
+    font-size: 10px;
+    padding: 2px 5px;
+  }
+
+  .toggle-token:hover::after {
+    font-size: 10px;
+    padding: 3px 6px;
   }
 
   .filter-category select {
-  padding: 2px 5px;
-  border-radius: 13px;
-  font-size: 10px;
+    padding: 2px 5px;
+    border-radius: 13px;
+    font-size: 10px;
   }
 
   .resource-threshold-input {
@@ -108,5 +127,9 @@
 
   .resource-threshold-value {
     font-size: 10px;
+  }
+
+  .resource-threshold-controls {
+    flex-wrap: wrap;
   }
 }

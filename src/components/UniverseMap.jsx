@@ -12,7 +12,7 @@ const UniverseMap = React.memo(() => {
   const { graph, planetData, materials, universeData } = useContext(GraphContext);
   const { highlightSelectedSystem } = useContext(SelectionContext);
   const { overlayProgram } = useCogcOverlay();
-  const { searchResults } = useContext(SearchContext);
+  const { searchResults, isRelativeThreshold } = useContext(SearchContext);
   const svgRef = useRef(null);
   const graphRef = useRef(null);
 
@@ -142,9 +142,9 @@ const UniverseMap = React.memo(() => {
 
   useEffect(() => {
     if (graphRef.current) {
-      addMouseEvents(graphRef.current.g, searchResults, materials);
+      addMouseEvents(graphRef.current.g, searchResults, materials, isRelativeThreshold);
     }
-  }, [searchResults, materials]);
+  }, [searchResults, materials, isRelativeThreshold]);
 
   // Apply Cogc overlay
   const applyCogcOverlay = useCallback(() => {
