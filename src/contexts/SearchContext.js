@@ -41,6 +41,12 @@ export const SearchProvider = ({ children }) => {
   const [systemSearchTerm, setSystemSearchTerm] = useState('');
   const [materialSearchTerm, setMaterialSearchTerm] = useState('');
 
+  const [resourceThreshold, setResourceThreshold] = useState(0);
+  const [isRelativeThreshold, setIsRelativeThreshold] = useState(false);
+  const [resourceTypeFilter, setResourceTypeFilter] = useState('ALL');
+  const [companySearchTerm, setCompanySearchTerm] = useState('');
+  const [isCompanySearch, setIsCompanySearch] = useState(false);
+
   const showMySystems = useCallback((searchTerm) => {
     const results = [];
     const terms = ["Nike", "Harmonia", "Deimos", "Norwick", "Hephaestus", "Griffonstone", "Demeter", "Phobos", "Vulcan", "Etherwind", "Nascent", "Elon", "Ice Station Alpha", "ZV-759d", "Halcyon", "Malahat", "ZV-639d", "Eos", "KW-602c", "Electronica", "WU-070a", "ZV-194b", "Life", "SE-110b", "KI-840c", "Bober", "SE-110a", "Astraeus", "KI-401b", "SE-648a", "SE-648b", "SE-648c", "Proxion", "Aratora", "KI-439b", "KI-401d", "Aceland", "SE-866e", "ZV-194d", "Avalon", "QJ-382g", "Gibson", "Pyrgos", "ZV-759g", "IY-206j", "IY-206c", "SE-110d", "Promitor", "QJ-382a", "Boucher", "Jotu", "OE-568j", "KI-401a", "EW-238c", "WU-974c", "KI-401c", "KI-840d", "KI-439d", "ZV-759e", "WU-882h", "Hermes", "ZV-194c", "Helion Prime", "KW-688d", "HP-454a", "ZK-602b", "KW-976c", "HP-454g", "Katoa", "Nemesis", "XD-354g", "YP-916c", "Orm", "YI-705c", "CB-282d", "GM-498a", "OY-569c", "XG-452b", "RC-639a", "WB-947h", "KW-020d", "Verdant", "Milliways", "Umbra", "Adalina", "VH-043e", "AJ-135e", "LS-746b", "IY-206i", "Tiezendor"];
@@ -71,8 +77,6 @@ export const SearchProvider = ({ children }) => {
   const clearGateways = useCallback( () => {
     console.log('clear Gateways');
   }, [universeData, planetData]);
-
-  const [resourceThreshold, setResourceThreshold] = useState(0);
 
   const handleSystemSearch = useCallback((searchTerm) => {
     const sanitizedSearchTerm = sanitizeInput(searchTerm);
@@ -119,7 +123,7 @@ export const SearchProvider = ({ children }) => {
     let matchingMaterialIds = [];
 
     if (terms.length === 0) {
-      // Return all planets if no search terms
+      // Populate results with all planets if no search terms
       Object.entries(planetData).forEach(([systemId, planets]) => {
         planets.forEach(planet => {
           results.push({
@@ -184,8 +188,36 @@ export const SearchProvider = ({ children }) => {
         return false;
       }
 
-      if (result.factor < resourceThreshold) {
-        return false;
+      if (result.type === 'material') {
+        // Apply resource type filter
+        if (resourceTypeFilter !== 'ALL' && result.resourceType !== resourceTypeFilter) {
+          return false;
+        }
+
+        // Apply factor check
+        let factorCheck;
+        if (isRelativeThreshold) {
+          let maxFactor;
+          if (resourceTypeFilter === 'ALL') {
+            // Use global maximum when 'ALL' is selected
+            maxFactor = Math.max(...results
+              .filter(r => r.type === 'material')
+              .map(r => r.factor));
+          } else {
+            // Use type-specific maximum when a specific type is selected
+            maxFactor = Math.max(...results
+              .filter(r => r.type === 'material' && r.resourceType === resourceTypeFilter)
+              .map(r => r.factor));
+          }
+          const relativeFactor = result.factor / maxFactor;
+          factorCheck = relativeFactor >= resourceThreshold;
+        } else {
+          factorCheck = result.factor >= resourceThreshold;
+        }
+
+        if (!factorCheck) {
+          return false;
+        }
       }
 
       const planetTypeCondition =
@@ -251,12 +283,43 @@ export const SearchProvider = ({ children }) => {
     highlightSearchResults(uniqueResults, highestFactorLiquid, highestFactorGaseous, highestFactorMineral);
     setSearchMaterial(matchingMaterialIds);
     return uniqueResults;
-  }, [planetData, materials, filters, resourceThreshold]);
+  }, [planetData, materials, filters, resourceThreshold, isRelativeThreshold, resourceTypeFilter]);
+
+  const handleCompanySearch = useCallback(async (companyCode) => {
+    const sanitizedCompanyCode = sanitizeInput(companyCode);
+    try {
+      const response = await fetch(`https://rest.fnar.net/company/code/${sanitizedCompanyCode}`);
+      const data = await response.json();
+
+      if (data && data.Planets) {
+        const results = data.Planets.map(planet => ({
+          type: 'company_base',
+          planetId: planet.PlanetId,
+          planetNaturalId: planet.PlanetNaturalId,
+          planetName: planet.PlanetName,
+          systemId: Object.keys(planetData).find(systemId =>
+          planetData[systemId].some(p => p.PlanetNaturalId === planet.PlanetNaturalId)
+          )
+        }));
+
+        setSearchResults(results);
+        highlightSearchResults(results);
+        return results;
+      } else {
+        return [];
+      }
+    } catch (error) {
+      console.error('Error fetching company data:', error);
+      return [];
+    }
+  }, [planetData]);
+
 
   const clearSearch = useCallback(() => {
     setSearchResults([]);
     setSystemSearchTerm('');
     setMaterialSearchTerm('');
+    setCompanySearchTerm('');
     setSearchMaterial([]);
     setSearchMaterialConcentrationLiquid([]);
     setSearchMaterialConcentrationGaseous([]);
@@ -276,6 +339,16 @@ export const SearchProvider = ({ children }) => {
     setMaterialSearchTerm(term);
   }, []);
 
+  const updateCompanySearchTerm = useCallback((term) => {
+    setCompanySearchTerm(term);
+  }, []);
+
+  const toggleCompanySearch = useCallback(() => {
+    setIsCompanySearch(prev => !prev);
+    clearSearch();
+  }, [clearSearch]);
+
+
   return (
     <SearchContext.Provider
       value={{
@@ -286,6 +359,7 @@ export const SearchProvider = ({ children }) => {
         searchMaterialConcentrationGaseous,
         handleSystemSearch,
         handleMaterialSearch,
+        handleCompanySearch,
         clearSearch,
         showMySystems,
         clearGateways,
@@ -293,10 +367,18 @@ export const SearchProvider = ({ children }) => {
         updateFilters,
         systemSearchTerm,
         materialSearchTerm,
+        companySearchTerm,
         updateSystemSearchTerm,
         updateMaterialSearchTerm,
+        updateCompanySearchTerm,
         resourceThreshold,
         setResourceThreshold,
+        isRelativeThreshold,
+        setIsRelativeThreshold,
+        resourceTypeFilter,
+        setResourceTypeFilter,
+        isCompanySearch,
+        toggleCompanySearch,
       }}
     >
       {children}
