@@ -1,6 +1,7 @@
 import React, { createContext, useState, useCallback, useContext } from 'react';
 import { GraphContext } from './GraphContext';
 import { highlightSearchResults, highlightSearchResultsCustomColor, clearHighlights } from '../utils/searchUtils';
+import { ClearAllGateways } from '../utils/graphUtils';
 
 
 export const SearchContext = createContext();
@@ -76,6 +77,7 @@ export const SearchProvider = ({ children }) => {
   
   const clearGateways = useCallback( () => {
     console.log('clear Gateways');
+    ClearAllGateways();
   }, []);
 
   const handleSystemSearch = useCallback((searchTerm) => {

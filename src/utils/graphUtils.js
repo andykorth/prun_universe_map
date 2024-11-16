@@ -90,6 +90,16 @@ export const highlightPath = (path, systemSelected) => {
   }
 }
 
+export const ClearAllGateways = (path) => {
+  const g = d3.select('#map-container g');
+
+  // clear any old paths and labels
+  g.selectAll('#gatewayLine').remove();
+  g.selectAll('#gatewayLineLabel').remove();
+  g.selectAll('#gatewayLineLabelOutline').remove();
+
+}
+
 export const DrawGatewayPlanner = (path) => {
 
   const { universeData } = useContext(GraphContext);
@@ -100,11 +110,6 @@ export const DrawGatewayPlanner = (path) => {
     const endSystem = path[path.length - 1];
     const g = d3.select('#map-container g');
 
-    // clear any old paths and labels
-    g.selectAll('#gatewayLine').remove();
-    g.selectAll('#gatewayLineLabel').remove();
-    g.selectAll('#gatewayLineLabelOutline').remove();
-    
     // Retrieve the coordinates of the start and end systems
     const startNode = d3.select(`#${CSS.escape(startSystem)}`);
     const endNode = d3.select(`#${CSS.escape(endSystem)}`);
