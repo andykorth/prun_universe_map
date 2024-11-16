@@ -72,11 +72,11 @@ export const SearchProvider = ({ children }) => {
     highlightSearchResultsCustomColor(results);
     return results;
 
-  }, [universeData, planetData]);
+  }, [planetData]);
   
   const clearGateways = useCallback( () => {
     console.log('clear Gateways');
-  }, [universeData, planetData]);
+  }, []);
 
   const handleSystemSearch = useCallback((searchTerm) => {
     const sanitizedSearchTerm = sanitizeInput(searchTerm);

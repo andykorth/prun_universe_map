@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import { find_path } from 'dijkstrajs';
+import { useContext } from 'react';
 import { colors } from '../config/config';
-import React, { useContext } from 'react';
 import { GraphContext } from '../contexts/GraphContext';
 
 export const findShortestPath = (graph, system1, system2, highlightPath) => {
@@ -141,7 +141,7 @@ export const DrawGatewayPlanner = (path) => {
       // midpoints used for the label.
       const midX = (startX + endX) / 2 + 15;
       const midY = (startY + endY) / 2 + 15;
-      const lineLength = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2)).toFixed(2);
+      // const lineLength = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2)).toFixed(2);
 
       g.append('text')
         .attr('id', 'gatewayLineLabelOutline')
