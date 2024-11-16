@@ -34,9 +34,10 @@ const App = () => {
 };
 
 const AppContent = ({ showFilters, setShowFilters }) => {
+
   const { showMySystems } = React.useContext(SearchContext);
   const { clearSearch, isCompanySearch, toggleCompanySearch } = React.useContext(SearchContext);
-  
+
   return (
     <div className="App">
       <header className="App-header">
@@ -44,7 +45,7 @@ const AppContent = ({ showFilters, setShowFilters }) => {
           <img src={logo} alt="Logo" className="App-logo" />
           <div style={{margin: 0}}>
           <h2 style={{margin: 3}}>OOG Capital Management</h2>
-          <h5 style={{margin: 3}}>Map by Taiyi</h5>
+          <h5 style={{margin: 3}}>Map by Taiyi, with gateway features added</h5>
           </div>
         </div>
         <div className="header-center">
@@ -60,8 +61,9 @@ const AppContent = ({ showFilters, setShowFilters }) => {
           <MaterialSearchField />
           <SearchField />
         </div>
+
         <div className="header-buttons">
-          <button className="clear-button" onClick={clearSearch}>Clear</button>
+          <button className="clear-button" onClick={clearSearch}>Clear Search</button>
           <button
             onClick={toggleCompanySearch}
             className={`toggle-token company-search-toggle ${isCompanySearch ? 'active' : ''}`}
@@ -71,8 +73,8 @@ const AppContent = ({ showFilters, setShowFilters }) => {
           </button>
         </div>
         <div className="header-info">
-          <button className="clear-button" onClick={showMySystems}>Show OOG</button>
-          <button className="clear-button" onClick={clearSearch}>Clear Search</button>        
+          <button className="clear-button" onClick={showMySystems}>Show OOG</button>     
+
           <InfoTooltip />
           <div className="pathfinding-toggle-container">
             <PathfindingToggle />
