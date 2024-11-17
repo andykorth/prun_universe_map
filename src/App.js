@@ -15,7 +15,7 @@ import './components/FilterCategories.css';
 import logo from './logo.png';
 
 const App = () => {
-  const [showFilters, setShowFilters] = useState(window.innerWidth > 768);
+  const [showFilters, setShowFilters] = useState(false);
 
   return (
     <GraphProvider>
@@ -45,7 +45,7 @@ const AppContent = ({ showFilters, setShowFilters }) => {
           <img src={logo} alt="Logo" className="App-logo" />
           <div style={{margin: 0}}>
           <h2 style={{margin: 3}}>OOG Capital Management</h2>
-          <h5 style={{margin: 3}}>Map by Taiyi, with gateway features added</h5>
+          <h5 style={{margin: 3}}>Orignally by Taiyi</h5>
           </div>
         </div>
         <div className="header-center">
