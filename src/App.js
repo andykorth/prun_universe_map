@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import UniverseMap from './components/UniverseMap';
 import Sidebar from './components/Sidebar';
 import PathfindingToggle from './components/PathfindingToggle';
+import MeteorDensityToggle from './components/MeteorDensityToggle';
 import SearchField from './components/SearchField';
 import MaterialSearchField from './components/MaterialSearchField';
 import FilterCategories from './components/FilterCategories';
@@ -10,6 +11,7 @@ import { GraphProvider } from './contexts/GraphContext';
 import { SelectionProvider } from './contexts/SelectionContext';
 import { SearchProvider, SearchContext } from './contexts/SearchContext';
 import { CogcOverlayProvider } from './contexts/CogcOverlayContext';
+import { DataPointProvider } from './contexts/DataPointContext';
 import './App.css';
 import './components/FilterCategories.css';
 import logo from './logo.png';
@@ -22,10 +24,12 @@ const App = () => {
       <SelectionProvider>
         <SearchProvider>
           <CogcOverlayProvider>
-            <AppContent
-              showFilters={showFilters}
-              setShowFilters={setShowFilters}
-            />
+            <DataPointProvider>
+              <AppContent
+                showFilters={showFilters}
+                setShowFilters={setShowFilters}
+              />
+            </DataPointProvider>
           </CogcOverlayProvider>
         </SearchProvider>
       </SelectionProvider>
@@ -68,11 +72,16 @@ const AppContent = ({ showFilters, setShowFilters }) => {
         </div>
         <div className="header-info">
           <InfoTooltip />
-          <div className="pathfinding-toggle-container">
-            <PathfindingToggle />
+            <div className="toggle-stack-container">
+            <div className="pathfinding-toggle-container">
+              <PathfindingToggle />
+            </div>
+            <div className="pathfinding-toggle-container">
+              <MeteorDensityToggle />
+            </div>
           </div>
         </div>
-      </header>
+        </header>
       <div className="main-content">
         <UniverseMap />
         <Sidebar />

@@ -1,4 +1,5 @@
 import React, { useEffect, useContext, useRef, useCallback } from 'react';
+import DataPointOverlay from './DataPointOverlay';
 import * as d3 from 'd3';
 import { GraphContext } from '../contexts/GraphContext';
 import { SelectionContext } from '../contexts/SelectionContext';
@@ -55,6 +56,8 @@ const UniverseMap = React.memo(() => {
       while (svgNode.firstChild && svgNode.firstChild !== g.node()) {
         g.node().appendChild(svgNode.firstChild);
       }
+
+      graphRef.current = { svg, g };
 
       const zoom = d3.zoom()
         .scaleExtent([1, 20])
@@ -150,7 +153,11 @@ const UniverseMap = React.memo(() => {
     }
   }, [attachClickEvents]);
 
-  return <div id="map-container"></div>;
+  return (
+    <div id="map-container">
+      <DataPointOverlay mapRef={graphRef} />
+    </div>
+  );
 });
 
 export default UniverseMap;
