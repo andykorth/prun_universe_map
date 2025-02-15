@@ -232,8 +232,8 @@ export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold)
     let hoverTimer;
     let overlayOriginalSize, overlayOriginalPos;
 
-    rect.on('mouseover', function(event) {
-      if (rect.attr('id') === 'rect1') return;
+    rect.on('mouseover.system', function(event) {
+      if (rect.attr('id') === 'rect1' || d3.select(event.target).classed('meteor-density-bar')) return;
       rect
         .attr('fill-opacity', 1)
         .attr('stroke-opacity', 1)
@@ -271,7 +271,7 @@ export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold)
         showInfoPanel(rect, x, y, searchResults, materials, isRelativeThreshold);
       }, 400);
 
-    }).on('mouseout', function() {
+    }).on('mouseout.system', function(event) {
       if (rect.attr('id') === 'rect1') return;
       rect.transition()
         .duration(200)

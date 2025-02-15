@@ -73,6 +73,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0px;
+  position: relative;
 }
 
 .App-logo {
@@ -242,6 +243,14 @@ body {
 .pathfinding-toggle .toggle-token {
   margin: 0px;
   margin-right: 8px;
+}
+
+.pathfinding-toggle .toggle-token::before {
+  content: "Pathfinding";
+}
+
+.meteor-density-toggle .toggle-token::before {
+  content: "Data Overlay";
 }
 
 .info-tooltip-container {
@@ -438,13 +447,17 @@ search-container {
     margin-bottom: 10px;
   }
 
-  .pathfinding-toggle-container {
-    display: none;
-  }
-
   .info-tooltip-container {
     margin-top: 0px;
     margin-left: 5px;
+  }
+
+  .pathfinding-toggle .toggle-token::before {
+    content: "Path";
+  }
+
+  .meteor-density-toggle .toggle-token::before {
+    content: "Data";
   }
 
   .sidebar {

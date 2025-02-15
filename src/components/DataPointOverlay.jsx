@@ -67,7 +67,7 @@ const DataPointOverlay = ({ mapRef }) => {
 
       // Add background bar
       systemGroup.append('rect')
-        .attr('class', 'meteor-density-bar-background')
+        .attr('class', 'meteor-density-bar-background data-overlay')
         .attr('x', nodeX + xOffset)
         .attr('y', nodeY)
         .attr('width', barWidth)
@@ -77,7 +77,7 @@ const DataPointOverlay = ({ mapRef }) => {
 
       // Add the density bar
       const bar = systemGroup.append('rect')
-        .attr('class', 'meteor-density-bar')
+        .attr('class', 'meteor-density-bar data-overlay')
         .attr('x', nodeX + xOffset)
         .attr('y', nodeY + maxBarHeight - barHeight)
         .attr('width', barWidth)
@@ -87,7 +87,7 @@ const DataPointOverlay = ({ mapRef }) => {
 
       // Add system name label
       systemGroup.append('text')
-        .attr('class', 'system-name-label')
+        .attr('class', 'system-name-label data-overlay')
         .attr('x', nodeX + (nodeWidth / 2))
         .attr('y', nodeY + nodeHeight + 2) // (16 / zoomLevel)
         .attr('fill', '#CCCCCC')
@@ -101,7 +101,8 @@ const DataPointOverlay = ({ mapRef }) => {
         .text(systemNames[systemId] || systemId);
 
       // Add hover interactions
-      bar.on('mouseover', function(event) {
+      bar.on('mouseover.density', function(event) {
+          event.stopPropagation();
           d3.select(this)
             .attr('opacity', 1)
             .attr('stroke', '#ffffff')
@@ -110,7 +111,7 @@ const DataPointOverlay = ({ mapRef }) => {
           // Add tooltip
           const tooltip = d3.select('body')
             .append('div')
-            .attr('class', 'tooltip')
+            .attr('class', 'meteor-density-tooltip data-overlay')
             .style('position', 'absolute')
             .style('left', `${event.pageX + 10}px`)
             .style('top', `${event.pageY - 10}px`)
@@ -130,11 +131,12 @@ const DataPointOverlay = ({ mapRef }) => {
               </div>
             `);
         })
-        .on('mouseout', function() {
+        .on('mouseout.density', function(event) {
+          event.stopPropagation();
           d3.select(this)
             .attr('opacity', 0.8)
             .attr('stroke', 'none');
-          d3.selectAll('.tooltip').remove();
+          d3.selectAll('.meteor-density-tooltip').remove();
         });
     });
   }, [mapRef, isOverlayVisible, isLoading, error, meteorDensityData, systemNames]);

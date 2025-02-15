@@ -72,6 +72,15 @@
   pointer-events: none;
 }
 
+.pathfinding-toggle-container .toggle-token[data-tooltip]::after {
+  position: absolute;
+  left: 30%;
+  bottom: -200%;
+  width: max-content;
+  max-width: 125px;
+  white-space: pre-wrap;
+}
+
 .resource-threshold-input {
   width: 50px;
   padding: 5px;

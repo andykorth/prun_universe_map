@@ -11,7 +11,6 @@ const MeteorDensityToggle = () => {
         onClick={toggleOverlayVisibility}
         data-tooltip="Toggle overlay with meteor density and system names"
       >
-        Data Overlay
       </button>
     </div>
   );

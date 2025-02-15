@@ -36,6 +36,7 @@ export const resetGraphState = (nextSelectedSystem) => {
       && systemId !== nextSelectedSystem
       && !node.classed('search-highlight')
       && !node.classed('cogc-overlay-rect')
+      && !node.classed('data-overlay')
       ) {
       node
         .attr('fill', colors.resetSystemFill)
