@@ -233,7 +233,7 @@ export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold)
     let overlayOriginalSize, overlayOriginalPos;
 
     rect.on('mouseover.system', function(event) {
-      if (rect.attr('id') === 'rect1' || d3.select(event.target).classed('meteor-density-bar')) return;
+      if (rect.attr('id') === 'rect1' || d3.select(event.target).classed('data-overlay')) return;
       rect
         .attr('fill-opacity', 1)
         .attr('stroke-opacity', 1)

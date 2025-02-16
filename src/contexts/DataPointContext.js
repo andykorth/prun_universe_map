@@ -6,6 +6,7 @@ export const DataPointContext = createContext();
 export const DataPointProvider = ({ children }) => {
   // State for system meteorite density data
   const [meteorDensityData, setMeteorDensityData] = useState({});
+  const [luminosityData, setLuminosityData] = useState({});
   const [systemNames, setSystemNames] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -29,13 +30,16 @@ export const DataPointProvider = ({ children }) => {
 
         // Transform data into maps for density and system names
         const densityMap = {};
+        const luminosityMap = {};
         const systemNameMap = {};
         data.forEach(system => {
           densityMap[system.SystemId] = system.MeteoroidDensity;
+          luminosityMap[system.SystemId] = system.Luminosity;
           systemNameMap[system.SystemId] = system.Name;
         });
 
         setMeteorDensityData(densityMap);
+        setLuminosityData(luminosityMap);
         setSystemNames(systemNameMap);
         setError(null);
       } catch (err) {
@@ -54,6 +58,10 @@ export const DataPointProvider = ({ children }) => {
     return meteorDensityData[systemId] || 0;
   }, [meteorDensityData]);
 
+  const getSystemLuminosity = useCallback((systemId) => {
+    return luminosityData[systemId] || 0;
+  }, [luminosityData]);
+
   // Toggle overlay visibility
   const toggleOverlayVisibility = useCallback(() => {
     setIsOverlayVisible(prev => !prev);
@@ -64,29 +72,33 @@ export const DataPointProvider = ({ children }) => {
     setUseRelativeScale(prev => !prev);
   }, []);
 
-  // Get maximum density value for relative scaling
-  const maxDensity = useMemo(() => {
-    return Math.max(0, ...Object.values(meteorDensityData));
-  }, [meteorDensityData]);
+  // Get maximum density and luminosity value for relative scaling
+  const maxValues = useMemo(() => ({
+    density: Math.max(0, ...Object.values(meteorDensityData)),
+    luminosity: Math.max(0, ...Object.values(luminosityData))
+  }), [meteorDensityData, luminosityData]);
 
   // Calculate normalized density based on scale type
-  const getNormalizedDensity = useCallback((density) => {
-    if (!useRelativeScale) return density;
-    return maxDensity === 0 ? 0 : density / maxDensity;
-  }, [useRelativeScale, maxDensity]);
+  const getNormalizedValue = useCallback((value, type) => {
+    if (!useRelativeScale) return value;
+    const maxValue = maxValues[type];
+    return maxValue === 0 ? 0 : value / maxValue;
+  }, [useRelativeScale, maxValues]);
 
   const contextValue = {
     meteorDensityData,
+    luminosityData,
     systemNames,
     isOverlayVisible,
     useRelativeScale,
     isLoading,
     error,
     getSystemMeteorDensity,
+    getSystemLuminosity,
     toggleOverlayVisibility,
     toggleScaleType,
-    getNormalizedDensity,
-    maxDensity
+    getNormalizedValue,
+    maxValues
   };
 
   return (
