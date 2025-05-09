@@ -208,6 +208,26 @@ body {
   margin-bottom: 20px;
 }
 
+.sidebar .planet-id-link {
+  color: #FFC107;            /* amber/gold */
+  text-decoration: none;
+}
+
+.sidebar .planet-id-link:visited {
+  color: #FFB300;
+}
+
+.sidebar .planet-id-link:hover {
+  color: #FFECB3;            /* pale gold */
+  text-decoration: underline;
+}
+
+.sidebar .planet-id-link:focus,
+.sidebar .planet-id-link:active {
+  outline: 2px solid #FFECB3;
+  outline-offset: 2px;
+}
+
 .resource-item-sb {
   display: flex;
   align-items: center;

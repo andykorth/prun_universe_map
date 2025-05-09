@@ -216,7 +216,19 @@ const Sidebar = () => {
             <div key={planet.PlanetNaturalId} className={`planet-info-sb ${isHighlighted(null, planet.PlanetNaturalId) ? 'highlighted' : ''}`}>
               <h3>
                 <PlanetTypeIcon isRocky={planet.Surface} />
-                <span style={{ marginLeft: '5px' }}>{planet.PlanetName} ({planet.PlanetNaturalId})</span>
+                <span style={{ marginLeft: '5px' }}>
+                  {planet.PlanetName}{' '}
+                  (
+                    <a
+                      href={`https://prunplanner.org/plan/${planet.PlanetNaturalId}`}
+                      className="planet-id-link"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {planet.PlanetNaturalId}
+                    </a>
+                  )
+                </span>
                 {isConditionAbnormal('gravity', planet.Gravity) && (
                   <PlanetConditionIcon
                     condition="gravity"
