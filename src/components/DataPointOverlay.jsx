@@ -113,19 +113,19 @@ const DataPointOverlay = ({ mapRef }) => {
         .attr('opacity', 0.8);
 
       // System name label
-      systemGroup.append('text')
-        .attr('class', 'system-name-label data-overlay')
-        .attr('x', nodeX + (nodeWidth / 2))
-        .attr('y', nodeY + nodeHeight + 2)
-        .attr('fill', '#CCCCCC')
-        .attr('stroke', '#000000')
-        .attr('stroke-width', 1 / zoomLevel)
-        .attr('paint-order', 'stroke')
-        .attr('font-size', '6px')
-        .attr('text-anchor', 'middle')
-        .attr('dominant-baseline', 'hanging')
-        .style('pointer-events', 'none')
-        .text(systemNames[systemId] || systemId);
+      // systemGroup.append('text')
+      //   .attr('class', 'system-name-label data-overlay')
+      //   .attr('x', nodeX + (nodeWidth / 2))
+      //   .attr('y', nodeY + nodeHeight + 2)
+      //   .attr('fill', '#CCCCCC')
+      //   .attr('stroke', '#000000')
+      //   .attr('stroke-width', 1 / zoomLevel)
+      //   .attr('paint-order', 'stroke')
+      //   .attr('font-size', '6px')
+      //   .attr('text-anchor', 'middle')
+      //   .attr('dominant-baseline', 'hanging')
+      //   .style('pointer-events', 'none')
+      //   .text(systemNames[systemId] || systemId);
 
       // Add hover interactions for both bars
       const addBarHoverEffects = (bar, dataType, value, colorScale) => {
@@ -146,7 +146,7 @@ const DataPointOverlay = ({ mapRef }) => {
             .style('color', 'white')
             .style('padding', '5px')
             .style('border-radius', '4px')
-            .style('font-size', '12px')
+            .style('font-size', '11px')
             .style('pointer-events', 'none')
             .html(`
               <div style="background: rgba(0,0,0,0.9); padding: 8px; border-radius: 4px; border: 1px solid #444">

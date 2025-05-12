@@ -266,7 +266,7 @@ body {
 }
 
 .pathfinding-toggle .toggle-token::before {
-  content: "Pathfinding";
+  content: "Pathfinding/Gateways";
 }
 
 .meteor-density-toggle .toggle-token::before {

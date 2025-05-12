@@ -11,7 +11,6 @@ const PathfindingToggle = () => {
         onClick={togglePathfinding}
         data-tooltip="Toggle pathfinding mode"
       >
-        Pathfinding/Gateways
       </button>
     </div>
   );
