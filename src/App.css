@@ -69,6 +69,13 @@ body {
   margin: 5px;
 }
 
+.toggle-stack-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  position: relative;
+}
+
 .App-logo {
   width: 50px;
   height: 50px;
@@ -201,6 +208,26 @@ body {
   margin-bottom: 20px;
 }
 
+.sidebar .planet-id-link {
+  color: #FFC107;            /* amber/gold */
+  text-decoration: none;
+}
+
+.sidebar .planet-id-link:visited {
+  color: #FFB300;
+}
+
+.sidebar .planet-id-link:hover {
+  color: #FFECB3;            /* pale gold */
+  text-decoration: underline;
+}
+
+.sidebar .planet-id-link:focus,
+.sidebar .planet-id-link:active {
+  outline: 2px solid #FFECB3;
+  outline-offset: 2px;
+}
+
 .resource-item-sb {
   display: flex;
   align-items: center;
@@ -236,6 +263,14 @@ body {
 .pathfinding-toggle .toggle-token {
   margin: 0px;
   margin-right: 8px;
+}
+
+.pathfinding-toggle .toggle-token::before {
+  content: "Pathfinding";
+}
+
+.meteor-density-toggle .toggle-token::before {
+  content: "Data Overlay";
 }
 
 .info-tooltip-container {
@@ -432,13 +467,17 @@ search-container {
     margin-bottom: 10px;
   }
 
-  .pathfinding-toggle-container {
-    display: none;
-  }
-
   .info-tooltip-container {
     margin-top: 0px;
     margin-left: 5px;
+  }
+
+  .pathfinding-toggle .toggle-token::before {
+    content: "Path";
+  }
+
+  .meteor-density-toggle .toggle-token::before {
+    content: "Data";
   }
 
   .sidebar {
