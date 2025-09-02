@@ -68,25 +68,29 @@ const createFacilityIndicator = (hasFeature, IconComponent) => {
   return ReactDOMServer.renderToString(iconElement);
 };
 
-const determinePlanetTier = (buildRequirements) => {
-  const tier4 = ['TSH'];
-  const tier3 = ['MGC', 'BL', 'HSE', 'INS'];
-  const tier2 = ['SEA'];
+const determinePlanetTier = (buildRequirements = []) => {
+  // Distinct tickers; unknowns ignored
+  const PENALTY = {
+    SEA: 0,
+    MCG: 0,
+    BL:  1,
+    INS: 1,
+    HSE: 1,
+    AEF: 1,
+    MGC: 2,
+    TSH: 2,
+  };
 
-  let highestTier = 1; // Start with the lowest tier
+  // De-duplicate tickers found in requirements
+  const tickers = Array.from(new Set(
+    (buildRequirements || [])
+      .map(r => (r?.MaterialTicker || r?.Material || '').toUpperCase())
+      .filter(Boolean)
+  ));
 
-  for (const requirement of buildRequirements) {
-    const ticker = requirement.MaterialTicker;
-    if (tier4.includes(ticker)) {
-      return 4; // If we find a Tier 4 material, we can return immediately as it's the highest
-    } else if (tier3.includes(ticker) && highestTier < 3) {
-      highestTier = 3;
-    } else if (tier2.includes(ticker) && highestTier < 2) {
-      highestTier = 2;
-    }
-  }
-
-  return highestTier;
+  const totalPenalty = tickers.reduce((sum, t) => sum + (PENALTY[t] ?? 0), 0);
+  const stars = Math.max(0, Math.min(3, 3 - totalPenalty));
+  return stars; // 0..3
 };
 
 
@@ -97,11 +101,12 @@ const formatCOGCProgram = (programType) => {
 };
 
 // Function to create PlanetTier indicator
-const createPlanetTierIndicator = (tier) => {
-  const maxTier = 4;
+const createPlanetTierIndicator = (starCount) => {
+  const total = 3;
   const filledStar = '★';
   const emptyStar = '☆';
-  const stars = filledStar.repeat(maxTier - tier) + emptyStar.repeat(Math.max(0, tier - 1));
+  const filled = Math.max(0, Math.min(total, starCount|0));
+  const stars = filledStar.repeat(filled) + emptyStar.repeat(total - filled);
   return `<span class="planet-tier">${stars}</span>`;
 };
 
