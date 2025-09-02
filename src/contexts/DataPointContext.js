@@ -22,7 +22,9 @@ export const DataPointProvider = ({ children }) => {
     const fetchMeteorData = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch('systemstars.json');
+
+        // if we aren't running at the root of the webserver, we need to look at the appropriate place for these.
+        const response = await fetch(`${process.env.PUBLIC_URL}/systemstars.json`);
         if (!response.ok) {
           throw new Error('Failed to fetch system stars data');
         }

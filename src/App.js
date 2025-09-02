@@ -77,7 +77,7 @@ const AppContent = ({ showFilters, setShowFilters }) => {
           </button>
         </div>
         <div className="header-info">
-          <button className="clear-button" onClick={showMySystems}>Show OOG</button>     
+          {/* <button className="clear-button" onClick={showMySystems}>Show OOG</button>      */}
 
           <InfoTooltip />
             <div className="toggle-stack-container">
