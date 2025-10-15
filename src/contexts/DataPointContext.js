@@ -24,7 +24,7 @@ export const DataPointProvider = ({ children }) => {
         setIsLoading(true);
 
         // if we aren't running at the root of the webserver, we need to look at the appropriate place for these.
-        const response = await fetch(`${process.env.PUBLIC_URL}/systemstars.json`);
+        const response = await fetch(`${process.env.PUBLIC_URL}/prun_universe_data.json`);
         if (!response.ok) {
           throw new Error('Failed to fetch system stars data');
         }
