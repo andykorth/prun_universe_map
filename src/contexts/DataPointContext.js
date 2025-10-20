@@ -18,39 +18,56 @@ export const DataPointProvider = ({ children }) => {
   const [useRelativeScale, setUseRelativeScale] = useState(false);
 
   // Fetch system stars data
+  // In src/contexts/DataPointContext.js
+
+  // Fetch system stars data
   useEffect(() => {
-    const fetchMeteorData = async () => {
+    const fetchOverlayData = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch('systemstars.json');
-        if (!response.ok) {
-          throw new Error('Failed to fetch system stars data');
-        }
-        const data = await response.json();
+        const [staticResponse, freshResponse] = await Promise.all([
+          fetch('systemstars.json'),         // The old, enriched file with Luminosity/Density
+          fetch('prun_universe_data.json') // The file that will be updated weekly with fresh names
+        ]);
 
-        // Transform data into maps for density and system names
+        if (!staticResponse.ok || !freshResponse.ok) {
+          throw new Error('Failed to fetch all necessary system data');
+        }
+
+        const staticData = await staticResponse.json();
+        const freshData = await freshResponse.json();
+
+        const freshSystemNamesMap = new Map(
+            freshData.map(system => [system.SystemId, system.Name])
+        );
+
         const densityMap = {};
         const luminosityMap = {};
-        const systemNameMap = {};
-        data.forEach(system => {
+        const finalSystemNameMap = {};
+
+        staticData.forEach(system => {
           densityMap[system.SystemId] = system.MeteoroidDensity;
           luminosityMap[system.SystemId] = system.Luminosity;
-          systemNameMap[system.SystemId] = system.Name;
+          
+          const freshName = freshSystemNamesMap.get(system.SystemId);
+          
+          finalSystemNameMap[system.SystemId] = freshName || system.Name;
         });
 
         setMeteorDensityData(densityMap);
         setLuminosityData(luminosityMap);
-        setSystemNames(systemNameMap);
+        setSystemNames(finalSystemNameMap);
         setError(null);
+
       } catch (err) {
-        console.error('Error fetching meteor density data:', err);
+        console.error('Error fetching and combining overlay data:', err);
         setError(err.message);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchMeteorData();
+    fetchOverlayData();
   }, []);
 
   // Get meteorite density for a specific system
