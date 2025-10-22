@@ -36,8 +36,13 @@ def save_graph_data(systems, edges, output_file):
         json.dump(graph, f, indent=2)
 
 if __name__ == '__main__':
+<<<<<<< HEAD
     svg_file = 'PrUn_universe_map_normalized.svg'
     output_file = './src/components/graph_data.json'
+=======
+    svg_file = './PrUn_universe_map_normalized.svg'
+    output_file = './graph_data.json'
+>>>>>>> origin/main
 
     systems, edges = parse_svg(svg_file)
     save_graph_data(systems, edges, output_file)
