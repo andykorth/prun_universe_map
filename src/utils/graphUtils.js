@@ -22,10 +22,10 @@ export const findShortestPath = (graph, system1, system2, highlightPath) => {
     const path = find_path(graphNodes, system1, system2);
     console.log('Found Path:', path)
     highlightPath(path, system2);
-    DrawGatewayPlanner(path);
   } catch (error) {
     console.error('Error finding path:', error);
   }
+  DrawGatewayPlanner(system1, system2);
 };
 
 // Function to reset all nodes and paths
@@ -101,78 +101,74 @@ export const ClearAllGateways = (path) => {
 
 }
 
-export const DrawGatewayPlanner = (path) => {
+export const DrawGatewayPlanner = (startSystem, endSystem) => {
 
   const { universeData } = useContext(GraphContext);
 
-  // Draw Gateway Planner Path:
-  if (path.length >= 2) {
-    const startSystem = path[0];
-    const endSystem = path[path.length - 1];
-    const g = d3.select('#map-container g');
+// Draw Gateway Planner Path:
+  const g = d3.select('#map-container g');
 
-    // Retrieve the coordinates of the start and end systems
-    const startNode = d3.select(`#${CSS.escape(startSystem)}`);
-    const endNode = d3.select(`#${CSS.escape(endSystem)}`);
+  // Retrieve the coordinates of the start and end systems
+  const startNode = d3.select(`#${CSS.escape(startSystem)}`);
+  const endNode = d3.select(`#${CSS.escape(endSystem)}`);
 
-    if (startNode.node() && endNode.node()) {
-      const startX = parseFloat(startNode.attr('x'));
-      const startY = parseFloat(startNode.attr('y'));
-      const endX = parseFloat(endNode.attr('x'));
-      const endY = parseFloat(endNode.attr('y'));
+  if (startNode.node() && endNode.node()) {
+    const startX = parseFloat(startNode.attr('x'));
+    const startY = parseFloat(startNode.attr('y'));
+    const endX = parseFloat(endNode.attr('x'));
+    const endY = parseFloat(endNode.attr('y'));
 
-      // Draw a dotted red line between start and end systems
-      g.insert('line', `:nth-child(100)`) // gross hack to get it under the planets but above the universe region polygons
-        .attr('id', 'gatewayLine')
-        .attr('x1', startX + 7.5 )
-        .attr('y1', startY + 7.5 )
-        .attr('x2', endX + 15)
-        .attr('y2', endY + 15)
-        .attr('stroke', 'red')
-        .attr('stroke-width', 3)
-        .attr('stroke-dasharray', '4 3'); // Dotted line
+    // Draw a dotted red line between start and end systems
+    g.insert('line', `:nth-child(238)`) // gross hack to get it under the planets but above the universe region polygons
+      .attr('id', 'gatewayLine')
+      .attr('x1', startX + 7.5 )
+      .attr('y1', startY + 7.5 )
+      .attr('x2', endX + 15)
+      .attr('y2', endY + 15)
+      .attr('stroke', 'red')
+      .attr('stroke-width', 3)
+      .attr('stroke-dasharray', '4 3'); // Dotted line
 
-      // need to pull real X,Y,Z data from universe for the parsec calc, not the nice map X,Y display values
-      const startSystemData = universeData ? universeData[startSystem] : null;
-      const endSystemData = universeData ? universeData[endSystem] : null;
+    // need to pull real X,Y,Z data from universe for the parsec calc, not the nice map X,Y display values
+    const startSystemData = universeData ? universeData[startSystem] : null;
+    const endSystemData = universeData ? universeData[endSystem] : null;
 
-      // see https://rest.fnar.net/global/simulationdata for the ParsecLength
-      const parsecConstant = 12;
-      const parsecDistance = Math.sqrt(
-        Math.pow(startSystemData[0]["PositionX"]  - endSystemData[0]["PositionX"], 2) + 
-        Math.pow(startSystemData[0]["PositionY"]  - endSystemData[0]["PositionY"], 2) + 
-        Math.pow(startSystemData[0]["PositionZ"]  - endSystemData[0]["PositionZ"], 2)
-      ) / parsecConstant;
+    // see https://rest.fnar.net/global/simulationdata for the ParsecLength
+    const parsecConstant = 12;
+    const parsecDistance = Math.sqrt(
+      Math.pow(startSystemData[0]["PositionX"]  - endSystemData[0]["PositionX"], 2) + 
+      Math.pow(startSystemData[0]["PositionY"]  - endSystemData[0]["PositionY"], 2) + 
+      Math.pow(startSystemData[0]["PositionZ"]  - endSystemData[0]["PositionZ"], 2)
+    ) / parsecConstant;
 
-      // midpoints used for the label.
-      const midX = (startX + endX) / 2 + 15;
-      const midY = (startY + endY) / 2 + 15;
-      // const lineLength = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2)).toFixed(2);
+    // midpoints used for the label.
+    const midX = (startX + endX) / 2 + 15;
+    const midY = (startY + endY) / 2 + 15;
+    // const lineLength = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2)).toFixed(2);
 
-      g.append('text')
-        .attr('id', 'gatewayLineLabelOutline')
-        .attr('x', midX)
-        .attr('y', midY)
-        .attr('fill', '#ffffff')
-        .attr('font-size', '12px')
-        .attr('text-anchor', 'middle')
-        .attr('stroke', 'white') // Stroke the outline
-        .attr('stroke-width', '2px') // Thickness of the outline
-        .attr('style', 'text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.3);')
-        .attr('dy', -15) // Adjusts the position of the text slightly above the line
-        .text(`${parsecDistance.toFixed(2)} parsecs`);
-    
-      g.append('text')
-        .attr('id', 'gatewayLineLabel')
-        .attr('x', midX)
-        .attr('y', midY)
-        .attr('fill', '#dd0000')
-        .attr('font-size', '12px')
-        .attr('text-anchor', 'middle')
-        .attr('style', 'text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.3);')
-        .attr('dy', -15) // Adjusts the position of the text slightly above the line
-        .text(`${parsecDistance.toFixed(2)} parsecs`);
-    }
+    g.append('text')
+      .attr('id', 'gatewayLineLabelOutline')
+      .attr('x', midX)
+      .attr('y', midY)
+      .attr('fill', '#ffffff')
+      .attr('font-size', '12px')
+      .attr('text-anchor', 'middle')
+      .attr('stroke', 'white') // Stroke the outline
+      .attr('stroke-width', '2px') // Thickness of the outline
+      .attr('style', 'text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.3);')
+      .attr('dy', -15) // Adjusts the position of the text slightly above the line
+      .text(`${parsecDistance.toFixed(2)} parsecs`);
+  
+    g.append('text')
+      .attr('id', 'gatewayLineLabel')
+      .attr('x', midX)
+      .attr('y', midY)
+      .attr('fill', '#dd0000')
+      .attr('font-size', '12px')
+      .attr('text-anchor', 'middle')
+      .attr('style', 'text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.3);')
+      .attr('dy', -15) // Adjusts the position of the text slightly above the line
+      .text(`${parsecDistance.toFixed(2)} parsecs`);
   }
 };
 
