@@ -3,15 +3,24 @@ An interactive, data-rich visualization of the Prosperous Universe game world.
 This project provides a user-friendly interface for exploring star systems, planets, and their resources, 
 with features including:
 
-Interactive SVG-based map of the game universe
-Detailed information panels for each star system and planet
-Pathfinding functionality to plot routes between systems
-Visual indicators for planet tiers and available facilities
-Integration with game data for up-to-date information on resources and COGC programs
-React-based UI with D3.js for smooth interactions and animations
+* Interactive SVG-based map of the game universe
+* Detailed information panels for each star system and planet
+* Pathfinding functionality to plot routes between systems
+* Visual indicators for planet tiers and available facilities
+* Integration with game data for up-to-date information on resources and COGC programs
+* React-based UI with D3.js for smooth interactions and animations
 
 Perfect for players looking to plan their interstellar trade routes or for those curious about the vast 
 Prosperous Universe game world. Contributions welcome!
+
+### Updating the PRUN data:
+
+* Replace `public/prun_universe_data.json` with the contents from the FIO endpoint: https://rest.fnar.net/systemstars
+* Replace `public/planet_data.json` with the contents of: https://rest.fnar.net/planet/allplanets/full
+* `public/systemstars.json` is an edited version of `prun_universe_data` that has star luminosity 
+* At the moment the PrUn_Universe_map svg files need to be hand edited in inkscape with new data.
+* Run the python script 
+
 
 ### Tech Stack:
 
@@ -19,12 +28,6 @@ Prosperous Universe game world. Contributions welcome!
 * D3.js
 * SVG
 * Tailwind CSS
-
-### Updating the PRUN data:
-
-* Replace `public/prun_universe_data.json` with the contents from the FIO endpoint: https://rest.fnar.net/systemstars
-* Replace `public/planet_data.json` with the contents of: https://rest.fnar.net/planet/allplanets/full
-* Run the python script 
 
 ### Getting Started with Create React App
 
