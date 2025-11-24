@@ -29,7 +29,7 @@ export const findShortestPath = (graph, system1, system2, highlightPath) => {
 };
 
 // Function to reset all nodes and paths
-export const resetGraphState = (nextSelectedSystem) => {
+export const resetGraphState = (nextSelectedSystem, colorByDist) => {
   const svg = d3.select('#map-container svg');
   // Reset all system nodes color and stroke except the background rect and current selection
   svg.selectAll('rect').each(function() {
@@ -45,7 +45,9 @@ export const resetGraphState = (nextSelectedSystem) => {
         .attr('fill', colors.resetSystemFill)
         .attr('fill-opacity', colors.resetSystemFillOpacity)
         .attr('stroke', colors.resetSystemStroke)
-        .attr('stroke-width', colors.resetSystemStrokeWidth);
+        .attr('stroke-width', colors.resetSystemStrokeWidth)
+        .attr('ry', 15);
+
     }
   });
 
@@ -55,12 +57,15 @@ export const resetGraphState = (nextSelectedSystem) => {
       .attr('stroke', colors.resetPathStroke)
       .attr('stroke-width', colors.resetPathStrokeWidth);
   });
+
+  if(colorByDist)
+    ColorSystemsByDistance(nextSelectedSystem);
 };
 
 // Function to highlight the path
 export const highlightPath = (path, systemSelected) => {
   // Reset all system nodes color and stroke except the background rect
-  resetGraphState(systemSelected)
+  resetGraphState(systemSelected, false)
 
   // Highlight systems in the path
   path.forEach(system => {
@@ -112,7 +117,7 @@ export const DrawGatewayPlanner = (startSystem, endSystem) => {
   const startNode = d3.select(`#${CSS.escape(startSystem)}`);
   const endNode = d3.select(`#${CSS.escape(endSystem)}`);
 
-  if (startNode.node() && endNode.node()) {
+  if (startNode.node() && endNode.node() && startSystem !== endSystem) {
     const startX = parseFloat(startNode.attr('x'));
     const startY = parseFloat(startNode.attr('y'));
     const endX = parseFloat(endNode.attr('x'));
@@ -172,22 +177,82 @@ export const DrawGatewayPlanner = (startSystem, endSystem) => {
   }
 };
 
+export const ColorSystemsByDistance = (startSystem) => {
+
+  const { universeData } = useContext(GraphContext);
+
+  if (!startSystem || !universeData || !universeData[startSystem]) return;
+
+  const parsecConstant = 12;
+
+  // The reference system’s XYZ
+  const start = universeData[startSystem][0];
+  const { PositionX: sx, PositionY: sy, PositionZ: sz } = start;
+
+  // Build a D3 color scale based on distance
+  // Feel free to change this — your data may warrant something else
+  const distances = [];
+
+  // First pass — compute all distances so we can scale nicely
+  for (const systemName in universeData) {
+    const sys = universeData[systemName][0];
+    const dx = sx - sys.PositionX;
+    const dy = sy - sys.PositionY;
+    const dz = sz - sys.PositionZ;
+    const dist = Math.sqrt(dx * dx + dy * dy + dz * dz) / parsecConstant;
+
+    distances.push(dist);
+  }
+
+  // Second pass — apply D3 colors to every node
+  for (const systemName in universeData) {
+    const sys = universeData[systemName][0];
+
+    const dx = sx - sys.PositionX;
+    const dy = sy - sys.PositionY;
+    const dz = sz - sys.PositionZ;
+    const distParsecs = Math.sqrt(dx * dx + dy * dy + dz * dz) / parsecConstant;
+
+    var color = "#900";
+    if(distParsecs < 25 ){
+      color = "#f80";
+    }
+    if(distParsecs < 20 ){
+      color = "#ff0";
+    }
+    if(distParsecs < 15 ){
+      color = "#0ee";
+    }
+    if(distParsecs < 10 ){
+      color = "#3f3";
+    }
+
+    const node = d3.select(`#${CSS.escape(systemName)}`);
+    if (!node.empty()) {
+      node
+        .attr("fill", color)
+    }
+  }
+};
+
 export const highlightSelectedSystem = (prevSelectedSystem, nextSelectedSystem, pathfindingSelection, isPathfindingEnabled) => {
 
   // Check if pathfindingSelection is empty, if so reset all nodes
   if (pathfindingSelection.length < 2 && isPathfindingEnabled) {
-    resetGraphState(nextSelectedSystem);
-  }
+    resetGraphState(nextSelectedSystem, true);
+  }else{
 
-  // Reset previous system if it's not part of pathfinding selection
-  if (prevSelectedSystem && !pathfindingSelection.includes(prevSelectedSystem)) {
-    const prevSystemNode = d3.select(`#${CSS.escape(prevSelectedSystem)}`);
-    if (!prevSystemNode.empty() && !prevSystemNode.classed('search-highlight')) {
-      prevSystemNode
-        .attr('fill', colors.resetSystemFill)
-        .attr('fill-opacity', colors.resetSystemFillOpacity)
-        .attr('stroke', colors.resetSystemStroke)
-        .attr('stroke-width', colors.resetSystemStrokeWidth);
+    // Reset previous system if it's not part of pathfinding selection
+    if (prevSelectedSystem && !pathfindingSelection.includes(prevSelectedSystem)) {
+      const prevSystemNode = d3.select(`#${CSS.escape(prevSelectedSystem)}`);
+      if (!prevSystemNode.empty() && !prevSystemNode.classed('search-highlight')) {
+        prevSystemNode
+          .attr('fill', colors.resetSystemFill)
+          .attr('fill-opacity', colors.resetSystemFillOpacity)
+          .attr('stroke', colors.resetSystemStroke)
+          .attr('ry', 15)
+          .attr('stroke-width', colors.resetSystemStrokeWidth);
+      }
     }
   }
 
@@ -198,7 +263,11 @@ export const highlightSelectedSystem = (prevSelectedSystem, nextSelectedSystem, 
       nextSystemNode
         .attr('fill', colors.systemFill)
         .attr('stroke', colors.systemStroke)
-        .attr('stroke-width', colors.systemStrokeWidth);
+        .attr('stroke-width', colors.systemStrokeWidth)
+        .attr('ry', 0);
     }
   }
+
+
+
 };

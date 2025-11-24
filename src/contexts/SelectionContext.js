@@ -12,19 +12,20 @@ export const SelectionProvider = ({ children }) => {
   const { findShortestPath } = useContext(GraphContext);
 
   const togglePathfinding = useCallback(() => {
-  setIsPathfindingEnabled(prev => {
-    if (prev) {
-      // If turning off pathfinding, reset the graph state
-      highlightSelectedSystemUtil(null, null, [], prev);
-    }
-    return !prev;
-  });
-  setPathfindingSelection([]); // Reset selection when toggling
-}, []);
+    setIsPathfindingEnabled(prev => {
+      if (prev) {
+        // If turning off pathfinding, reset the graph state
+        highlightSelectedSystemUtil(null, null, [], prev);
+      }
+      return !prev;
+    });
+    setPathfindingSelection([]); // Reset selection when toggling
+  }, []);
 
 const highlightSelectedSystem = useCallback((nextSelectedSystem) => {
   if (isPathfindingEnabled) {
     setPathfindingSelection(prev => {
+
       let newSelection;
       if (prev.length === 2) {
         // Reset selection if it already has two entries

@@ -9,7 +9,7 @@ export const clearHighlights = () => {
     .attr('stroke', colors.resetSystemStroke)
     .attr('stroke-width', colors.resetSystemStrokeWidth);
 
-  resetGraphState();
+  resetGraphState(null, false);
 };
 
 
