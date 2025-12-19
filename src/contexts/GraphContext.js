@@ -9,6 +9,7 @@ export const GraphProvider = ({ children }) => {
   const [selectedSystems, setSelectedSystems] = useState([]);
   const [planetData, setPlanetData] = useState({});
   const [universeData, setUniverseData] = useState({});
+  const [populationData, setPopulationData] = useState({});
 
   useEffect(() => {
     console.log('Fetching graph data');
@@ -64,6 +65,17 @@ export const GraphProvider = ({ children }) => {
       .catch(error => {
         console.error('Error fetching planet data:', error);
       });
+
+    // Fetch Population Data
+    fetch('population_data.json')
+      .then(response => response.json())
+      .then(data => {
+        setPopulationData(data);
+      })
+      .catch(error => {
+        console.warn('Population data not loaded or file missing', error);
+      });
+
   }, []);
 
   const findShortestPath = useCallback((system1, system2) => {
@@ -82,7 +94,8 @@ export const GraphProvider = ({ children }) => {
         setSelectedSystems,
         findShortestPath,
         planetData,
-        universeData
+        universeData,
+        populationData
       }}
     >
       {children}

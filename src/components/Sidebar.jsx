@@ -1,5 +1,5 @@
 import React, { useState, useContext, useMemo } from 'react';
-import { ChevronRight, ChevronLeft, Earth, Cloud, Thermometer, Gauge, Weight } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Earth, Cloud, Thermometer, Gauge, Weight, Users } from 'lucide-react';
 import { GraphContext } from '../contexts/GraphContext';
 import { SearchContext } from '../contexts/SearchContext';
 import { SelectionContext } from '../contexts/SelectionContext';
@@ -103,9 +103,141 @@ const PlanetConditionIcon = ({ condition, value, ticker }) => {
   );
 };
 
+const WorkforceIcon = ({ planetId, populationData }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  const data = populationData[planetId];
+
+  // 1. If no data, render nothing (invisible)
+  if (!data) return null;
+
+  const tiers = ['Pioneer', 'Settler', 'Technician', 'Engineer', 'Scientist'];
+
+  // 2. Calculate Totals & Status Color
+  let totalOpenJobs = 0;
+  let totalUnemployed = 0;
+
+  tiers.forEach(tier => {
+    const tierData = data.Workforce[tier];
+    if (tierData) {
+      totalOpenJobs += tierData.OpenJobs;
+      totalUnemployed += tierData.Unemployed;
+    }
+  });
+
+  const totalPop = tiers.reduce((sum, tier) => sum + (data.Workforce[tier]?.Population || 0), 0);
+  
+  // Logic: Do not display if population is less than 10
+  if (totalPop <= 10) return null;
+
+  let iconColor = '#888888'; // Default Grey (Balanced)
+  if (totalOpenJobs > 0) {
+    iconColor = '#f54c4c'; // Red (Shortage) - Priority 1
+  } else if (totalUnemployed > 0) {
+    iconColor = '#66ff66'; // Green (Surplus) - Priority 2
+  }
+
+  // 3. Calculate "Days Ago"
+  const getAgeString = (timestamp) => {
+    const diffMs = Date.now() - timestamp;
+    // Convert to days: ms / 1000 / 60 / 60 / 24
+    const days = diffMs / 86400000;
+    
+    if (days < 0.1) return "Just now";
+    return `${days.toFixed(1)} days ago`;
+  };
+
+  const ageString = getAgeString(data.Timestamp);
+
+  return (
+    <div
+      className="planet-condition-icon" // Re-using existing class for relative positioning
+      style={{ marginLeft: '8px', cursor: 'pointer' }}
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
+      onClick={() => setShowTooltip(!showTooltip)} // Support click on mobile
+    >
+      <Users
+        size={16}
+        color={iconColor}
+        strokeWidth={1.5}
+      />
+      
+      {showTooltip && (
+        <div className="tooltip" style={{ 
+          minWidth: '230px',
+          textAlign: 'left', 
+          backgroundColor: '#222', 
+          border: '1px solid #444',
+          zIndex: 2000,
+          // Position overrides:
+          left: 'auto',       
+          right: 0,           
+          transform: 'none'   
+        }}>
+          {/* Header */}
+          <div style={{ 
+            borderBottom: '1px solid #444', 
+            paddingBottom: '5px', 
+            marginBottom: '5px', 
+            fontSize: '11px', 
+            color: '#aaa',
+            display: 'flex',
+            justifyContent: 'space-between'
+          }}>
+            <span>Population: {totalPop.toLocaleString()}</span>
+            <span style={{ fontStyle: 'italic' }}>{ageString}</span>
+          </div>
+
+          {/* Table Header */}
+          <div style={{ display: 'flex', fontSize: '10px', color: '#888', marginBottom: '2px' }}>
+            <span style={{ flex: 1 }}>Tier</span>
+            <span style={{ width: '65px', textAlign: 'right' }}>Unemployed</span>
+            <span style={{ width: '60px', textAlign: 'right' }}>Open Jobs</span>
+          </div>
+
+          {/* Rows */}
+          {tiers.map(tier => {
+            const wf = data.Workforce[tier];
+            if (!wf || (wf.Population === 0 && wf.OpenJobs === 0)) return null;
+            
+            const hasUnemployment = wf.Unemployed > 0;
+            const hasOpenJobs = wf.OpenJobs > 0;
+
+            return (
+              <div key={tier} style={{ display: 'flex', fontSize: '11px', marginBottom: '2px' }}>
+                <span style={{ flex: 1, color: '#ddd' }}>{tier}</span>
+                
+                {/* Unemployed Column */}
+                <span style={{ 
+                  width: '65px',
+                  textAlign: 'right', 
+                  color: hasUnemployment ? '#66ff66' : '#444',
+                  fontWeight: hasUnemployment ? 'bold' : 'normal'
+                }}>
+                  {wf.Unemployed > 0 ? wf.Unemployed : '-'}
+                </span>
+
+                {/* Open Jobs Column */}
+                <span style={{ 
+                  width: '60px',
+                  textAlign: 'right', 
+                  color: hasOpenJobs ? '#f54c4c' : '#444',
+                  fontWeight: hasOpenJobs ? 'bold' : 'normal'
+                }}>
+                  {wf.OpenJobs > 0 ? wf.OpenJobs : '-'}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(window.innerWidth < 768);
-  const { universeData, planetData, materials } = useContext(GraphContext);
+  const { universeData, planetData, materials, populationData } = useContext(GraphContext);
   const { selectedSystem } = useContext(SelectionContext);
   const { searchMaterial, searchResults, isRelativeThreshold, isCompanySearch } = useContext(SearchContext);
 
@@ -248,6 +380,12 @@ const Sidebar = () => {
                     condition="pressure"
                     value={planet.Pressure}
                     ticker={getConditionTicker('pressure', planet.Pressure)}
+                  />
+                )}
+                {populationData && (
+                  <WorkforceIcon 
+                    planetId={planet.PlanetNaturalId} 
+                    populationData={populationData}
                   />
                 )}
               </h3>
