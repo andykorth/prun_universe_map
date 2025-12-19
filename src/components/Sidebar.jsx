@@ -1,4 +1,5 @@
-import React, { useState, useContext, useMemo } from 'react';
+import React, { useState, useContext, useMemo, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import { ChevronRight, ChevronLeft, Earth, Cloud, Thermometer, Gauge, Weight, Users } from 'lucide-react';
 import { GraphContext } from '../contexts/GraphContext';
 import { SearchContext } from '../contexts/SearchContext';
@@ -105,6 +106,8 @@ const PlanetConditionIcon = ({ condition, value, ticker }) => {
 
 const WorkforceIcon = ({ planetId, populationData }) => {
   const [showTooltip, setShowTooltip] = useState(false);
+  const iconRef = useRef(null);
+  const [tooltipPos, setTooltipPos] = useState({ top: 0, right: 0 });
   const data = populationData[planetId];
 
   // 1. If no data, render nothing (invisible)
@@ -146,33 +149,47 @@ const WorkforceIcon = ({ planetId, populationData }) => {
     return `${days.toFixed(1)} days ago`;
   };
 
-  const ageString = getAgeString(data.Timestamp);
+  const handleMouseEnter = () => {
+    if (iconRef.current) {
+      const rect = iconRef.current.getBoundingClientRect();
+      setTooltipPos({
+        top: rect.bottom + 5, 
+        // Align the right edge of tooltip with right edge of icon
+        right: window.innerWidth - rect.right 
+      });
+    }
+    setShowTooltip(true);
+  };
 
   return (
-    <div
-      className="planet-condition-icon" // Re-using existing class for relative positioning
-      style={{ marginLeft: '8px', cursor: 'pointer' }}
-      onMouseEnter={() => setShowTooltip(true)}
-      onMouseLeave={() => setShowTooltip(false)}
-      onClick={() => setShowTooltip(!showTooltip)} // Support click on mobile
-    >
-      <Users
-        size={16}
-        color={iconColor}
-        strokeWidth={1.5}
-      />
+    <>
+      <div
+        ref={iconRef}
+        className="planet-condition-icon"
+        style={{ marginLeft: '8px', cursor: 'pointer' }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={() => setShowTooltip(false)}
+        onClick={() => setShowTooltip(!showTooltip)}
+      >
+        <Users
+          size={16}
+          color={iconColor}
+          strokeWidth={1.5}
+        />
+      </div>
       
-      {showTooltip && (
+      {showTooltip && ReactDOM.createPortal(
         <div className="tooltip" style={{ 
-          minWidth: '230px',
+          minWidth: '230px', 
           textAlign: 'left', 
           backgroundColor: '#222', 
           border: '1px solid #444',
           zIndex: 2000,
-          // Position overrides:
-          left: 'auto',       
-          right: 0,           
-          transform: 'none'   
+          position: 'fixed',
+          top: tooltipPos.top,
+          right: tooltipPos.right,
+          pointerEvents: 'none', // Prevents tooltip from interfering with mouse events if it overlaps
+          boxShadow: '0 4px 6px rgba(0,0,0,0.3)'
         }}>
           {/* Header */}
           <div style={{ 
@@ -185,7 +202,7 @@ const WorkforceIcon = ({ planetId, populationData }) => {
             justifyContent: 'space-between'
           }}>
             <span>Population: {totalPop.toLocaleString()}</span>
-            <span style={{ fontStyle: 'italic' }}>{ageString}</span>
+            <span style={{ fontStyle: 'italic' }}>{getAgeString(data.Timestamp)}</span>
           </div>
 
           {/* Table Header */}
@@ -209,7 +226,7 @@ const WorkforceIcon = ({ planetId, populationData }) => {
                 
                 {/* Unemployed Column */}
                 <span style={{ 
-                  width: '65px',
+                  width: '65px', 
                   textAlign: 'right', 
                   color: hasUnemployment ? '#66ff66' : '#444',
                   fontWeight: hasUnemployment ? 'bold' : 'normal'
@@ -219,7 +236,7 @@ const WorkforceIcon = ({ planetId, populationData }) => {
 
                 {/* Open Jobs Column */}
                 <span style={{ 
-                  width: '60px',
+                  width: '60px', 
                   textAlign: 'right', 
                   color: hasOpenJobs ? '#f54c4c' : '#444',
                   fontWeight: hasOpenJobs ? 'bold' : 'normal'
@@ -229,9 +246,10 @@ const WorkforceIcon = ({ planetId, populationData }) => {
               </div>
             );
           })}
-        </div>
+        </div>,
+        document.body
       )}
-    </div>
+    </>
   );
 };
 
