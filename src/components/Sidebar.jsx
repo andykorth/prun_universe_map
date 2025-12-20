@@ -4,6 +4,8 @@ import { ChevronRight, ChevronLeft, Earth, Cloud, Thermometer, Gauge, Weight, Us
 import { GraphContext } from '../contexts/GraphContext';
 import { SearchContext } from '../contexts/SearchContext';
 import { SelectionContext } from '../contexts/SelectionContext';
+import { useCogcOverlay } from '../contexts/CogcOverlayContext';
+import { cogcPrograms } from '../constants/cogcPrograms';
 
 const ResourceIcon = ({ type }) => {
   let icon = '❓';
@@ -24,24 +26,51 @@ const ResourceIcon = ({ type }) => {
   return <span title={type}>{icon}</span>;
 };
 
-const PlanetTypeIcon = ({ isRocky }) => {
+// Updated PlanetTypeIcon to show Tooltip with Type + CoGC
+const PlanetTypeIcon = ({ isRocky, cogcProgram }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
   const IconComponent = isRocky ? Earth : Cloud;
+  const typeText = isRocky ? "Rocky Planet" : "Gas Giant";
+
+  // Helper to format program string
+  const formatProgram = (prog) => {
+    if (!prog) return '';
+    return prog.split('_').map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(' ');
+  };
+
   return (
-    <IconComponent
-      size={18}
-      color="#f7a600"
-      strokeWidth={1.5}
-      title={isRocky ? "Rocky Planet" : "Gas Giant"}
-      style={{
-        display: 'inline-block',
-        verticalAlign: 'middle',
-        width: '18px',
-        height: '18px',
-        color: '#f7a600', // Ensuring color is applied
-        fill: 'none', // Ensure no fill is applied
-        stroke: 'currentColor', // Use the color for stroke
-      }}
-    />
+    <div 
+      className="planet-condition-icon" // Reuse for relative positioning
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
+      style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '5px' }}
+    >
+      <IconComponent
+        size={18}
+        color="#f7a600"
+        strokeWidth={1.5}
+        style={{
+          display: 'inline-block',
+          verticalAlign: 'middle',
+          width: '18px',
+          height: '18px',
+          color: '#f7a600',
+          fill: 'none',
+          stroke: 'currentColor',
+        }}
+      />
+      {showTooltip && (
+        <div className="tooltip" style={{ minWidth: '120px' }}>
+          <strong>{typeText}</strong>
+          {cogcProgram && (
+            <div style={{ marginTop: '5px', borderTop: '1px solid #555', paddingTop: '3px' }}>
+              <span style={{ fontSize: '10px', color: '#aaa' }}>CoGC Program:</span><br/>
+              <span style={{ color: '#f7a600' }}>{formatProgram(cogcProgram)}</span>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 };
 
@@ -258,6 +287,11 @@ const Sidebar = () => {
   const { universeData, planetData, materials, populationData } = useContext(GraphContext);
   const { selectedSystem } = useContext(SelectionContext);
   const { searchMaterial, searchResults, isRelativeThreshold, isCompanySearch } = useContext(SearchContext);
+  
+  // Get Overlay Program from Context
+  const { overlayProgram } = useCogcOverlay();
+  const selectedProgramValue = cogcPrograms.find(program => program.display === overlayProgram)?.value;
+
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -278,13 +312,37 @@ const Sidebar = () => {
   // Sort planets by PlanetNaturalId
   const sortedPlanets = planets ? [...planets].sort((a, b) => a.PlanetNaturalId.localeCompare(b.PlanetNaturalId)) : null;
 
-  const isHighlighted = (materialId, planetId) => {
+  // Helper to extract the active CoGC from a planet object
+  const getActiveCogc = (planet) => {
+    if (!planet.COGCPrograms || planet.COGCPrograms.length === 0) return null;
+    const sortedPrograms = [...planet.COGCPrograms].sort((a, b) => b.StartEpochMs - a.StartEpochMs);
+    const relevantProgram = sortedPrograms[1] || sortedPrograms[0];
+    return relevantProgram ? relevantProgram.ProgramType : null;
+  };
+
+  const isHighlighted = (materialId, planetId, planet) => {
+    // 1. Search Result Highlight
     const isPlanetInSearchResults = searchResults.some(result =>
       (result.type === 'planet' && result.id === planetId) ||
       (result.type === 'material' && result.planetId === planetId) ||
       (result.type === 'company_base' && result.planetNaturalId === planetId)
     );
     const isMaterialInSearchMaterial = searchMaterial.includes(materialId);
+    
+    // 2. CoGC Overlay Highlight
+    // If a program is selected, and this planet matches it, highlight it.
+    let isCogcMatch = false;
+    if (selectedProgramValue) {
+        const activeCogc = getActiveCogc(planet);
+        if (activeCogc === selectedProgramValue) {
+            isCogcMatch = true;
+        }
+    }
+
+    // Combine conditions
+    if (isCogcMatch) return true;
+
+    // Normal Search Logic
     return (isMaterialInSearchMaterial && isPlanetInSearchResults) ||
            (isCompanySearch && isPlanetInSearchResults);
   };
@@ -362,10 +420,14 @@ const Sidebar = () => {
       {!isCollapsed && (
         <div className="sidebar-content">
           <h2>{selectedSystem && universeData[selectedSystem] ? universeData[selectedSystem][0].Name : 'No System Selected'}</h2>
-          {sortedPlanets && sortedPlanets.map((planet, index) => (
-            <div key={planet.PlanetNaturalId} className={`planet-info-sb ${isHighlighted(null, planet.PlanetNaturalId) ? 'highlighted' : ''}`}>
+          {sortedPlanets && sortedPlanets.map((planet, index) => {
+            const activeCogc = getActiveCogc(planet);
+            const shouldHighlight = isHighlighted(null, planet.PlanetNaturalId, planet);
+
+            return (
+            <div key={planet.PlanetNaturalId} className={`planet-info-sb ${shouldHighlight ? 'highlighted' : ''}`}>
               <h3>
-                <PlanetTypeIcon isRocky={planet.Surface} />
+                <PlanetTypeIcon isRocky={planet.Surface} cogcProgram={activeCogc} />
                 <span style={{ marginLeft: '5px' }}>
                   {planet.PlanetName}{' '}
                   (
@@ -418,9 +480,9 @@ const Sidebar = () => {
                         display: 'flex',
                         alignItems: 'center',
                         marginBottom: '5px',
-                        fontWeight: isHighlighted(resource.MaterialId, planet.PlanetNaturalId) ? 'bold' : 'normal',
-                        color: isHighlighted(resource.MaterialId, planet.PlanetNaturalId) ? '#4a90e2' : 'inherit',
-                        backgroundColor: isHighlighted(resource.MaterialId, planet.PlanetNaturalId) ? 'rgba(74, 144, 226, 0.1)' : 'transparent',
+                        fontWeight: isHighlighted(resource.MaterialId, planet.PlanetNaturalId, planet) ? 'bold' : 'normal',
+                        color: isHighlighted(resource.MaterialId, planet.PlanetNaturalId, planet) ? '#4a90e2' : 'inherit',
+                        backgroundColor: isHighlighted(resource.MaterialId, planet.PlanetNaturalId, planet) ? 'rgba(74, 144, 226, 0.1)' : 'transparent',
                         padding: '2px 5px',
                         borderRadius: '3px'
                       }}
@@ -441,11 +503,12 @@ const Sidebar = () => {
                   );
                 })}
               </ul>
-              {isCompanySearch && isHighlighted(null, planet.PlanetNaturalId) && (
+              {isCompanySearch && isHighlighted(null, planet.PlanetNaturalId, planet) && (
                 <div className="company-base-indicator">Company Base</div>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

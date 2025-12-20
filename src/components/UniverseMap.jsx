@@ -26,6 +26,10 @@ const UniverseMap = React.memo(() => {
   const { searchResults, isRelativeThreshold } = useContext(SearchContext);
   const svgRef = useRef(null);
   const graphRef = useRef(null);
+
+  // Derive the actual program value (e.g., ADVERTISING_METALLURGY) from the display name
+  const selectedProgramValue = cogcPrograms.find(program => program.display === overlayProgram)?.value;
+
   // Handle system click
   const handleSystemClick = useCallback((systemId) => {
     if (systemId === 'rect1') {
@@ -71,7 +75,7 @@ const UniverseMap = React.memo(() => {
       g.selectAll('rect').each(function() {
         const systemId = d3.select(this).attr('id');
         if (CX_SYSTEMS.includes(systemId)) {
-          d3.select(this).attr('rx', '2').attr('ry', '2')
+          d3.select(this).attr('rx', '2').attr('ry', '2');
         }
       });
 
@@ -85,7 +89,8 @@ const UniverseMap = React.memo(() => {
 
       svg.call(zoom);
 
-      addMouseEvents(g, searchResults, materials);
+      // Pass selectedProgramValue to addMouseEvents
+      addMouseEvents(g, searchResults, materials, undefined, selectedProgramValue);
 
       // Store references for later use
       svgRef.current = svgNode;
@@ -107,18 +112,24 @@ const UniverseMap = React.memo(() => {
   // eslint-disable-next-line
   }, [graph]);
 
+  // Update mouse events when search results OR cogc selection changes
   useEffect(() => {
     if (graphRef.current) {
-      addMouseEvents(graphRef.current.g, searchResults, materials, isRelativeThreshold);
+      addMouseEvents(
+          graphRef.current.g, 
+          searchResults, 
+          materials, 
+          isRelativeThreshold, 
+          selectedProgramValue
+      );
     }
-  }, [searchResults, materials, isRelativeThreshold]);
+  }, [searchResults, materials, isRelativeThreshold, selectedProgramValue]);
 
   // Apply Cogc overlay
   const applyCogcOverlay = useCallback(() => {
     if (!graphRef.current || !overlayProgram) return;
 
     const { g } = graphRef.current;
-    const selectedProgramValue = cogcPrograms.find(program => program.display === overlayProgram)?.value;
 
     g.selectAll('.cogc-overlay-rect').remove();
 
@@ -156,14 +167,13 @@ const UniverseMap = React.memo(() => {
           .attr('stroke-width', '3px')
           .attr('rx', borderRadius)
           .attr('ry', borderRadius);
-          
         rect.property('cogcOverlayRect', overlayRect);
       } else {
         rect.classed('cogc-overlay', false);
         rect.property('cogcOverlayRect', null);
       }
     });
-  }, [overlayProgram, planetData]);
+  }, [overlayProgram, planetData, selectedProgramValue]);
 
   // Effect to apply Cogc overlay when overlayProgram changes
   useEffect(() => {

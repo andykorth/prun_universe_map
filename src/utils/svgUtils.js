@@ -111,8 +111,7 @@ const createPlanetTierIndicator = (starCount) => {
 };
 
 // Function to create and show the info panel
-const showInfoPanel = (rect, x, y, searchResults, materials, isRelativeThreshold) => {
-  console.log(searchResults)
+const showInfoPanel = (rect, x, y, searchResults, materials, isRelativeThreshold, selectedCogcProgram) => {
   const isPlanetInSearchResults = (planetId) => {
     return searchResults.some(result =>
       (result.type === 'planet' && result.planetId === planetId) ||
@@ -183,15 +182,20 @@ const showInfoPanel = (rect, x, y, searchResults, materials, isRelativeThreshold
         </div>
       </div>`;
     if (planet.HasChamberOfCommerce) {
-      let programType
+      let programType = null;
       if (planet.COGCPrograms.length > 0) {
         const programs = planet.COGCPrograms;
         const sortedPrograms = programs.sort((a, b) => b.StartEpochMs - a.StartEpochMs);
         const currentProgram = sortedPrograms[1] || sortedPrograms[0] || null;
-        programType = currentProgram.ProgramType;
+        programType = currentProgram ? currentProgram.ProgramType : null;
       }
       const formattedProgram = formatCOGCProgram(programType);
-      content += `<div class="cogc-program">CoGC: ${formattedProgram}</div>`;
+      
+      // Check if this program matches the selection
+      const isCogcMatch = selectedCogcProgram && programType === selectedCogcProgram;
+      const style = isCogcMatch ? 'color: #f7a600; font-weight: bold;' : '';
+      
+      content += `<div class="cogc-program" style="${style}">CoGC: ${formattedProgram}</div>`;
     }
     // Add resource bars for matching materials
     if (matchingMaterials.length > 0) {
@@ -229,7 +233,7 @@ const hideInfoPanel = () => {
 };
 
 // Function to add mouseover and mouseout events for animation
-export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold) => {
+export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold, selectedCogcProgram) => {
   g.selectAll('rect').each(function() {
     const rect = d3.select(this);
     const originalSize = { width: +rect.attr('width'), height: +rect.attr('height') };
@@ -273,7 +277,7 @@ export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold)
       // Set timer for info panel
       hoverTimer = setTimeout(() => {
         const [x, y] = d3.pointer(event);
-        showInfoPanel(rect, x, y, searchResults, materials, isRelativeThreshold);
+        showInfoPanel(rect, x, y, searchResults, materials, isRelativeThreshold, selectedCogcProgram);
       }, 400);
 
     }).on('mouseout.system', function(event) {
