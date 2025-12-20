@@ -41,6 +41,15 @@ const PlanetTypeIcon = ({ isRocky, cogcProgram }) => {
     return prog.split('_').map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(' ');
   };
 
+  // Helper to calculate days ago
+  const getAgeString = (timestamp) => {
+    if (!timestamp) return '';
+    const diffMs = Date.now() - timestamp;
+    const days = diffMs / 86400000; // 1000 * 60 * 60 * 24
+    if (days < 0.1) return "Just now";
+    return `${days.toFixed(1)} days ago`;
+  };
+
   const handleMouseEnter = () => {
     if (iconRef.current) {
       const rect = iconRef.current.getBoundingClientRect();
@@ -92,7 +101,10 @@ const PlanetTypeIcon = ({ isRocky, cogcProgram }) => {
           {cogcProgram && (
             <div style={{ marginTop: '5px', borderTop: '1px solid #555', paddingTop: '3px' }}>
               <span style={{ fontSize: '10px', color: '#aaa' }}>CoGC Program:</span><br/>
-              <span style={{ color: '#f7a600' }}>{formatProgram(cogcProgram)}</span>
+              <span style={{ color: '#f7a600' }}>{formatProgram(cogcProgram.ProgramType)}</span>
+              <div style={{ fontSize: '10px', color: '#aaa', marginTop: '2px', fontStyle: 'italic' }}>
+                Started: {getAgeString(cogcProgram.StartEpochMs)}
+              </div>
             </div>
           )}
         </div>,
@@ -345,11 +357,10 @@ const Sidebar = () => {
     if (!planet.COGCPrograms || planet.COGCPrograms.length === 0) return null;
     const sortedPrograms = [...planet.COGCPrograms].sort((a, b) => b.StartEpochMs - a.StartEpochMs);
     const relevantProgram = sortedPrograms[1] || sortedPrograms[0];
-    return relevantProgram ? relevantProgram.ProgramType : null;
+    return relevantProgram || null; // Returns the full Program Object
   };
 
   // Logic to highlight the CARD (Gold stripe) - CoGC OR Search
-  // MODIFIED: Exclude material searches from highlighting the card itself
   const isCardHighlighted = (planetId, planet) => {
     // 1. Search Result (Planet or Company ONLY)
     const isPlanetInSearchResults = searchResults.some(result =>
@@ -360,7 +371,7 @@ const Sidebar = () => {
     // 2. CoGC Overlay
     if (selectedProgramValue) {
         const activeCogc = getActiveCogc(planet);
-        if (activeCogc === selectedProgramValue) return true;
+        if (activeCogc && activeCogc.ProgramType === selectedProgramValue) return true;
     }
 
     return isPlanetInSearchResults;
