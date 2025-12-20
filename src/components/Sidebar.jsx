@@ -26,9 +26,12 @@ const ResourceIcon = ({ type }) => {
   return <span title={type}>{icon}</span>;
 };
 
-// Updated PlanetTypeIcon to show Tooltip with Type + CoGC
+// Updated PlanetTypeIcon to show Tooltip with Type + CoGC using Portal
 const PlanetTypeIcon = ({ isRocky, cogcProgram }) => {
   const [showTooltip, setShowTooltip] = useState(false);
+  const iconRef = useRef(null);
+  const [tooltipStyle, setTooltipStyle] = useState({});
+
   const IconComponent = isRocky ? Earth : Cloud;
   const typeText = isRocky ? "Rocky Planet" : "Gas Giant";
 
@@ -38,29 +41,53 @@ const PlanetTypeIcon = ({ isRocky, cogcProgram }) => {
     return prog.split('_').map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(' ');
   };
 
+  const handleMouseEnter = () => {
+    if (iconRef.current) {
+      const rect = iconRef.current.getBoundingClientRect();
+      setTooltipStyle({
+        position: 'fixed',
+        top: rect.bottom + 5,
+        left: rect.left, // Align left edge of tooltip with left edge of icon
+        backgroundColor: '#333',
+        color: 'white',
+        padding: '10px',
+        borderRadius: '4px',
+        boxShadow: '0 4px 8px rgba(0,0,0,0.5)',
+        border: '2px solid #222222',
+        minWidth: '150px',
+        zIndex: 2000,
+        pointerEvents: 'none'
+      });
+    }
+    setShowTooltip(true);
+  };
+
   return (
-    <div 
-      className="planet-condition-icon" // Reuse for relative positioning
-      onMouseEnter={() => setShowTooltip(true)}
-      onMouseLeave={() => setShowTooltip(false)}
-      style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '5px' }}
-    >
-      <IconComponent
-        size={18}
-        color="#f7a600"
-        strokeWidth={1.5}
-        style={{
-          display: 'inline-block',
-          verticalAlign: 'middle',
-          width: '18px',
-          height: '18px',
-          color: '#f7a600',
-          fill: 'none',
-          stroke: 'currentColor',
-        }}
-      />
-      {showTooltip && (
-        <div className="tooltip" style={{ minWidth: '120px' }}>
+    <>
+      <div 
+        ref={iconRef}
+        className="planet-condition-icon" 
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={() => setShowTooltip(false)}
+        style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '5px', cursor: 'help' }}
+      >
+        <IconComponent
+          size={18}
+          color="#f7a600"
+          strokeWidth={1.5}
+          style={{
+            display: 'inline-block',
+            verticalAlign: 'middle',
+            width: '18px',
+            height: '18px',
+            color: '#f7a600',
+            fill: 'none',
+            stroke: 'currentColor',
+          }}
+        />
+      </div>
+      {showTooltip && ReactDOM.createPortal(
+        <div className="tooltip" style={tooltipStyle}>
           <strong>{typeText}</strong>
           {cogcProgram && (
             <div style={{ marginTop: '5px', borderTop: '1px solid #555', paddingTop: '3px' }}>
@@ -68,9 +95,10 @@ const PlanetTypeIcon = ({ isRocky, cogcProgram }) => {
               <span style={{ color: '#f7a600' }}>{formatProgram(cogcProgram)}</span>
             </div>
           )}
-        </div>
+        </div>,
+        document.body
       )}
-    </div>
+    </>
   );
 };
 
@@ -320,8 +348,26 @@ const Sidebar = () => {
     return relevantProgram ? relevantProgram.ProgramType : null;
   };
 
-  const isHighlighted = (materialId, planetId, planet) => {
-    // 1. Search Result Highlight
+  // Logic to highlight the CARD (Gold stripe) - CoGC OR Search
+  // MODIFIED: Exclude material searches from highlighting the card itself
+  const isCardHighlighted = (planetId, planet) => {
+    // 1. Search Result (Planet or Company ONLY)
+    const isPlanetInSearchResults = searchResults.some(result =>
+      (result.type === 'planet' && result.id === planetId) ||
+      (result.type === 'company_base' && result.planetNaturalId === planetId)
+    );
+
+    // 2. CoGC Overlay
+    if (selectedProgramValue) {
+        const activeCogc = getActiveCogc(planet);
+        if (activeCogc === selectedProgramValue) return true;
+    }
+
+    return isPlanetInSearchResults;
+  };
+
+  // Logic to highlight RESOURCES (Blue text) - Search Result ONLY
+  const isResourceHighlighted = (materialId, planetId) => {
     const isPlanetInSearchResults = searchResults.some(result =>
       (result.type === 'planet' && result.id === planetId) ||
       (result.type === 'material' && result.planetId === planetId) ||
@@ -329,19 +375,6 @@ const Sidebar = () => {
     );
     const isMaterialInSearchMaterial = searchMaterial.includes(materialId);
     
-    // 2. CoGC Overlay Highlight
-    // If a program is selected, and this planet matches it, highlight it.
-    let isCogcMatch = false;
-    if (selectedProgramValue) {
-        const activeCogc = getActiveCogc(planet);
-        if (activeCogc === selectedProgramValue) {
-            isCogcMatch = true;
-        }
-    }
-
-    // Combine conditions
-    if (isCogcMatch) return true;
-
     // Normal Search Logic
     return (isMaterialInSearchMaterial && isPlanetInSearchResults) ||
            (isCompanySearch && isPlanetInSearchResults);
@@ -422,10 +455,10 @@ const Sidebar = () => {
           <h2>{selectedSystem && universeData[selectedSystem] ? universeData[selectedSystem][0].Name : 'No System Selected'}</h2>
           {sortedPlanets && sortedPlanets.map((planet, index) => {
             const activeCogc = getActiveCogc(planet);
-            const shouldHighlight = isHighlighted(null, planet.PlanetNaturalId, planet);
+            const shouldHighlightCard = isCardHighlighted(planet.PlanetNaturalId, planet);
 
             return (
-            <div key={planet.PlanetNaturalId} className={`planet-info-sb ${shouldHighlight ? 'highlighted' : ''}`}>
+            <div key={planet.PlanetNaturalId} className={`planet-info-sb ${shouldHighlightCard ? 'highlighted' : ''}`}>
               <h3>
                 <PlanetTypeIcon isRocky={planet.Surface} cogcProgram={activeCogc} />
                 <span style={{ marginLeft: '5px' }}>
@@ -472,6 +505,8 @@ const Sidebar = () => {
               <ul>
                 {planet.Resources.map((resource, idx) => {
                   const key = `${resource.MaterialId}-${resource.ResourceType}`;
+                  const shouldHighlightResource = isResourceHighlighted(resource.MaterialId, planet.PlanetNaturalId);
+                  
                   return (
                     <li
                       key={idx}
@@ -480,9 +515,9 @@ const Sidebar = () => {
                         display: 'flex',
                         alignItems: 'center',
                         marginBottom: '5px',
-                        fontWeight: isHighlighted(resource.MaterialId, planet.PlanetNaturalId, planet) ? 'bold' : 'normal',
-                        color: isHighlighted(resource.MaterialId, planet.PlanetNaturalId, planet) ? '#4a90e2' : 'inherit',
-                        backgroundColor: isHighlighted(resource.MaterialId, planet.PlanetNaturalId, planet) ? 'rgba(74, 144, 226, 0.1)' : 'transparent',
+                        fontWeight: shouldHighlightResource ? 'bold' : 'normal',
+                        color: shouldHighlightResource ? '#4a90e2' : 'inherit',
+                        backgroundColor: shouldHighlightResource ? 'rgba(74, 144, 226, 0.1)' : 'transparent',
                         padding: '2px 5px',
                         borderRadius: '3px'
                       }}
@@ -503,7 +538,7 @@ const Sidebar = () => {
                   );
                 })}
               </ul>
-              {isCompanySearch && isHighlighted(null, planet.PlanetNaturalId, planet) && (
+              {isCompanySearch && shouldHighlightCard && (
                 <div className="company-base-indicator">Company Base</div>
               )}
             </div>
