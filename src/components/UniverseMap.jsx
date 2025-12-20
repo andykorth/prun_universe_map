@@ -9,6 +9,16 @@ import { cogcPrograms } from '../constants/cogcPrograms';
 import './UniverseMap.css';
 import { SearchContext } from '../contexts/SearchContext';
 
+// CX System IDs (Internal IDs)
+const CX_SYSTEMS = [
+  '8ecf9670ba070d78cfb5537e8d9f1b6c', // Antares
+  '92029ff27c1abe932bd2c61ee4c492c7', // Benten
+  'f2f57766ebaca9d69efae41ccf4d8853', // Hortus
+  '49b6615d39ccba05752b3be77b2ebf36', // Moria
+  'a4ba8b12739da65efc2b518703652ee1', // Arclight
+  'afda9bea7f948f4a066a8882cdfa9055'  // Hubur
+];
+
 const UniverseMap = React.memo(() => {
   const { graph, planetData, materials } = useContext(GraphContext);
   const { highlightSelectedSystem } = useContext(SelectionContext);
@@ -56,6 +66,14 @@ const UniverseMap = React.memo(() => {
       while (svgNode.firstChild && svgNode.firstChild !== g.node()) {
         g.node().appendChild(svgNode.firstChild);
       }
+
+      // Apply shapes to CX Systems ---
+      g.selectAll('rect').each(function() {
+        const systemId = d3.select(this).attr('id');
+        if (CX_SYSTEMS.includes(systemId)) {
+          d3.select(this).attr('rx', '2').attr('ry', '2')
+        }
+      });
 
       graphRef.current = { svg, g };
 
@@ -121,6 +139,11 @@ const UniverseMap = React.memo(() => {
         const width = parseFloat(rect.attr('width'));
         const height = parseFloat(rect.attr('height'));
         const scaleUp = 4;
+        
+        // Apply correct shape to overlay ---
+        const isCX = CX_SYSTEMS.includes(systemId);
+        const borderRadius = isCX ? '4' : '50%';
+
         // Create a new overlay rect
         const overlayRect = g.append('rect')
           .attr('class', 'cogc-overlay-rect')
@@ -131,8 +154,9 @@ const UniverseMap = React.memo(() => {
           .attr('fill', 'none')
           .attr('stroke', '#56c7f7')
           .attr('stroke-width', '3px')
-          .attr('rx', '50%')
-          .attr('ry', '50%');
+          .attr('rx', borderRadius)
+          .attr('ry', borderRadius);
+          
         rect.property('cogcOverlayRect', overlayRect);
       } else {
         rect.classed('cogc-overlay', false);
