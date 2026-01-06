@@ -162,13 +162,14 @@ const UniverseMap = React.memo(() => {
           materials, 
           isRelativeThreshold, 
           selectedProgramValue,
-          activeMode, // NEW
-          gatewayData // NEW
+          activeMode,
+          gatewayData,
+          universeData
       );
       // Re-attach click events to ensure they use latest closure variables (important for handleSystemClick)
       attachClickEvents(graphRef.current.g);
     }
-  }, [searchResults, materials, isRelativeThreshold, selectedProgramValue, activeMode, gatewayData, attachClickEvents]);
+  }, [searchResults, materials, isRelativeThreshold, selectedProgramValue, activeMode, gatewayData, universeData, attachClickEvents]);
 
 
   // 2. Handle Gateway Visuals (Heatmap/Highlight)

@@ -235,7 +235,7 @@ const hideInfoPanel = () => {
 };
 
 // Function to add mouseover and mouseout events for animation
-export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold, selectedCogcProgram, activeMode, gatewayData) => {
+export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold, selectedCogcProgram, activeMode, gatewayData, universeData) => {
   g.selectAll('rect').each(function() {
     const rect = d3.select(this);
     const systemId = rect.attr('id').replace('#', '');
@@ -274,14 +274,7 @@ export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold,
 
       // 2. MODE SPECIFIC LOGIC
       if (activeMode === MAP_MODES.GATEWAY) {
-          // GATEWAY MODE: Rubber Banding & Mini Tooltip
-          // (Scale up is skipped here)
-          
-          // Ensure we don't proceed if data missing
-          // Note: We need to access universeData. 
-          // Since this function is called from UniverseMap where universeData is available in context,
-          // but strictly speaking 'universeData' variable here relies on the module-level variable set by fetchData().
-          // If fetchData hasn't completed, this might be null.
+          // Check passed universeData
           if (!gatewayData || !universeData) return;
 
           const hoveredSystem = universeData[systemId] ? universeData[systemId][0] : null;
