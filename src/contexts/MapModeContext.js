@@ -138,11 +138,20 @@ export const MapModeProvider = ({ children }) => {
     }));
   }, []);
 
-  const clearGatewaySelections = useCallback(() => {
+  const resetSelection = useCallback(() => {
     setGatewayData(prev => ({
       ...prev,
       originA: null,
       originB: null
+    }));
+  }, []);
+
+  const clearAllGateways = useCallback(() => {
+    setGatewayData(prev => ({
+      ...prev,
+      originA: null,
+      originB: null,
+      plannedGateways: [] 
     }));
   }, []);
 
@@ -157,9 +166,10 @@ export const MapModeProvider = ({ children }) => {
       setGatewayStrategy,
       setOriginById,
       addPlannedGateway,
-      addDualRoute, // New export
+      addDualRoute, 
       removePlannedGateway,
-      clearGatewaySelections,
+      resetSelection,   
+      clearAllGateways, 
       calculate3DDistance
     }}>
       {children}

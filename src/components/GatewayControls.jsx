@@ -2,7 +2,7 @@ import React from 'react';
 import { useMapMode, GATEWAY_STRATEGIES } from '../contexts/MapModeContext';
 
 const GatewayControls = () => {
-  const { gatewayData, setGatewayStrategy, clearGatewaySelections } = useMapMode();
+  const { gatewayData, setGatewayStrategy, clearAllGateways } = useMapMode();
 
   return (
     <div className="gateway-controls" style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
@@ -23,7 +23,7 @@ const GatewayControls = () => {
         </button>
       </div>
       
-      <button className="clear-button" onClick={clearGatewaySelections}>
+      <button className="clear-button" onClick={clearAllGateways}>
         Clear Selection
       </button>
     </div>

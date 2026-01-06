@@ -2,19 +2,29 @@ import React, { useEffect } from 'react';
 import * as d3 from 'd3';
 import { useMapMode } from '../contexts/MapModeContext';
 
-const GatewayLayer = ({ mapRef }) => {
-  const { existingGateways, gatewayData } = useMapMode();
+const GatewayLayer = ({ mapRef, mapRenderKey }) => {
+  const { existingGateways, gatewayData, activeMode } = useMapMode();
 
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapRef.current || mapRenderKey === 0) return;
+    
     const { g } = mapRef.current;
 
-    // cleanup
-    g.selectAll('.gateway-line').remove();
-    g.selectAll('.planned-gateway-line').remove();
-    g.selectAll('.gateway-arrow').remove(); // If using markers
+    let layerGroup = g.select('.gateway-layer-group');
+    
+    if (layerGroup.empty()) {
+        const firstSystemNode = g.select('rect:not(#rect1)').node();
+        
+        if (firstSystemNode) {
+            layerGroup = g.insert('g', () => firstSystemNode)
+                          .attr('class', 'gateway-layer-group');
+        } else {
+            layerGroup = g.append('g').attr('class', 'gateway-layer-group');
+        }
+    }
 
-    // Helper to get coords
+    layerGroup.selectAll('*').remove();
+
     const getCoords = (systemId) => {
         const node = g.select(`#${CSS.escape(systemId)}`);
         if (node.empty()) return null;
@@ -24,14 +34,13 @@ const GatewayLayer = ({ mapRef }) => {
         };
     };
 
-    // Draw Existing Gateways
     if (existingGateways && existingGateways.length > 0) {
         existingGateways.forEach(gw => {
             const start = getCoords(gw.sourceId);
             const end = getCoords(gw.targetId);
             
             if (start && end) {
-                g.append('line')
+                layerGroup.append('line') // Append to layerGroup, not g
                     .attr('class', 'gateway-line')
                     .attr('x1', start.x)
                     .attr('y1', start.y)
@@ -45,28 +54,19 @@ const GatewayLayer = ({ mapRef }) => {
         });
     }
 
-    // Draw Planned Gateways
     if (gatewayData.plannedGateways && gatewayData.plannedGateways.length > 0) {
         gatewayData.plannedGateways.forEach(gw => {
-             // plannedGateways stores names/distances, check if we have IDs or need to look up
-             // For safety, assuming gw object has sourceId and targetId added during creation, 
-             // or we look up by name if IDs aren't stored. 
-             // Phase 1 implementation stored: { id, source: name, target: name, distance }
-             // We need IDs to draw lines. I will assume we passed IDs or will look them up via node selection.
-             // EDIT: Context implementation passed full objects. I will update Context/Map to ensure IDs are passed.
-             // For now, let's try to find nodes by ID.
-             
              const start = getCoords(gw.sourceId);
              const end = getCoords(gw.targetId);
 
              if (start && end) {
-                 g.append('line')
+                 layerGroup.append('line')
                     .attr('class', 'planned-gateway-line')
                     .attr('x1', start.x)
                     .attr('y1', start.y)
                     .attr('x2', end.x)
                     .attr('y2', end.y)
-                    .attr('stroke', '#f7a600') // PrUn Gold
+                    .attr('stroke', '#f7a600') 
                     .attr('stroke-width', 2)
                     .attr('stroke-dasharray', '6,3')
                     .attr('pointer-events', 'none');
@@ -74,7 +74,7 @@ const GatewayLayer = ({ mapRef }) => {
         });
     }
 
-  }, [mapRef, existingGateways, gatewayData.plannedGateways]);
+  }, [mapRef, existingGateways, gatewayData.plannedGateways, mapRenderKey, activeMode]);
 
   return null;
 };
