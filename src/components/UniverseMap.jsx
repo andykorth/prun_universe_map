@@ -1,15 +1,18 @@
 import React, { useEffect, useContext, useRef, useCallback } from 'react';
 import DataPointOverlay from './DataPointOverlay';
+import GatewayLayer from './GatewayLayer'; // NEW
 import * as d3 from 'd3';
 import { GraphContext } from '../contexts/GraphContext';
 import { SelectionContext } from '../contexts/SelectionContext';
 import { useCogcOverlay } from '../contexts/CogcOverlayContext';
+import { useMapMode, MAP_MODES, GATEWAY_STRATEGIES } from '../contexts/MapModeContext'; // NEW
 import { addMouseEvents } from '../utils/svgUtils';
+import { resetGraphState, renderGatewayVisuals } from '../utils/graphUtils'; // NEW
+import { calculate3DDistance } from '../utils/distanceUtils';
 import { cogcPrograms } from '../constants/cogcPrograms';
 import './UniverseMap.css';
 import { SearchContext } from '../contexts/SearchContext';
 
-// CX System IDs (Internal IDs)
 const CX_SYSTEMS = [
   '8ecf9670ba070d78cfb5537e8d9f1b6c', // Antares
   '92029ff27c1abe932bd2c61ee4c492c7', // Benten
@@ -20,25 +23,66 @@ const CX_SYSTEMS = [
 ];
 
 const UniverseMap = React.memo(() => {
-  const { graph, planetData, materials } = useContext(GraphContext);
+  const { graph, planetData, materials, universeData } = useContext(GraphContext);
   const { highlightSelectedSystem } = useContext(SelectionContext);
   const { overlayProgram } = useCogcOverlay();
   const { searchResults, isRelativeThreshold } = useContext(SearchContext);
+  
+  // NEW Hooks
+  const { activeMode, gatewayData, setOriginById, addPlannedGateway, clearGatewaySelections } = useMapMode();
+
   const svgRef = useRef(null);
   const graphRef = useRef(null);
-
-  // Derive the actual program value (e.g., ADVERTISING_METALLURGY) from the display name
   const selectedProgramValue = cogcPrograms.find(program => program.display === overlayProgram)?.value;
 
-  // Handle system click
+  // --- Click Handling ---
   const handleSystemClick = useCallback((systemId) => {
-    if (systemId === 'rect1') {
-      return;
-    }
-    highlightSelectedSystem(systemId);
-  }, [highlightSelectedSystem]);
+    if (systemId === 'rect1') return;
 
-  // Attach click events
+    if (activeMode === MAP_MODES.STANDARD) {
+        // Standard Behavior
+        highlightSelectedSystem(systemId);
+    } 
+    else if (activeMode === MAP_MODES.GATEWAY) {
+        // Gateway Behavior
+        if (gatewayData.strategy === GATEWAY_STRATEGIES.SINGLE) {
+            if (!gatewayData.originA) {
+                // Set Origin A
+                setOriginById(systemId, 'A');
+            } else {
+                // Plan Route (A -> Target)
+                const targetSystem = universeData[systemId][0];
+                const dist = calculate3DDistance(gatewayData.originA, targetSystem);
+                
+                addPlannedGateway({
+                    id: Date.now().toString(),
+                    sourceId: gatewayData.originA.SystemId,
+                    targetId: targetSystem.SystemId,
+                    source: gatewayData.originA.Name,
+                    target: targetSystem.Name,
+                    distance: dist.toFixed(2)
+                });
+                
+                // Reset Origin A (deselect) per instruction
+                clearGatewaySelections();
+            }
+        } 
+        else if (gatewayData.strategy === GATEWAY_STRATEGIES.DUAL) {
+            if (!gatewayData.originA) {
+                setOriginById(systemId, 'A');
+            } else if (!gatewayData.originB) {
+                setOriginById(systemId, 'B');
+            } else {
+                // If both set, maybe cycle A? Or do nothing? 
+                // Let's reset A to new click for fluid behavior
+                setOriginById(systemId, 'A');
+            }
+        }
+    }
+  }, [activeMode, gatewayData, highlightSelectedSystem, setOriginById, addPlannedGateway, clearGatewaySelections, universeData]);
+
+
+  // Attach Events
   const attachClickEvents = useCallback((g) => {
     g.selectAll('rect').on('click', function() {
       const systemId = d3.select(this).attr('id').replace('#', '');
@@ -46,7 +90,8 @@ const UniverseMap = React.memo(() => {
     });
   }, [handleSystemClick]);
 
-  // Initialize D3 graph
+
+  // --- D3 Initialization ---
   useEffect(() => {
     if (!graph || !graph.edges) return;
 
@@ -54,24 +99,16 @@ const UniverseMap = React.memo(() => {
       const svgNode = data.documentElement;
       const container = document.getElementById('map-container');
 
-      // Clear any existing SVG to prevent duplicates
-      while (container.firstChild) {
-        container.removeChild(container.firstChild);
-      }
-
-      // Append the SVG node to the container
+      while (container.firstChild) container.removeChild(container.firstChild);
       container.appendChild(svgNode);
 
-      // Select the SVG element and create a group element
       const svg = d3.select(svgNode);
       const g = svg.append('g');
 
-      // Move all children of the SVG to the group
       while (svgNode.firstChild && svgNode.firstChild !== g.node()) {
         g.node().appendChild(svgNode.firstChild);
       }
 
-      // Apply shapes to CX Systems ---
       g.selectAll('rect').each(function() {
         const systemId = d3.select(this).attr('id');
         if (CX_SYSTEMS.includes(systemId)) {
@@ -89,18 +126,15 @@ const UniverseMap = React.memo(() => {
 
       svg.call(zoom);
 
-      // Pass selectedProgramValue to addMouseEvents
-      addMouseEvents(g, searchResults, materials, undefined, selectedProgramValue);
+      // Initial Mouse Events
+      addMouseEvents(g, searchResults, materials, isRelativeThreshold, selectedProgramValue, activeMode, gatewayData);
 
-      // Store references for later use
       svgRef.current = svgNode;
       graphRef.current = { svg, g };
 
-      // Attach click events here, after the SVG is fully initialized
       attachClickEvents(g);
     });
 
-    // Cleanup function
     return () => {
       if (svgRef.current) {
         const container = document.getElementById('map-container');
@@ -110,9 +144,12 @@ const UniverseMap = React.memo(() => {
       }
     };
   // eslint-disable-next-line
-  }, [graph]);
+  }, [graph]); // Run once on graph load
 
-  // Update mouse events when search results OR cogc selection changes
+
+  // --- Updates & Rerenders ---
+
+  // 1. Update Mouse Events when Context changes
   useEffect(() => {
     if (graphRef.current) {
       addMouseEvents(
@@ -120,17 +157,35 @@ const UniverseMap = React.memo(() => {
           searchResults, 
           materials, 
           isRelativeThreshold, 
-          selectedProgramValue
+          selectedProgramValue,
+          activeMode, // NEW
+          gatewayData // NEW
       );
+      // Re-attach click events to ensure they use latest closure variables (important for handleSystemClick)
+      attachClickEvents(graphRef.current.g);
     }
-  }, [searchResults, materials, isRelativeThreshold, selectedProgramValue]);
+  }, [searchResults, materials, isRelativeThreshold, selectedProgramValue, activeMode, gatewayData, attachClickEvents]);
 
-  // Apply Cogc overlay
+
+  // 2. Handle Gateway Visuals (Heatmap/Highlight)
+  useEffect(() => {
+    if (!graphRef.current || !universeData) return;
+    const { svg } = graphRef.current;
+
+    if (activeMode === MAP_MODES.GATEWAY) {
+        renderGatewayVisuals(svg, gatewayData, universeData);
+    } else {
+        // When switching back to standard, ensure reset (unless pathfinding is holding state)
+        // resetGraphState calls 'renderGatewayVisuals' if mode is GATEWAY, else resets to gray
+        resetGraphState(null, activeMode, null, null);
+    }
+  }, [activeMode, gatewayData, universeData]);
+
+
+  // 3. COGC Overlay (Existing)
   const applyCogcOverlay = useCallback(() => {
     if (!graphRef.current || !overlayProgram) return;
-
     const { g } = graphRef.current;
-
     g.selectAll('.cogc-overlay-rect').remove();
 
     g.selectAll('rect').each(function() {
@@ -150,12 +205,9 @@ const UniverseMap = React.memo(() => {
         const width = parseFloat(rect.attr('width'));
         const height = parseFloat(rect.attr('height'));
         const scaleUp = 4;
-        
-        // Apply correct shape to overlay ---
         const isCX = CX_SYSTEMS.includes(systemId);
         const borderRadius = isCX ? '4' : '50%';
 
-        // Create a new overlay rect
         const overlayRect = g.append('rect')
           .attr('class', 'cogc-overlay-rect')
           .attr('x', x - scaleUp/2)
@@ -175,21 +227,15 @@ const UniverseMap = React.memo(() => {
     });
   }, [overlayProgram, planetData, selectedProgramValue]);
 
-  // Effect to apply Cogc overlay when overlayProgram changes
   useEffect(() => {
     applyCogcOverlay();
   }, [applyCogcOverlay]);
 
-  // Update click events when handleSystemClick changes
-  useEffect(() => {
-    if (graphRef.current) {
-      attachClickEvents(graphRef.current.g);
-    }
-  }, [attachClickEvents]);
 
   return (
     <div id="map-container">
       <DataPointOverlay mapRef={graphRef} />
+      <GatewayLayer mapRef={graphRef} />
     </div>
   );
 });

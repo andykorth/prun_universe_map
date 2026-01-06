@@ -3,6 +3,8 @@ import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 import { BadgeCent, Anchor, Truck, BookOpen, Globe } from 'lucide-react';
 import { colors } from '../config/config';
+import { calculate3DDistance } from './distanceUtils';
+import { MAP_MODES, GATEWAY_STRATEGIES } from '../contexts/MapModeContext';
 
 let universeData = null;
 let planetData = null;
@@ -233,9 +235,10 @@ const hideInfoPanel = () => {
 };
 
 // Function to add mouseover and mouseout events for animation
-export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold, selectedCogcProgram) => {
+export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold, selectedCogcProgram, activeMode, gatewayData) => {
   g.selectAll('rect').each(function() {
     const rect = d3.select(this);
+    const systemId = rect.attr('id').replace('#', ''); // Ensure clean ID
     const originalSize = { width: +rect.attr('width'), height: +rect.attr('height') };
     const originalPos = { x: +rect.attr('x'), y: +rect.attr('y') };
     let hoverTimer;
@@ -243,6 +246,8 @@ export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold,
 
     rect.on('mouseover.system', function(event) {
       if (rect.attr('id') === 'rect1' || d3.select(event.target).classed('data-overlay')) return;
+
+      // 1. Hover Animation (Scale Up) - Apply in all modes
       rect
         .attr('fill-opacity', 1)
         .attr('stroke-opacity', 1)
@@ -253,56 +258,121 @@ export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold,
         .attr('x', originalPos.x - originalSize.width / 2)
         .attr('y', originalPos.y - originalSize.height / 2);
 
+      // Handle Overlay scaling
       const overlayRect = rect.property('cogcOverlayRect');
-
       if (overlayRect) {
-        overlayOriginalSize = {
-          width: +overlayRect.attr('width'),
-          height: +overlayRect.attr('height')
-        };
-        overlayOriginalPos = {
-          x: +overlayRect.attr('x'),
-          y: +overlayRect.attr('y')
-        };
-
-        overlayRect
-          .transition()
-          .duration(200)
+        overlayOriginalSize = { width: +overlayRect.attr('width'), height: +overlayRect.attr('height') };
+        overlayOriginalPos = { x: +overlayRect.attr('x'), y: +overlayRect.attr('y') };
+        overlayRect.transition().duration(200)
           .attr('width', overlayOriginalSize.width + originalSize.width)
           .attr('height', overlayOriginalSize.height + originalSize.width)
           .attr('x', overlayOriginalPos.x - originalSize.width / 2)
           .attr('y', overlayOriginalPos.y - originalSize.height / 2);
       }
 
-      // Set timer for info panel
-      hoverTimer = setTimeout(() => {
-        const [x, y] = d3.pointer(event);
-        showInfoPanel(rect, x, y, searchResults, materials, isRelativeThreshold, selectedCogcProgram);
-      }, 400);
+      // 2. MODE SPECIFIC LOGIC
+      if (activeMode === MAP_MODES.GATEWAY) {
+          // GATEWAY MODE: Rubber Banding & Mini Tooltip
+          if (!gatewayData || !universeData) return;
+
+          const hoveredSystem = universeData[systemId] ? universeData[systemId][0] : null;
+          if (!hoveredSystem) return;
+
+          // Helper to draw rubber band
+          const drawBand = (origin, cssClass) => {
+              const originNode = g.select(`#${CSS.escape(origin.SystemId)}`);
+              if (!originNode.empty()) {
+                  const x1 = parseFloat(originNode.attr('x')) + parseFloat(originNode.attr('width'))/2;
+                  const y1 = parseFloat(originNode.attr('y')) + parseFloat(originNode.attr('height'))/2;
+                  const x2 = originalPos.x + originalSize.width/2;
+                  const y2 = originalPos.y + originalSize.height/2;
+
+                  g.append('line')
+                    .attr('class', `rubber-band ${cssClass}`)
+                    .attr('x1', x1).attr('y1', y1)
+                    .attr('x2', x2).attr('y2', y2)
+                    .attr('stroke', '#fff')
+                    .attr('stroke-width', 1)
+                    .attr('stroke-dasharray', '3,3')
+                    .attr('pointer-events', 'none');
+              }
+          };
+
+          let tooltipText = "";
+          
+          if (gatewayData.strategy === GATEWAY_STRATEGIES.SINGLE && gatewayData.originA) {
+              const dist = calculate3DDistance(gatewayData.originA, hoveredSystem);
+              drawBand(gatewayData.originA, 'band-a');
+              tooltipText = `${dist.toFixed(2)} pc`;
+          } 
+          else if (gatewayData.strategy === GATEWAY_STRATEGIES.DUAL) {
+               const parts = [];
+               if (gatewayData.originA) {
+                   const distA = calculate3DDistance(gatewayData.originA, hoveredSystem);
+                   drawBand(gatewayData.originA, 'band-a');
+                   parts.push(`A: ${distA.toFixed(2)} pc`);
+               }
+               if (gatewayData.originB) {
+                   const distB = calculate3DDistance(gatewayData.originB, hoveredSystem);
+                   drawBand(gatewayData.originB, 'band-b');
+                   parts.push(`B: ${distB.toFixed(2)} pc`);
+               }
+               tooltipText = parts.join(' | ');
+          }
+
+          // Show Mini Tooltip
+          if (tooltipText) {
+              const [mouseX, mouseY] = d3.pointer(event, document.body); // Relative to body for fixed pos
+              d3.select('body').append('div')
+                .attr('class', 'gateway-tooltip')
+                .style('position', 'absolute')
+                .style('left', (mouseX + 15) + 'px')
+                .style('top', (mouseY - 10) + 'px')
+                .style('background', '#222')
+                .style('color', '#f7a600')
+                .style('padding', '4px 8px')
+                .style('border-radius', '4px')
+                .style('border', '1px solid #555')
+                .style('font-size', '12px')
+                .style('pointer-events', 'none')
+                .style('z-index', 1000)
+                .text(tooltipText);
+          }
+
+      } else {
+          // STANDARD MODE: Info Panel
+          hoverTimer = setTimeout(() => {
+            const [x, y] = d3.pointer(event, document.body); // Use body for absolute positioning
+            showInfoPanel(rect, x, y, searchResults, materials, isRelativeThreshold, selectedCogcProgram);
+          }, 400);
+      }
 
     }).on('mouseout.system', function(event) {
       if (rect.attr('id') === 'rect1') return;
-      rect.transition()
-        .duration(200)
+
+      // Reset Size
+      rect.transition().duration(200)
         .attr('width', originalSize.width)
         .attr('height', originalSize.height)
         .attr('x', originalPos.x)
         .attr('y', originalPos.y)
         .attr('fill-opacity', rect.classed('search-highlight') ? 1 : colors.resetSystemFillOpacity);
 
-      // Reset the overlay rect if it exists
-      const overlayRect = rect.property('cogcOverlayRect');
-      if (overlayRect) {
-        overlayRect
-          .transition()
-          .duration(200)
+      // Reset Overlay
+      if (rect.property('cogcOverlayRect')) {
+        const overlayRect = rect.property('cogcOverlayRect');
+        overlayRect.transition().duration(200)
           .attr('width', overlayOriginalSize.width)
           .attr('height', overlayOriginalSize.height)
           .attr('x', overlayOriginalPos.x)
           .attr('y', overlayOriginalPos.y);
       }
 
-      // Clear timer and hide info panel
+      // Cleanup Gateway Visuals
+      g.selectAll('.rubber-band').remove();
+      d3.selectAll('.gateway-tooltip').remove();
+
+      // Cleanup Standard Panel
       clearTimeout(hoverTimer);
       hideInfoPanel();
     });
