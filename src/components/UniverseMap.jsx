@@ -6,7 +6,7 @@ import { GraphContext } from '../contexts/GraphContext';
 import { SelectionContext } from '../contexts/SelectionContext';
 import { useCogcOverlay } from '../contexts/CogcOverlayContext';
 import { useMapMode, MAP_MODES, GATEWAY_STRATEGIES } from '../contexts/MapModeContext';
-import { addMouseEvents } from '../utils/svgUtils';
+import { addMouseEvents, drawGatewayHover } from '../utils/svgUtils'; // Import helper
 import { resetGraphState, renderGatewayVisuals } from '../utils/graphUtils';
 import { calculate3DDistance } from '../utils/distanceUtils';
 import { cogcPrograms } from '../constants/cogcPrograms';
@@ -27,12 +27,11 @@ const UniverseMap = React.memo(() => {
   const { highlightSelectedSystem } = useContext(SelectionContext);
   const { overlayProgram } = useCogcOverlay();
   const { searchResults, isRelativeThreshold } = useContext(SearchContext);
-  const { activeMode, gatewayData, setOriginById, addPlannedGateway, resetSelection } = useMapMode();
+  
+  const { activeMode, gatewayData, setOriginById, addPlannedGateway, resetSelection, hoveredSystemId } = useMapMode();
 
   const svgRef = useRef(null);
   const graphRef = useRef(null);
-  
-  // CHANGED: Use a counter to track map DOM re-creations
   const [mapRenderKey, setMapRenderKey] = useState(0);
 
   const selectedProgramValue = cogcPrograms.find(program => program.display === overlayProgram)?.value;
@@ -138,6 +137,7 @@ const UniverseMap = React.memo(() => {
         }
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [graph]); 
 
   useEffect(() => {
@@ -166,6 +166,17 @@ const UniverseMap = React.memo(() => {
         resetGraphState(null, activeMode, null, null);
     }
   }, [activeMode, gatewayData, universeData]);
+
+  useEffect(() => {
+      if (activeMode === MAP_MODES.GATEWAY && graphRef.current) {
+          const { g } = graphRef.current;
+          if (hoveredSystemId) {
+              drawGatewayHover(g, hoveredSystemId, gatewayData, universeData);
+          } else {
+              g.selectAll('.rubber-band').remove();
+          }
+      }
+  }, [hoveredSystemId, activeMode, gatewayData, universeData]);
 
   const applyCogcOverlay = useCallback(() => {
     if (!graphRef.current || !overlayProgram) return;

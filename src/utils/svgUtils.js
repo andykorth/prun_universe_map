@@ -234,7 +234,44 @@ const hideInfoPanel = () => {
   d3.select('.info-panel').remove();
 };
 
-// Function to add mouseover and mouseout events for animation
+export const drawGatewayHover = (g, systemId, gatewayData, universeData) => {
+    g.selectAll('.rubber-band').remove();
+
+    if (!gatewayData || !universeData || !systemId) return;
+
+    const targetSystem = universeData[systemId] ? universeData[systemId][0] : null;
+    if (!targetSystem) return;
+
+    const drawLine = (origin, cssClass) => {
+        const originNode = g.select(`#${CSS.escape(origin.SystemId)}`);
+        const targetNode = g.select(`#${CSS.escape(systemId)}`);
+
+        if (!originNode.empty() && !targetNode.empty()) {
+            const x1 = parseFloat(originNode.attr('x')) + parseFloat(originNode.attr('width'))/2;
+            const y1 = parseFloat(originNode.attr('y')) + parseFloat(originNode.attr('height'))/2;
+            const x2 = parseFloat(targetNode.attr('x')) + parseFloat(targetNode.attr('width'))/2;
+            const y2 = parseFloat(targetNode.attr('y')) + parseFloat(targetNode.attr('height'))/2;
+
+            g.append('line')
+            .attr('class', `rubber-band ${cssClass}`)
+            .attr('x1', x1).attr('y1', y1)
+            .attr('x2', x2).attr('y2', y2)
+            .attr('stroke', '#fff')
+            .attr('stroke-width', 1)
+            .attr('stroke-dasharray', '3,3')
+            .attr('pointer-events', 'none');
+        }
+    };
+
+    if (gatewayData.strategy === GATEWAY_STRATEGIES.SINGLE && gatewayData.originA) {
+        drawLine(gatewayData.originA, 'band-a');
+    } 
+    else if (gatewayData.strategy === GATEWAY_STRATEGIES.DUAL) {
+        if (gatewayData.originA) drawLine(gatewayData.originA, 'band-a');
+        if (gatewayData.originB) drawLine(gatewayData.originB, 'band-b');
+    }
+};
+
 export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold, selectedCogcProgram, activeMode, gatewayData, universeData) => {
   g.selectAll('rect').each(function() {
     const rect = d3.select(this);
@@ -247,7 +284,6 @@ export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold,
     rect.on('mouseover.system', function(event) {
       if (rect.attr('id') === 'rect1' || d3.select(event.target).classed('data-overlay')) return;
 
-      // 1. Hover Animation (Scale Up) - ONLY IN STANDARD MODE
       if (activeMode !== MAP_MODES.GATEWAY) {
           rect
             .attr('fill-opacity', 1)
@@ -259,7 +295,6 @@ export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold,
             .attr('x', originalPos.x - originalSize.width / 2)
             .attr('y', originalPos.y - originalSize.height / 2);
 
-          // Handle Overlay scaling
           const overlayRect = rect.property('cogcOverlayRect');
           if (overlayRect) {
             overlayOriginalSize = { width: +overlayRect.attr('width'), height: +overlayRect.attr('height') };
@@ -272,59 +307,31 @@ export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold,
           }
       }
 
-      // 2. MODE SPECIFIC LOGIC
       if (activeMode === MAP_MODES.GATEWAY) {
-          // Check passed universeData
-          if (!gatewayData || !universeData) return;
+          drawGatewayHover(g, systemId, gatewayData, universeData);
 
+          if (!gatewayData || !universeData) return;
           const hoveredSystem = universeData[systemId] ? universeData[systemId][0] : null;
           if (!hoveredSystem) return;
 
-          // Helper to draw rubber band
-          const drawBand = (origin, cssClass) => {
-              const originNode = g.select(`#${CSS.escape(origin.SystemId)}`);
-              if (!originNode.empty()) {
-                  const x1 = parseFloat(originNode.attr('x')) + parseFloat(originNode.attr('width'))/2;
-                  const y1 = parseFloat(originNode.attr('y')) + parseFloat(originNode.attr('height'))/2;
-                  
-                  // Use original center for hovered node (since we didn't scale it)
-                  const x2 = originalPos.x + originalSize.width/2;
-                  const y2 = originalPos.y + originalSize.height/2;
-
-                  g.append('line')
-                    .attr('class', `rubber-band ${cssClass}`)
-                    .attr('x1', x1).attr('y1', y1)
-                    .attr('x2', x2).attr('y2', y2)
-                    .attr('stroke', '#fff')
-                    .attr('stroke-width', 1)
-                    .attr('stroke-dasharray', '3,3')
-                    .attr('pointer-events', 'none');
-              }
-          };
-
           let tooltipText = "";
-          
           if (gatewayData.strategy === GATEWAY_STRATEGIES.SINGLE && gatewayData.originA) {
               const dist = calculate3DDistance(gatewayData.originA, hoveredSystem);
-              drawBand(gatewayData.originA, 'band-a');
               tooltipText = `${dist.toFixed(2)} pc`;
           } 
           else if (gatewayData.strategy === GATEWAY_STRATEGIES.DUAL) {
                const parts = [];
                if (gatewayData.originA) {
                    const distA = calculate3DDistance(gatewayData.originA, hoveredSystem);
-                   drawBand(gatewayData.originA, 'band-a');
                    parts.push(`A: ${distA.toFixed(2)} pc`);
                }
                if (gatewayData.originB) {
                    const distB = calculate3DDistance(gatewayData.originB, hoveredSystem);
-                   drawBand(gatewayData.originB, 'band-b');
                    parts.push(`B: ${distB.toFixed(2)} pc`);
                }
                tooltipText = parts.join(' | ');
           }
 
-          // Show Mini Tooltip
           if (tooltipText) {
               const [mouseX, mouseY] = d3.pointer(event, document.body); 
               d3.select('body').append('div')
@@ -344,7 +351,6 @@ export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold,
           }
 
       } else {
-          // STANDARD MODE: Info Panel
           hoverTimer = setTimeout(() => {
             const [x, y] = d3.pointer(event, document.body); 
             showInfoPanel(rect, x, y, searchResults, materials, isRelativeThreshold, selectedCogcProgram);
@@ -354,19 +360,15 @@ export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold,
     }).on('mouseout.system', function(event) {
       if (rect.attr('id') === 'rect1') return;
 
-      // Always reset size/opacity (safe to do even if we didn't scale up)
-      rect.transition()
-        .duration(200)
+      rect.transition().duration(200)
         .attr('width', originalSize.width)
         .attr('height', originalSize.height)
         .attr('x', originalPos.x)
         .attr('y', originalPos.y)
         .attr('fill-opacity', rect.classed('search-highlight') ? 1 : colors.resetSystemFillOpacity);
 
-      // Reset Overlay if it exists
       if (rect.property('cogcOverlayRect')) {
         const overlayRect = rect.property('cogcOverlayRect');
-        // We only scaled overlay in Standard mode, but resetting is safe
         if (overlayOriginalSize) { 
             overlayRect.transition().duration(200)
             .attr('width', overlayOriginalSize.width)
@@ -376,11 +378,9 @@ export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold,
         }
       }
 
-      // Cleanup Gateway Visuals
       g.selectAll('.rubber-band').remove();
       d3.selectAll('.gateway-tooltip').remove();
 
-      // Cleanup Standard Panel
       clearTimeout(hoverTimer);
       hideInfoPanel();
     });

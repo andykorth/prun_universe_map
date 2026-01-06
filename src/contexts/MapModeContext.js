@@ -19,6 +19,7 @@ export const MapModeProvider = ({ children }) => {
   
   const [activeMode, setActiveMode] = useState(MAP_MODES.STANDARD);
   const [existingGateways, setExistingGateways] = useState([]);
+  const [hoveredSystemId, setHoveredSystemId] = useState(null);
 
   const [gatewayData, setGatewayData] = useState({
     originA: null, 
@@ -170,7 +171,9 @@ export const MapModeProvider = ({ children }) => {
       removePlannedGateway,
       resetSelection,   
       clearAllGateways, 
-      calculate3DDistance
+      calculate3DDistance,
+      hoveredSystemId,
+      setHoveredSystemId
     }}>
       {children}
     </MapModeContext.Provider>

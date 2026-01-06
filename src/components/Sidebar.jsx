@@ -9,6 +9,7 @@ import { useMapMode, MAP_MODES, GATEWAY_STRATEGIES } from '../contexts/MapModeCo
 import { cogcPrograms } from '../constants/cogcPrograms';
 import { colors } from '../config/config';
 
+// --- Reusing Existing Helper Components (ResourceIcon, etc.) ---
 const ResourceIcon = ({ type }) => {
   let icon = '❓';
   switch (type) {
@@ -297,7 +298,7 @@ const Sidebar = () => {
   const { universeData, planetData, materials, populationData } = useContext(GraphContext);
   const { selectedSystem } = useContext(SelectionContext);
   const { searchMaterial, searchResults, isRelativeThreshold, isCompanySearch } = useContext(SearchContext);
-  const { activeMode, gatewayData, candidateList, addPlannedGateway, addDualRoute, removePlannedGateway } = useMapMode();
+  const { activeMode, gatewayData, removePlannedGateway, candidateList, addPlannedGateway, addDualRoute, setHoveredSystemId } = useMapMode();
   const { overlayProgram } = useCogcOverlay();
   
   const selectedProgramValue = cogcPrograms.find(program => program.display === overlayProgram)?.value;
@@ -480,7 +481,12 @@ const Sidebar = () => {
                           <p className="placeholder-text">Select a system on the map to see nearby candidates.</p>
                       ) : (
                           candidateList.map(cand => (
-                              <div key={cand.system.SystemId} className="planned-gateway-item">
+                              <div 
+                                key={cand.system.SystemId} 
+                                className="planned-gateway-item"
+                                onMouseEnter={() => setHoveredSystemId(cand.system.SystemId)} // Signal Enter
+                                onMouseLeave={() => setHoveredSystemId(null)}                 // Signal Leave
+                              >
                                   <span>{cand.system.Name}</span>
                                   <span className="dist">{cand.distance.toFixed(2)} pc</span>
                                   <button className="delete-gw-btn" title="Add to Plan" onClick={() => addPlannedGateway({
@@ -508,7 +514,13 @@ const Sidebar = () => {
                            <p className="placeholder-text">Select two systems to find midpoints.</p>
                        ) : (
                            candidateList.map(cand => (
-                               <div key={cand.system.SystemId} className="planned-gateway-item" style={{flexDirection:'column', alignItems:'stretch'}}>
+                               <div 
+                                key={cand.system.SystemId} 
+                                className="planned-gateway-item" 
+                                style={{flexDirection:'column', alignItems:'stretch'}}
+                                onMouseEnter={() => setHoveredSystemId(cand.system.SystemId)} // Signal Enter
+                                onMouseLeave={() => setHoveredSystemId(null)}                 // Signal Leave
+                               >
                                    <div style={{display:'flex', justifyContent:'space-between'}}>
                                       <span style={{fontWeight:'bold', color:'#f7a600'}}>{cand.system.Name}</span>
                                       <button className="delete-gw-btn" title="Add Dual Route" onClick={() => addDualRoute(gatewayData.originA, gatewayData.originB, cand.system)}>
