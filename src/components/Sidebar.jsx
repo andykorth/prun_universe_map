@@ -1,6 +1,6 @@
 import React, { useState, useContext, useMemo, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import { ChevronRight, ChevronLeft, Earth, Cloud, Thermometer, Gauge, Weight, Users, X } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Earth, Cloud, Thermometer, Gauge, Weight, Users, X, Plus } from 'lucide-react';
 import { GraphContext } from '../contexts/GraphContext';
 import { SearchContext } from '../contexts/SearchContext';
 import { SelectionContext } from '../contexts/SelectionContext';
@@ -8,8 +8,6 @@ import { useCogcOverlay } from '../contexts/CogcOverlayContext';
 import { useMapMode, MAP_MODES, GATEWAY_STRATEGIES } from '../contexts/MapModeContext';
 import { cogcPrograms } from '../constants/cogcPrograms';
 import { colors } from '../config/config';
-
-// --- Reusing Existing Helper Components ---
 
 const ResourceIcon = ({ type }) => {
   let icon = '❓';
@@ -299,7 +297,7 @@ const Sidebar = () => {
   const { universeData, planetData, materials, populationData } = useContext(GraphContext);
   const { selectedSystem } = useContext(SelectionContext);
   const { searchMaterial, searchResults, isRelativeThreshold, isCompanySearch } = useContext(SearchContext);
-  const { activeMode, gatewayData, removePlannedGateway } = useMapMode();
+  const { activeMode, gatewayData, candidateList, addPlannedGateway, addDualRoute, removePlannedGateway } = useMapMode();
   const { overlayProgram } = useCogcOverlay();
   
   const selectedProgramValue = cogcPrograms.find(program => program.display === overlayProgram)?.value;
@@ -476,18 +474,55 @@ const Sidebar = () => {
       <div className="gateway-selection-info">
           {gatewayData.strategy === GATEWAY_STRATEGIES.SINGLE && (
               <>
-                  <h4>Origin: {gatewayData.originA || 'None Selected'}</h4>
+                  <h4>Origin: {gatewayData.originA ? gatewayData.originA.Name : 'None Selected'}</h4>
                   <div className="results-list">
-                      <p className="placeholder-text">Select a system on the map to see nearby candidates.</p>
+                      {candidateList.length === 0 ? (
+                          <p className="placeholder-text">Select a system on the map to see nearby candidates.</p>
+                      ) : (
+                          candidateList.map(cand => (
+                              <div key={cand.system.SystemId} className="planned-gateway-item">
+                                  <span>{cand.system.Name}</span>
+                                  <span className="dist">{cand.distance.toFixed(2)} pc</span>
+                                  <button className="delete-gw-btn" title="Add to Plan" onClick={() => addPlannedGateway({
+                                      id: Date.now().toString(),
+                                      sourceId: gatewayData.originA.SystemId,
+                                      targetId: cand.system.SystemId,
+                                      source: gatewayData.originA.Name,
+                                      target: cand.system.Name,
+                                      distance: cand.distance.toFixed(2)
+                                  })}>
+                                      <Plus size={16} />
+                                  </button>
+                              </div>
+                          ))
+                      )}
                   </div>
               </>
           )}
            {gatewayData.strategy === GATEWAY_STRATEGIES.DUAL && (
               <>
-                  <h4>Origin A: {gatewayData.originA || 'None'}</h4>
-                  <h4>Origin B: {gatewayData.originB || 'None'}</h4>
+                  <h4>Origin A: {gatewayData.originA ? gatewayData.originA.Name : 'None'}</h4>
+                  <h4>Origin B: {gatewayData.originB ? gatewayData.originB.Name : 'None'}</h4>
                   <div className="results-list">
-                       <p className="placeholder-text">Select two systems to find midpoints.</p>
+                       {candidateList.length === 0 ? (
+                           <p className="placeholder-text">Select two systems to find midpoints.</p>
+                       ) : (
+                           candidateList.map(cand => (
+                               <div key={cand.system.SystemId} className="planned-gateway-item" style={{flexDirection:'column', alignItems:'stretch'}}>
+                                   <div style={{display:'flex', justifyContent:'space-between'}}>
+                                      <span style={{fontWeight:'bold', color:'#f7a600'}}>{cand.system.Name}</span>
+                                      <button className="delete-gw-btn" title="Add Dual Route" onClick={() => addDualRoute(gatewayData.originA, gatewayData.originB, cand.system)}>
+                                          <Plus size={16} />
+                                      </button>
+                                   </div>
+                                   <div style={{display:'flex', justifyContent:'space-between', fontSize:'11px', marginTop:'2px', color:'#aaa'}}>
+                                       <span>To A: {cand.distA.toFixed(2)}</span>
+                                       <span>To B: {cand.distB.toFixed(2)}</span>
+                                       <span style={{color:'#fff'}}>Tot: {cand.totalDist.toFixed(2)}</span>
+                                   </div>
+                               </div>
+                           ))
+                       )}
                   </div>
               </>
           )}

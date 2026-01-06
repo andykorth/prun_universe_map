@@ -15,53 +15,42 @@ export const GATEWAY_STRATEGIES = {
 const MapModeContext = createContext();
 
 export const MapModeProvider = ({ children }) => {
-  const { universeData } = useContext(GraphContext); // Access Universe Data
+  const { universeData } = useContext(GraphContext); 
   
   const [activeMode, setActiveMode] = useState(MAP_MODES.STANDARD);
-  
-  // Existing Gateways (from JSON)
   const [existingGateways, setExistingGateways] = useState([]);
 
-  // Gateway Planning State
   const [gatewayData, setGatewayData] = useState({
-    originA: null, // Holds the full System Object, not just ID
+    originA: null, 
     originB: null,
     strategy: GATEWAY_STRATEGIES.SINGLE,
-    plannedGateways: [] // Array of { id, source, target, distance }
+    plannedGateways: [] 
   });
 
-  // Calculated Results State
   const [candidateList, setCandidateList] = useState([]);
 
-  // 1. Fetch Existing Gateways on Mount
+  // Fetch Existing Gateways
   useEffect(() => {
     fetch('gateways.json')
       .then(response => response.json())
-      .then(data => {
-        setExistingGateways(data);
-      })
-      .catch(err => {
-        console.error("Failed to load existing gateways:", err);
-      });
+      .then(data => setExistingGateways(data))
+      .catch(err => console.error("Failed to load existing gateways:", err));
   }, []);
 
-  // 2. Calculation Effect: Runs when Origins or Strategy change
+  // Calculation Effect
   useEffect(() => {
     if (activeMode !== MAP_MODES.GATEWAY || !universeData) return;
 
-    // Clear candidates if no origin selected
     if (!gatewayData.originA) {
       setCandidateList([]);
       return;
     }
 
     if (gatewayData.strategy === GATEWAY_STRATEGIES.SINGLE) {
-      // Find systems within range of Origin A
       const results = findClosestSystems(gatewayData.originA, universeData);
       setCandidateList(results);
     } 
     else if (gatewayData.strategy === GATEWAY_STRATEGIES.DUAL && gatewayData.originB) {
-      // Find midpoints between A and B
       const results = findBestMidpoints(gatewayData.originA, gatewayData.originB, universeData);
       setCandidateList(results);
     }
@@ -77,27 +66,69 @@ export const MapModeProvider = ({ children }) => {
     setGatewayData(prev => ({ 
       ...prev, 
       strategy,
-      // Reset Origin B if switching to Single, keep A
       originB: strategy === GATEWAY_STRATEGIES.SINGLE ? null : prev.originB 
     }));
   }, []);
 
-  // Helper to set origins by System ID (useful for map clicks)
   const setOriginById = useCallback((systemId, slot = 'A') => {
     if (!universeData || !universeData[systemId]) return;
-    const systemObj = universeData[systemId][0]; // universeData is grouped
-    
+    const systemObj = universeData[systemId][0]; 
     setGatewayData(prev => ({
       ...prev,
       [slot === 'A' ? 'originA' : 'originB']: systemObj
     }));
   }, [universeData]);
 
+  // Updated: Check for duplicates before adding
   const addPlannedGateway = useCallback((gateway) => {
-    setGatewayData(prev => ({
-      ...prev,
-      plannedGateways: [...prev.plannedGateways, gateway]
-    }));
+    setGatewayData(prev => {
+        // Simple check: same source/target IDs (order independent)
+        const exists = prev.plannedGateways.some(g => 
+            (g.sourceId === gateway.sourceId && g.targetId === gateway.targetId) ||
+            (g.sourceId === gateway.targetId && g.targetId === gateway.sourceId)
+        );
+        
+        if (exists) return prev; // Do nothing if exists
+
+        return {
+            ...prev,
+            plannedGateways: [...prev.plannedGateways, gateway]
+        };
+    });
+  }, []);
+
+  // New: Add Dual Route (A->Mid + Mid->B)
+  const addDualRoute = useCallback((originA, originB, midpoint) => {
+      const route1 = {
+          id: Date.now().toString() + "_1",
+          sourceId: originA.SystemId,
+          targetId: midpoint.SystemId,
+          source: originA.Name,
+          target: midpoint.Name,
+          distance: calculate3DDistance(originA, midpoint).toFixed(2)
+      };
+      
+      const route2 = {
+          id: Date.now().toString() + "_2",
+          sourceId: midpoint.SystemId,
+          targetId: originB.SystemId,
+          source: midpoint.Name,
+          target: originB.Name,
+          distance: calculate3DDistance(midpoint, originB).toFixed(2)
+      };
+
+      // Add both using functional update to ensure state consistency
+      setGatewayData(prev => {
+          // Filter duplicates for both routes
+          const isDup = (g, newG) => (g.sourceId === newG.sourceId && g.targetId === newG.targetId) ||
+                                     (g.sourceId === newG.targetId && g.targetId === newG.sourceId);
+          
+          let nextList = [...prev.plannedGateways];
+          if (!nextList.some(g => isDup(g, route1))) nextList.push(route1);
+          if (!nextList.some(g => isDup(g, route2))) nextList.push(route2);
+
+          return { ...prev, plannedGateways: nextList };
+      });
   }, []);
 
   const removePlannedGateway = useCallback((gatewayId) => {
@@ -121,14 +152,15 @@ export const MapModeProvider = ({ children }) => {
       toggleMode,
       existingGateways,
       gatewayData,
-      candidateList, // Expose calculation results to Sidebar
+      candidateList,
       setGatewayData,
       setGatewayStrategy,
       setOriginById,
       addPlannedGateway,
+      addDualRoute, // New export
       removePlannedGateway,
       clearGatewaySelections,
-      calculate3DDistance // Expose util for map hover effects
+      calculate3DDistance
     }}>
       {children}
     </MapModeContext.Provider>
