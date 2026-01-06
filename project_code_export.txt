@@ -104,8 +104,6 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 
 --- FILE: src/App.css ---
 
-/* App.css */
-
 body {
   background-color: #222222;
   margin: 0;
@@ -129,10 +127,14 @@ body {
 }
 
 .header-right {
-    flex-direction: column;
+    display: flex;
+    align-items: center; 
+    justify-content: center;
+    flex-wrap: nowrap; 
+    margin-left: 5px;
 }
 
-.header-left, .header-center, .header-right {
+.header-left, .header-center {
   display: flex;
   align-items: center;
   flex: 1 1 auto;
@@ -141,12 +143,7 @@ body {
 
 .header-center {
   justify-content: start;
-}
-
-.header-right {
-  align-items: end;
-  justify-content: center;
-  flex-wrap: wrap;
+  flex: 2 1 auto; 
 }
 
 .header-info {
@@ -172,7 +169,7 @@ body {
 .search-field,
 .clear-button,
 .pathfinding-toggle-container {
-  margin: 5px;
+  margin: 2px 5px; 
 }
 
 .toggle-stack-container {
@@ -180,7 +177,15 @@ body {
   flex-direction: column;
   gap: 0px;
   position: relative;
+  align-items: flex-start; 
 }
+
+.gateway-toggle-btn {
+    width: 100%; 
+    text-align: center;
+    margin: 0; 
+}
+
 
 .App-logo {
   width: 50px;
@@ -511,7 +516,156 @@ search-container {
   margin-bottom: 5px;
 }
 
-/* Adjusted css for small screen sizes */
+.std-center-group {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    flex: 1 1 auto;
+}
+
+.std-right-group {
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  flex-wrap: wrap;
+  flex-direction: column; 
+}
+
+.std-buttons-group {
+  display: flex;
+  flex: 0 1 auto;
+  margin-bottom: 2px;
+  flex-flow: row wrap;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.gateway-controls {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    width: 100%;
+    justify-content: center;
+}
+
+.strategy-toggle {
+    display: flex;
+    background: #333;
+    border-radius: 15px;
+    padding: 2px;
+}
+
+/* Sidebar Gateway Styles */
+.gateway-sidebar-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    font-size: 14px; 
+}
+
+.gateway-sidebar-content h4 {
+    margin: 0 0 10px 0;
+    font-size: 18px; 
+    font-weight: bold;
+    border-bottom: 1px solid #444;
+    padding-bottom: 5px;
+}
+
+.gateway-legend .legend-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    color: #ddd;
+}
+
+.color-box {
+    width: 14px;  
+    height: 14px;
+    margin-right: 8px;
+    border-radius: 3px;
+}
+
+.results-list {
+    min-height: 100px;
+    background: #2a2a2a;
+    border-radius: 4px;
+    padding: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #444; 
+}
+
+.planned-gateway-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #333; 
+    padding: 8px 10px;
+    margin-bottom: 6px; 
+    border-radius: 4px;
+    font-size: 13px; 
+    border: 1px solid #444;
+}
+
+.planned-gateway-item .dist {
+    color: #aaa;
+    margin-left: auto;
+    margin-right: 15px;
+    font-size: 12px;
+}
+
+.delete-gw-btn {
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    padding: 4px; 
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+    border-radius: 4px;
+}
+
+.delete-gw-btn:hover {
+    color: #fff;
+    background-color: #f54c4c;
+}
+
+.placeholder-text {
+    color: #888;
+    font-style: italic;
+    font-size: 13px; 
+    text-align: center;
+    padding: 30px 10px;
+}
+
+/* Toggle Tokens (Shared) */
+.toggle-token {
+  font-size: 12px;
+  padding: 5px 9px;
+  margin: 2px;
+  border: 1px solid #ccc;
+  border-radius: 15px;
+  background-color: #f0f0f0;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.toggle-token.active {
+  background-color: #f7a600;
+  color: white;
+  border-color: #f7a600;
+}
+
 
 @media (max-width: 820px) {
   .App-header {
@@ -532,11 +686,24 @@ search-container {
     flex: 0 1 auto;
   }
 
+  /* Adjust standard controls for mobile */
+  .standard-controls-container {
+      flex-wrap: wrap;
+      justify-content: center !important;
+  }
+  
+  .std-center-group, .std-right-group, .std-buttons-group {
+      justify-content: center;
+      width: 100%;
+      flex-direction: row; 
+      margin-bottom: 5px;
+  }
+
   .filter-toggle {
     padding: 3px 6px;
     font-size: 12px;
   }
-
+  
   .filter-categories {
     flex-direction: row;
     flex-wrap: wrap;
@@ -617,138 +784,6 @@ search-container {
   }
 }
 
-.header-center {
-  flex: 2; /* Allow center to take up available space */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0 10px;
-}
-
-.header-right {
-  flex: 1;
-  display: flex;
-  justify-content: flex-end;
-}
-
-/* Standard Controls Styles */
-.standard-controls {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  align-items: center;
-}
-
-.controls-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  gap: 10px;
-}
-
-.search-group {
-    display: flex;
-}
-
-.button-group {
-    display: flex;
-}
-
-
-/* Gateway Controls Styles */
-.gateway-controls {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-}
-
-.strategy-toggle {
-    display: flex;
-    background: #333;
-    border-radius: 15px;
-    padding: 2px;
-}
-
-/* Global Tools Right Side */
-.global-tools {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.mode-switch-btn {
-    font-weight: bold;
-    border: 1px solid #f7a600;
-}
-
-.tool-separator {
-    width: 1px;
-    height: 24px;
-    background: #444;
-    margin: 0 5px;
-}
-
-.mini-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-/* Sidebar Gateway Styles */
-.gateway-legend .legend-items {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    font-size: 11px;
-    color: #ccc;
-}
-
-.color-box {
-    width: 12px;
-    height: 12px;
-    margin-right: 5px;
-    border-radius: 2px;
-}
-
-.planned-gateway-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #333;
-    padding: 5px 8px;
-    margin-bottom: 4px;
-    border-radius: 4px;
-    font-size: 12px;
-}
-
-.delete-gw-btn {
-    background: none;
-    border: none;
-    color: #666;
-    cursor: pointer;
-    padding: 2px;
-    display: flex;
-}
-
-.delete-gw-btn:hover {
-    color: #f54c4c;
-}
-
-.placeholder-text {
-    color: #666;
-    font-style: italic;
-    font-size: 12px;
-    text-align: center;
-    padding: 20px 0;
-}
-
 --- FILE: src/App.js ---
 
 import React, { useState } from 'react';
@@ -803,27 +838,29 @@ const AppContent = () => {
         </div>
 
         <div className="header-right">
-          <div className="global-tools">
-             <button 
-                className={`toggle-token mode-switch-btn ${activeMode === MAP_MODES.GATEWAY ? 'active' : ''}`}
-                onClick={toggleMode}
-                title="Toggle Gateway Planning Mode"
-             >
-                {activeMode === MAP_MODES.STANDARD ? 'Gateway Planner' : 'Exit Planner'}
-             </button>
-             
-             <div className="tool-separator"></div>
-
              <InfoTooltip />
-             <div className="mini-stack">
+             <div className="toggle-stack-container">
+                {/* Gateway Toggle (Top) */}
+                <div className="pathfinding-toggle-container">
+                    <button 
+                        className={`toggle-token gateway-toggle-btn ${activeMode === MAP_MODES.GATEWAY ? 'active' : ''}`}
+                        onClick={toggleMode}
+                        data-tooltip="Toggle Gateway Planning Mode"
+                    >
+                        Gateway
+                    </button>
+                </div>
+
+                {/* Pathfinding Toggle (Middle) */}
                 <div className="pathfinding-toggle-container">
                     <PathfindingToggle />
                 </div>
+
+                {/* Data Toggle (Bottom) */}
                 <div className="pathfinding-toggle-container">
                     <MeteorDensityToggle />
                 </div>
              </div>
-          </div>
         </div>
       </header>
       
@@ -1178,7 +1215,9 @@ export const GraphProvider = ({ children }) => {
 
 --- FILE: src/contexts/MapModeContext.js ---
 
-import React, { createContext, useState, useContext, useCallback } from 'react';
+import React, { createContext, useState, useContext, useCallback, useEffect } from 'react';
+import { GraphContext } from './GraphContext';
+import { calculate3DDistance, findClosestSystems, findBestMidpoints } from '../utils/distanceUtils';
 
 export const MAP_MODES = {
   STANDARD: 'STANDARD',
@@ -1193,29 +1232,121 @@ export const GATEWAY_STRATEGIES = {
 const MapModeContext = createContext();
 
 export const MapModeProvider = ({ children }) => {
-  const [activeMode, setActiveMode] = useState(MAP_MODES.STANDARD);
+  const { universeData } = useContext(GraphContext); 
   
-  // Gateway specific state
+  const [activeMode, setActiveMode] = useState(MAP_MODES.STANDARD);
+  const [existingGateways, setExistingGateways] = useState([]);
+  const [hoveredSystemId, setHoveredSystemId] = useState(null);
+
   const [gatewayData, setGatewayData] = useState({
-    originA: null,
+    originA: null, 
     originB: null,
     strategy: GATEWAY_STRATEGIES.SINGLE,
-    plannedGateways: [] // Array of { id, source, target, distance }
+    plannedGateways: [] 
   });
 
+  const [candidateList, setCandidateList] = useState([]);
+
+  // Fetch Existing Gateways
+  useEffect(() => {
+    fetch('gateways.json')
+      .then(response => response.json())
+      .then(data => setExistingGateways(data))
+      .catch(err => console.error("Failed to load existing gateways:", err));
+  }, []);
+
+  // Calculation Effect
+  useEffect(() => {
+    if (activeMode !== MAP_MODES.GATEWAY || !universeData) return;
+
+    if (!gatewayData.originA) {
+      setCandidateList([]);
+      return;
+    }
+
+    if (gatewayData.strategy === GATEWAY_STRATEGIES.SINGLE) {
+      const results = findClosestSystems(gatewayData.originA, universeData);
+      setCandidateList(results);
+    } 
+    else if (gatewayData.strategy === GATEWAY_STRATEGIES.DUAL && gatewayData.originB) {
+      const results = findBestMidpoints(gatewayData.originA, gatewayData.originB, universeData);
+      setCandidateList(results);
+    }
+  }, [gatewayData.originA, gatewayData.originB, gatewayData.strategy, activeMode, universeData]);
+
+
+  // Actions
   const toggleMode = useCallback(() => {
     setActiveMode(prev => prev === MAP_MODES.STANDARD ? MAP_MODES.GATEWAY : MAP_MODES.STANDARD);
   }, []);
 
   const setGatewayStrategy = useCallback((strategy) => {
-    setGatewayData(prev => ({ ...prev, strategy }));
+    setGatewayData(prev => ({ 
+      ...prev, 
+      strategy,
+      originB: strategy === GATEWAY_STRATEGIES.SINGLE ? null : prev.originB 
+    }));
   }, []);
 
-  const addPlannedGateway = useCallback((gateway) => {
+  const setOriginById = useCallback((systemId, slot = 'A') => {
+    if (!universeData || !universeData[systemId]) return;
+    const systemObj = universeData[systemId][0]; 
     setGatewayData(prev => ({
       ...prev,
-      plannedGateways: [...prev.plannedGateways, gateway]
+      [slot === 'A' ? 'originA' : 'originB']: systemObj
     }));
+  }, [universeData]);
+
+  // Updated: Check for duplicates before adding
+  const addPlannedGateway = useCallback((gateway) => {
+    setGatewayData(prev => {
+        // Simple check: same source/target IDs (order independent)
+        const exists = prev.plannedGateways.some(g => 
+            (g.sourceId === gateway.sourceId && g.targetId === gateway.targetId) ||
+            (g.sourceId === gateway.targetId && g.targetId === gateway.sourceId)
+        );
+        
+        if (exists) return prev; // Do nothing if exists
+
+        return {
+            ...prev,
+            plannedGateways: [...prev.plannedGateways, gateway]
+        };
+    });
+  }, []);
+
+  // New: Add Dual Route (A->Mid + Mid->B)
+  const addDualRoute = useCallback((originA, originB, midpoint) => {
+      const route1 = {
+          id: Date.now().toString() + "_1",
+          sourceId: originA.SystemId,
+          targetId: midpoint.SystemId,
+          source: originA.Name,
+          target: midpoint.Name,
+          distance: calculate3DDistance(originA, midpoint).toFixed(2)
+      };
+      
+      const route2 = {
+          id: Date.now().toString() + "_2",
+          sourceId: midpoint.SystemId,
+          targetId: originB.SystemId,
+          source: midpoint.Name,
+          target: originB.Name,
+          distance: calculate3DDistance(midpoint, originB).toFixed(2)
+      };
+
+      // Add both using functional update to ensure state consistency
+      setGatewayData(prev => {
+          // Filter duplicates for both routes
+          const isDup = (g, newG) => (g.sourceId === newG.sourceId && g.targetId === newG.targetId) ||
+                                     (g.sourceId === newG.targetId && g.targetId === newG.sourceId);
+          
+          let nextList = [...prev.plannedGateways];
+          if (!nextList.some(g => isDup(g, route1))) nextList.push(route1);
+          if (!nextList.some(g => isDup(g, route2))) nextList.push(route2);
+
+          return { ...prev, plannedGateways: nextList };
+      });
   }, []);
 
   const removePlannedGateway = useCallback((gatewayId) => {
@@ -1225,7 +1356,7 @@ export const MapModeProvider = ({ children }) => {
     }));
   }, []);
 
-  const clearGatewaySelections = useCallback(() => {
+  const resetSelection = useCallback(() => {
     setGatewayData(prev => ({
       ...prev,
       originA: null,
@@ -1233,16 +1364,33 @@ export const MapModeProvider = ({ children }) => {
     }));
   }, []);
 
+  const clearAllGateways = useCallback(() => {
+    setGatewayData(prev => ({
+      ...prev,
+      originA: null,
+      originB: null,
+      plannedGateways: [] 
+    }));
+  }, []);
+
   return (
     <MapModeContext.Provider value={{
       activeMode,
       toggleMode,
+      existingGateways,
       gatewayData,
+      candidateList,
       setGatewayData,
       setGatewayStrategy,
+      setOriginById,
       addPlannedGateway,
+      addDualRoute, 
       removePlannedGateway,
-      clearGatewaySelections
+      resetSelection,   
+      clearAllGateways, 
+      calculate3DDistance,
+      hoveredSystemId,
+      setHoveredSystemId
     }}>
       {children}
     </MapModeContext.Provider>
@@ -1760,11 +1908,101 @@ export const isPointNearBar = (point, barPosition, barDimensions) => {
   );
 };
 
+--- FILE: src/utils/distanceUtils.js ---
+
+import { colors } from '../config/config';
+
+/**
+ * Calculates the 3D Euclidean distance between two systems.
+ * Expects objects with PositionX, PositionY, PositionZ properties.
+ */
+export const calculate3DDistance = (sys1, sys2) => {
+  if (!sys1 || !sys2) return Infinity;
+
+  // Fallback if Z is missing (though PrUn data usually has it)
+  const z1 = sys1.PositionZ || 0;
+  const z2 = sys2.PositionZ || 0;
+
+  const dx = sys1.PositionX - sys2.PositionX;
+  const dy = sys1.PositionY - sys2.PositionY;
+  const dz = z1 - z2;
+
+  return Math.sqrt(dx * dx + dy * dy + dz * dz)/12.0;
+};
+
+/**
+ * Returns the appropriate color from the Tol Palette based on distance.
+ */
+export const getDistanceColor = (distance) => {
+  if (distance < 10) return colors.gateway.under10;
+  if (distance < 15) return colors.gateway.under15;
+  if (distance < 20) return colors.gateway.under20;
+  if (distance < 25) return colors.gateway.under25;
+  return colors.gateway.over25;
+};
+
+/**
+ * Generates a list of candidate systems sorted by distance from the origin.
+ * Filters out systems > maxRange (optional, default 30pc to include the >25pc bucket).
+ */
+export const findClosestSystems = (origin, allSystemsMap, maxRange = 25) => {
+  if (!origin) return [];
+
+  const candidates = [];
+  
+  Object.values(allSystemsMap).forEach(systemArray => {
+    const target = systemArray[0]; // universeData is grouped by ID, so we take the first item
+    if (target.SystemId === origin.SystemId) return; // Skip self
+
+    const dist = calculate3DDistance(origin, target);
+    
+    if (dist <= maxRange) {
+      candidates.push({
+        system: target,
+        distance: dist
+      });
+    }
+  });
+
+  // Sort by nearest first
+  return candidates.sort((a, b) => a.distance - b.distance);
+};
+
+/**
+ * Generates a list of midpoints sorted by the lowest combined distance (A->Node + B->Node).
+ */
+export const findBestMidpoints = (originA, originB, allSystemsMap, limit = 50) => {
+  if (!originA || !originB) return [];
+
+  const candidates = [];
+
+  Object.values(allSystemsMap).forEach(systemArray => {
+    const target = systemArray[0];
+    if (target.SystemId === originA.SystemId || target.SystemId === originB.SystemId) return;
+
+    const distA = calculate3DDistance(originA, target);
+    const distB = calculate3DDistance(originB, target);
+    const totalDist = distA + distB;
+
+    candidates.push({
+      system: target,
+      distA,
+      distB,
+      totalDist
+    });
+  });
+
+  // Sort by lowest total distance
+  return candidates.sort((a, b) => a.totalDist - b.totalDist).slice(0, limit);
+};
+
 --- FILE: src/utils/graphUtils.js ---
 
 import * as d3 from 'd3';
 import { find_path } from 'dijkstrajs';
 import { colors } from '../config/config';
+import { calculate3DDistance, getDistanceColor } from './distanceUtils';
+import { MAP_MODES, GATEWAY_STRATEGIES } from '../contexts/MapModeContext';
 
 export const findShortestPath = (graph, system1, system2, highlightPath) => {
   if (system1 === 'rect1' || system2 === 'rect1') {
@@ -1789,13 +2027,18 @@ export const findShortestPath = (graph, system1, system2, highlightPath) => {
   }
 };
 
-// Function to reset all nodes and paths
-export const resetGraphState = (nextSelectedSystem) => {
+export const resetGraphState = (nextSelectedSystem, activeMode, gatewayData, universeData) => {
   const svg = d3.select('#map-container svg');
-  // Reset all system nodes color and stroke except the background rect and current selection
+
+  if (activeMode === MAP_MODES.GATEWAY) {
+      renderGatewayVisuals(svg, gatewayData, universeData);
+      return;
+  }
+
   svg.selectAll('rect').each(function() {
     const node = d3.select(this);
     const systemId = node.attr('id');
+    
     if (systemId !== 'rect1'
       && systemId !== nextSelectedSystem
       && !node.classed('search-highlight')
@@ -1807,10 +2050,15 @@ export const resetGraphState = (nextSelectedSystem) => {
         .attr('fill-opacity', colors.resetSystemFillOpacity)
         .attr('stroke', colors.resetSystemStroke)
         .attr('stroke-width', colors.resetSystemStrokeWidth);
+
+      const savedRx = node.attr('data-original-rx');
+      const savedRy = node.attr('data-original-ry');
+      
+      if (savedRx !== null) node.attr('rx', savedRx === 'null' ? null : savedRx);
+      if (savedRy !== null) node.attr('ry', savedRy === 'null' ? null : savedRy);
     }
   });
 
-  // Reset all paths color and stroke
   svg.selectAll('path').each(function() {
     d3.select(this)
       .attr('stroke', colors.resetPathStroke)
@@ -1818,14 +2066,90 @@ export const resetGraphState = (nextSelectedSystem) => {
   });
 };
 
-// Function to highlight the path
-export const highlightPath = (path, systemSelected) => {
-  // Reset all system nodes color and stroke except the background rect
-  resetGraphState(systemSelected)
+export const renderGatewayVisuals = (svg, gatewayData, universeData) => {
+    if (!universeData) return;
 
-  // Highlight systems in the path
+    const { originA, originB, strategy } = gatewayData;
+
+    const getDualColor = (val, min, max) => {
+        const t = (val - min) / (max - min); 
+        if (t < 0.2) return colors.tol.green;
+        if (t < 0.4) return colors.tol.teal;
+        if (t < 0.6) return colors.tol.sand;
+        if (t < 0.8) return colors.tol.rose;
+        return colors.tol.wine;
+    };
+
+    let minTotal = Infinity;
+    if (strategy === GATEWAY_STRATEGIES.DUAL && originA && originB) {
+        Object.values(universeData).forEach(sysArr => {
+            const sys = sysArr[0];
+            const d = calculate3DDistance(originA, sys) + calculate3DDistance(originB, sys);
+            if (d < minTotal) minTotal = d;
+        });
+    }
+
+    svg.selectAll('rect').each(function() {
+        const node = d3.select(this);
+        const systemId = node.attr('id');
+        if (systemId === 'rect1') return;
+
+        const systemData = universeData[systemId] ? universeData[systemId][0] : null;
+        if (!systemData) return;
+
+        if (node.attr('data-original-ry') == null) {
+            const rx = node.attr('rx');
+            const ry = node.attr('ry');
+            node.attr('data-original-rx', rx === null ? 'null' : rx);
+            node.attr('data-original-ry', ry === null ? 'null' : ry);
+        }
+
+        let fill = colors.resetSystemFill;
+        let stroke = colors.resetSystemStroke;
+        let strokeWidth = colors.resetSystemStrokeWidth;
+        
+        const storedRx = node.attr('data-original-rx');
+        const storedRy = node.attr('data-original-ry');
+        let rx = storedRx === 'null' ? null : storedRx;
+        let ry = storedRy === 'null' ? null : storedRy;
+
+        if (strategy === GATEWAY_STRATEGIES.SINGLE) {
+            if (originA) {
+                if (systemId === originA.SystemId) {
+                    fill = colors.systemFill; 
+                    ry = 4; rx = 4; strokeWidth = "2px";
+                } else {
+                    const dist = calculate3DDistance(originA, systemData);
+                    fill = getDistanceColor(dist);
+                }
+            }
+        }
+        else if (strategy === GATEWAY_STRATEGIES.DUAL) {
+            if (originA && systemId === originA.SystemId) {
+                fill = colors.systemFill;
+                ry = 4; rx = 4; strokeWidth = "2px";
+            } else if (originB && systemId === originB.SystemId) {
+                fill = colors.systemFill;
+                ry = 4; rx = 4; strokeWidth = "2px";
+            } else if (originA && originB) {
+                const dist = calculate3DDistance(originA, systemData) + calculate3DDistance(originB, systemData);
+                fill = getDualColor(dist, minTotal, minTotal * 1.5);
+            }
+        }
+
+        node.attr('fill', fill)
+            .attr('stroke', stroke)
+            .attr('stroke-width', strokeWidth)
+            .attr('rx', rx)
+            .attr('ry', ry);
+    });
+};
+
+export const highlightPath = (path, systemSelected) => {
+  resetGraphState(systemSelected, 'STANDARD', null, null); 
+
   path.forEach(system => {
-  const systemNode = d3.select(`#${CSS.escape(system)}`);
+    const systemNode = d3.select(`#${CSS.escape(system)}`);
     if (!systemNode.classed('search-highlight')) {
       systemNode
         .attr('fill', colors.systemFill)
@@ -1833,7 +2157,6 @@ export const highlightPath = (path, systemSelected) => {
     }
   });
 
-  // Highlight paths in the path
   for (let i = 0; i < path.length - 1; i++) {
     const start = path[i];
     const end = path[i + 1];
@@ -1843,7 +2166,6 @@ export const highlightPath = (path, systemSelected) => {
       .attr('stroke-width', colors.pathStrokeWidth);
   }
 
-  // Ensure the start and end systems of the path are highlighted
   if (path.length >= 2) {
     const startSystem = path[0];
     const endSystem = path[path.length - 1];
@@ -1853,13 +2175,10 @@ export const highlightPath = (path, systemSelected) => {
 };
 
 export const highlightSelectedSystem = (prevSelectedSystem, nextSelectedSystem, pathfindingSelection, isPathfindingEnabled) => {
-
-  // Check if pathfindingSelection is empty, if so reset all nodes
   if (pathfindingSelection.length < 2 && isPathfindingEnabled) {
-    resetGraphState(nextSelectedSystem);
+    resetGraphState(nextSelectedSystem, 'STANDARD', null, null);
   }
 
-  // Reset previous system if it's not part of pathfinding selection
   if (prevSelectedSystem && !pathfindingSelection.includes(prevSelectedSystem)) {
     const prevSystemNode = d3.select(`#${CSS.escape(prevSelectedSystem)}`);
     if (!prevSystemNode.empty() && !prevSystemNode.classed('search-highlight')) {
@@ -1868,10 +2187,14 @@ export const highlightSelectedSystem = (prevSelectedSystem, nextSelectedSystem, 
         .attr('fill-opacity', colors.resetSystemFillOpacity)
         .attr('stroke', colors.resetSystemStroke)
         .attr('stroke-width', colors.resetSystemStrokeWidth);
+        
+        const savedRx = prevSystemNode.attr('data-original-rx');
+        const savedRy = prevSystemNode.attr('data-original-ry');
+        if (savedRx !== null) prevSystemNode.attr('rx', savedRx === 'null' ? null : savedRx);
+        if (savedRy !== null) prevSystemNode.attr('ry', savedRy === 'null' ? null : savedRy);
     }
   }
 
-  // Highlight new system
   if (nextSelectedSystem) {
     const nextSystemNode = d3.select(`#${CSS.escape(nextSelectedSystem)}`);
     if (!nextSystemNode.empty() && !nextSystemNode.classed('search-highlight')) {
@@ -1882,7 +2205,6 @@ export const highlightSelectedSystem = (prevSelectedSystem, nextSelectedSystem, 
     }
   }
 };
-
 
 --- FILE: src/utils/searchUtils.js ---
 
@@ -1994,6 +2316,8 @@ import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 import { BadgeCent, Anchor, Truck, BookOpen, Globe } from 'lucide-react';
 import { colors } from '../config/config';
+import { calculate3DDistance } from './distanceUtils';
+import { MAP_MODES, GATEWAY_STRATEGIES } from '../contexts/MapModeContext';
 
 let universeData = null;
 let planetData = null;
@@ -2223,10 +2547,48 @@ const hideInfoPanel = () => {
   d3.select('.info-panel').remove();
 };
 
-// Function to add mouseover and mouseout events for animation
-export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold, selectedCogcProgram) => {
+export const drawGatewayHover = (g, systemId, gatewayData, universeData) => {
+    g.selectAll('.rubber-band').remove();
+
+    if (!gatewayData || !universeData || !systemId) return;
+
+    const targetSystem = universeData[systemId] ? universeData[systemId][0] : null;
+    if (!targetSystem) return;
+
+    const drawLine = (origin, cssClass) => {
+        const originNode = g.select(`#${CSS.escape(origin.SystemId)}`);
+        const targetNode = g.select(`#${CSS.escape(systemId)}`);
+
+        if (!originNode.empty() && !targetNode.empty()) {
+            const x1 = parseFloat(originNode.attr('x')) + parseFloat(originNode.attr('width'))/2;
+            const y1 = parseFloat(originNode.attr('y')) + parseFloat(originNode.attr('height'))/2;
+            const x2 = parseFloat(targetNode.attr('x')) + parseFloat(targetNode.attr('width'))/2;
+            const y2 = parseFloat(targetNode.attr('y')) + parseFloat(targetNode.attr('height'))/2;
+
+            g.append('line')
+            .attr('class', `rubber-band ${cssClass}`)
+            .attr('x1', x1).attr('y1', y1)
+            .attr('x2', x2).attr('y2', y2)
+            .attr('stroke', '#fff')
+            .attr('stroke-width', 1)
+            .attr('stroke-dasharray', '3,3')
+            .attr('pointer-events', 'none');
+        }
+    };
+
+    if (gatewayData.strategy === GATEWAY_STRATEGIES.SINGLE && gatewayData.originA) {
+        drawLine(gatewayData.originA, 'band-a');
+    } 
+    else if (gatewayData.strategy === GATEWAY_STRATEGIES.DUAL) {
+        if (gatewayData.originA) drawLine(gatewayData.originA, 'band-a');
+        if (gatewayData.originB) drawLine(gatewayData.originB, 'band-b');
+    }
+};
+
+export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold, selectedCogcProgram, activeMode, gatewayData, universeData) => {
   g.selectAll('rect').each(function() {
     const rect = d3.select(this);
+    const systemId = rect.attr('id').replace('#', '');
     const originalSize = { width: +rect.attr('width'), height: +rect.attr('height') };
     const originalPos = { x: +rect.attr('x'), y: +rect.attr('y') };
     let hoverTimer;
@@ -2234,66 +2596,104 @@ export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold,
 
     rect.on('mouseover.system', function(event) {
       if (rect.attr('id') === 'rect1' || d3.select(event.target).classed('data-overlay')) return;
-      rect
-        .attr('fill-opacity', 1)
-        .attr('stroke-opacity', 1)
-        .transition()
-        .duration(200)
-        .attr('width', originalSize.width * 2)
-        .attr('height', originalSize.height * 2)
-        .attr('x', originalPos.x - originalSize.width / 2)
-        .attr('y', originalPos.y - originalSize.height / 2);
 
-      const overlayRect = rect.property('cogcOverlayRect');
+      if (activeMode !== MAP_MODES.GATEWAY) {
+          rect
+            .attr('fill-opacity', 1)
+            .attr('stroke-opacity', 1)
+            .transition()
+            .duration(200)
+            .attr('width', originalSize.width * 2)
+            .attr('height', originalSize.height * 2)
+            .attr('x', originalPos.x - originalSize.width / 2)
+            .attr('y', originalPos.y - originalSize.height / 2);
 
-      if (overlayRect) {
-        overlayOriginalSize = {
-          width: +overlayRect.attr('width'),
-          height: +overlayRect.attr('height')
-        };
-        overlayOriginalPos = {
-          x: +overlayRect.attr('x'),
-          y: +overlayRect.attr('y')
-        };
-
-        overlayRect
-          .transition()
-          .duration(200)
-          .attr('width', overlayOriginalSize.width + originalSize.width)
-          .attr('height', overlayOriginalSize.height + originalSize.width)
-          .attr('x', overlayOriginalPos.x - originalSize.width / 2)
-          .attr('y', overlayOriginalPos.y - originalSize.height / 2);
+          const overlayRect = rect.property('cogcOverlayRect');
+          if (overlayRect) {
+            overlayOriginalSize = { width: +overlayRect.attr('width'), height: +overlayRect.attr('height') };
+            overlayOriginalPos = { x: +overlayRect.attr('x'), y: +overlayRect.attr('y') };
+            overlayRect.transition().duration(200)
+              .attr('width', overlayOriginalSize.width + originalSize.width)
+              .attr('height', overlayOriginalSize.height + originalSize.width)
+              .attr('x', overlayOriginalPos.x - originalSize.width / 2)
+              .attr('y', overlayOriginalPos.y - originalSize.height / 2);
+          }
       }
 
-      // Set timer for info panel
-      hoverTimer = setTimeout(() => {
-        const [x, y] = d3.pointer(event);
-        showInfoPanel(rect, x, y, searchResults, materials, isRelativeThreshold, selectedCogcProgram);
-      }, 400);
+      if (activeMode === MAP_MODES.GATEWAY) {
+          drawGatewayHover(g, systemId, gatewayData, universeData);
+
+          if (!gatewayData || !universeData) return;
+          const hoveredSystem = universeData[systemId] ? universeData[systemId][0] : null;
+          if (!hoveredSystem) return;
+
+          let tooltipText = "";
+          if (gatewayData.strategy === GATEWAY_STRATEGIES.SINGLE && gatewayData.originA) {
+              const dist = calculate3DDistance(gatewayData.originA, hoveredSystem);
+              tooltipText = `${dist.toFixed(2)} pc`;
+          } 
+          else if (gatewayData.strategy === GATEWAY_STRATEGIES.DUAL) {
+               const parts = [];
+               if (gatewayData.originA) {
+                   const distA = calculate3DDistance(gatewayData.originA, hoveredSystem);
+                   parts.push(`A: ${distA.toFixed(2)} pc`);
+               }
+               if (gatewayData.originB) {
+                   const distB = calculate3DDistance(gatewayData.originB, hoveredSystem);
+                   parts.push(`B: ${distB.toFixed(2)} pc`);
+               }
+               tooltipText = parts.join(' | ');
+          }
+
+          if (tooltipText) {
+              const [mouseX, mouseY] = d3.pointer(event, document.body); 
+              d3.select('body').append('div')
+                .attr('class', 'gateway-tooltip')
+                .style('position', 'absolute')
+                .style('left', (mouseX + 15) + 'px')
+                .style('top', (mouseY - 10) + 'px')
+                .style('background', '#222')
+                .style('color', '#f7a600')
+                .style('padding', '4px 8px')
+                .style('border-radius', '4px')
+                .style('border', '1px solid #555')
+                .style('font-size', '12px')
+                .style('pointer-events', 'none')
+                .style('z-index', 1000)
+                .text(tooltipText);
+          }
+
+      } else {
+          hoverTimer = setTimeout(() => {
+            const [x, y] = d3.pointer(event, document.body); 
+            showInfoPanel(rect, x, y, searchResults, materials, isRelativeThreshold, selectedCogcProgram);
+          }, 400);
+      }
 
     }).on('mouseout.system', function(event) {
       if (rect.attr('id') === 'rect1') return;
-      rect.transition()
-        .duration(200)
+
+      rect.transition().duration(200)
         .attr('width', originalSize.width)
         .attr('height', originalSize.height)
         .attr('x', originalPos.x)
         .attr('y', originalPos.y)
         .attr('fill-opacity', rect.classed('search-highlight') ? 1 : colors.resetSystemFillOpacity);
 
-      // Reset the overlay rect if it exists
-      const overlayRect = rect.property('cogcOverlayRect');
-      if (overlayRect) {
-        overlayRect
-          .transition()
-          .duration(200)
-          .attr('width', overlayOriginalSize.width)
-          .attr('height', overlayOriginalSize.height)
-          .attr('x', overlayOriginalPos.x)
-          .attr('y', overlayOriginalPos.y);
+      if (rect.property('cogcOverlayRect')) {
+        const overlayRect = rect.property('cogcOverlayRect');
+        if (overlayOriginalSize) { 
+            overlayRect.transition().duration(200)
+            .attr('width', overlayOriginalSize.width)
+            .attr('height', overlayOriginalSize.height)
+            .attr('x', overlayOriginalPos.x)
+            .attr('y', overlayOriginalPos.y);
+        }
       }
 
-      // Clear timer and hide info panel
+      g.selectAll('.rubber-band').remove();
+      d3.selectAll('.gateway-tooltip').remove();
+
       clearTimeout(hoverTimer);
       hideInfoPanel();
     });
@@ -2819,7 +3219,7 @@ import React from 'react';
 import { useMapMode, GATEWAY_STRATEGIES } from '../contexts/MapModeContext';
 
 const GatewayControls = () => {
-  const { gatewayData, setGatewayStrategy, clearGatewaySelections } = useMapMode();
+  const { gatewayData, setGatewayStrategy, clearAllGateways } = useMapMode();
 
   return (
     <div className="gateway-controls" style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
@@ -2840,7 +3240,7 @@ const GatewayControls = () => {
         </button>
       </div>
       
-      <button className="clear-button" onClick={clearGatewaySelections}>
+      <button className="clear-button" onClick={clearAllGateways}>
         Clear Selection
       </button>
     </div>
@@ -2848,6 +3248,90 @@ const GatewayControls = () => {
 };
 
 export default GatewayControls;
+
+--- FILE: src/components/GatewayLayer.jsx ---
+
+import { useEffect } from 'react';
+import { useMapMode } from '../contexts/MapModeContext';
+
+const GatewayLayer = ({ mapRef, mapRenderKey }) => {
+  const { existingGateways, gatewayData, activeMode } = useMapMode();
+
+  useEffect(() => {
+    if (!mapRef.current || mapRenderKey === 0) return;
+    
+    const { g } = mapRef.current;
+
+    let layerGroup = g.select('.gateway-layer-group');
+    
+    if (layerGroup.empty()) {
+        const firstSystemNode = g.select('rect:not(#rect1)').node();
+        
+        if (firstSystemNode) {
+            layerGroup = g.insert('g', () => firstSystemNode)
+                          .attr('class', 'gateway-layer-group');
+        } else {
+            layerGroup = g.append('g').attr('class', 'gateway-layer-group');
+        }
+    }
+
+    layerGroup.selectAll('*').remove();
+
+    const getCoords = (systemId) => {
+        const node = g.select(`#${CSS.escape(systemId)}`);
+        if (node.empty()) return null;
+        return {
+            x: parseFloat(node.attr('x')) + parseFloat(node.attr('width')) / 2,
+            y: parseFloat(node.attr('y')) + parseFloat(node.attr('height')) / 2
+        };
+    };
+
+    if (existingGateways && existingGateways.length > 0) {
+        existingGateways.forEach(gw => {
+            const start = getCoords(gw.sourceId);
+            const end = getCoords(gw.targetId);
+            
+            if (start && end) {
+                layerGroup.append('line')
+                    .attr('class', 'gateway-line')
+                    .attr('x1', start.x)
+                    .attr('y1', start.y)
+                    .attr('x2', end.x)
+                    .attr('y2', end.y)
+                    .attr('stroke', '#666')
+                    .attr('stroke-width', 1)
+                    .attr('stroke-dasharray', '4,2')
+                    .attr('pointer-events', 'none');
+            }
+        });
+    }
+
+    if (gatewayData.plannedGateways && gatewayData.plannedGateways.length > 0) {
+        gatewayData.plannedGateways.forEach(gw => {
+             const start = getCoords(gw.sourceId);
+             const end = getCoords(gw.targetId);
+
+             if (start && end) {
+                 layerGroup.append('line')
+                    .attr('class', 'planned-gateway-line')
+                    .attr('x1', start.x)
+                    .attr('y1', start.y)
+                    .attr('x2', end.x)
+                    .attr('y2', end.y)
+                    .attr('stroke', '#f7a600') 
+                    .attr('stroke-width', 2)
+                    .attr('stroke-dasharray', '6,3')
+                    .attr('pointer-events', 'none');
+             }
+        });
+    }
+
+  }, [mapRef, existingGateways, gatewayData.plannedGateways, mapRenderKey, activeMode]);
+
+  return null;
+};
+
+export default GatewayLayer;
 
 --- FILE: src/components/InfoTooltip.jsx ---
 
@@ -3282,7 +3766,7 @@ export default SearchField;
 
 import React, { useState, useContext, useMemo, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import { ChevronRight, ChevronLeft, Earth, Cloud, Thermometer, Gauge, Weight, Users, X } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Earth, Cloud, Thermometer, Gauge, Weight, Users, X, Plus } from 'lucide-react';
 import { GraphContext } from '../contexts/GraphContext';
 import { SearchContext } from '../contexts/SearchContext';
 import { SelectionContext } from '../contexts/SelectionContext';
@@ -3291,8 +3775,7 @@ import { useMapMode, MAP_MODES, GATEWAY_STRATEGIES } from '../contexts/MapModeCo
 import { cogcPrograms } from '../constants/cogcPrograms';
 import { colors } from '../config/config';
 
-// --- Reusing Existing Helper Components ---
-
+// --- Reusing Existing Helper Components (ResourceIcon, etc.) ---
 const ResourceIcon = ({ type }) => {
   let icon = '❓';
   switch (type) {
@@ -3581,7 +4064,7 @@ const Sidebar = () => {
   const { universeData, planetData, materials, populationData } = useContext(GraphContext);
   const { selectedSystem } = useContext(SelectionContext);
   const { searchMaterial, searchResults, isRelativeThreshold, isCompanySearch } = useContext(SearchContext);
-  const { activeMode, gatewayData, removePlannedGateway } = useMapMode();
+  const { activeMode, gatewayData, removePlannedGateway, candidateList, addPlannedGateway, addDualRoute, setHoveredSystemId } = useMapMode();
   const { overlayProgram } = useCogcOverlay();
   
   const selectedProgramValue = cogcPrograms.find(program => program.display === overlayProgram)?.value;
@@ -3758,18 +4241,66 @@ const Sidebar = () => {
       <div className="gateway-selection-info">
           {gatewayData.strategy === GATEWAY_STRATEGIES.SINGLE && (
               <>
-                  <h4>Origin: {gatewayData.originA || 'None Selected'}</h4>
+                  <h4>Origin: {gatewayData.originA ? gatewayData.originA.Name : 'None Selected'}</h4>
                   <div className="results-list">
-                      <p className="placeholder-text">Select a system on the map to see nearby candidates.</p>
+                      {candidateList.length === 0 ? (
+                          <p className="placeholder-text">Select a system on the map to see nearby candidates.</p>
+                      ) : (
+                          candidateList.map(cand => (
+                              <div 
+                                key={cand.system.SystemId} 
+                                className="planned-gateway-item"
+                                onMouseEnter={() => setHoveredSystemId(cand.system.SystemId)} // Signal Enter
+                                onMouseLeave={() => setHoveredSystemId(null)}                 // Signal Leave
+                              >
+                                  <span>{cand.system.Name}</span>
+                                  <span className="dist">{cand.distance.toFixed(2)} pc</span>
+                                  <button className="delete-gw-btn" title="Add to Plan" onClick={() => addPlannedGateway({
+                                      id: Date.now().toString(),
+                                      sourceId: gatewayData.originA.SystemId,
+                                      targetId: cand.system.SystemId,
+                                      source: gatewayData.originA.Name,
+                                      target: cand.system.Name,
+                                      distance: cand.distance.toFixed(2)
+                                  })}>
+                                      <Plus size={16} />
+                                  </button>
+                              </div>
+                          ))
+                      )}
                   </div>
               </>
           )}
            {gatewayData.strategy === GATEWAY_STRATEGIES.DUAL && (
               <>
-                  <h4>Origin A: {gatewayData.originA || 'None'}</h4>
-                  <h4>Origin B: {gatewayData.originB || 'None'}</h4>
+                  <h4>Origin A: {gatewayData.originA ? gatewayData.originA.Name : 'None'}</h4>
+                  <h4>Origin B: {gatewayData.originB ? gatewayData.originB.Name : 'None'}</h4>
                   <div className="results-list">
-                       <p className="placeholder-text">Select two systems to find midpoints.</p>
+                       {candidateList.length === 0 ? (
+                           <p className="placeholder-text">Select two systems to find midpoints.</p>
+                       ) : (
+                           candidateList.map(cand => (
+                               <div 
+                                key={cand.system.SystemId} 
+                                className="planned-gateway-item" 
+                                style={{flexDirection:'column', alignItems:'stretch'}}
+                                onMouseEnter={() => setHoveredSystemId(cand.system.SystemId)} // Signal Enter
+                                onMouseLeave={() => setHoveredSystemId(null)}                 // Signal Leave
+                               >
+                                   <div style={{display:'flex', justifyContent:'space-between'}}>
+                                      <span style={{fontWeight:'bold', color:'#f7a600'}}>{cand.system.Name}</span>
+                                      <button className="delete-gw-btn" title="Add Dual Route" onClick={() => addDualRoute(gatewayData.originA, gatewayData.originB, cand.system)}>
+                                          <Plus size={16} />
+                                      </button>
+                                   </div>
+                                   <div style={{display:'flex', justifyContent:'space-between', fontSize:'11px', marginTop:'2px', color:'#aaa'}}>
+                                       <span>To A: {cand.distA.toFixed(2)}</span>
+                                       <span>To B: {cand.distB.toFixed(2)}</span>
+                                       <span style={{color:'#fff'}}>Tot: {cand.totalDist.toFixed(2)}</span>
+                                   </div>
+                               </div>
+                           ))
+                       )}
                   </div>
               </>
           )}
@@ -3825,9 +4356,10 @@ const StandardControls = () => {
   const { clearSearch, toggleCompanySearch, isCompanySearch } = useContext(SearchContext);
 
   return (
-    <div className="standard-controls">
-      {/* Group 1: Filters (Originally header-center) */}
-      <div className="std-ctrl-filters">
+    <div className="standard-controls-container" style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between' }}>
+      
+      {/* Mimics original .header-center */}
+      <div className="std-center-group">
          <button
             className="filter-toggle"
             onClick={() => setShowFilters(!showFilters)}
@@ -3837,15 +4369,15 @@ const StandardControls = () => {
           {showFilters && <FilterCategories />}
       </div>
 
-      <div className="std-ctrl-right-group">
-          {/* Group 2: Search Fields (Originally header-right) */}
-          <div className="std-ctrl-search">
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+          {/* Mimics original .header-right */}
+          <div className="std-right-group">
             <MaterialSearchField />
             <SearchField />
           </div>
 
-          {/* Group 3: Action Buttons (Originally header-buttons) */}
-          <div className="std-ctrl-buttons">
+          {/* Mimics original .header-buttons */}
+          <div className="std-buttons-group">
              <button className="clear-button" onClick={clearSearch}>Clear</button>
              <button
                 onClick={toggleCompanySearch}
@@ -4055,18 +4587,21 @@ export default StandardControls;
 
 --- FILE: src/components/UniverseMap.jsx ---
 
-import React, { useEffect, useContext, useRef, useCallback } from 'react';
+import React, { useEffect, useContext, useRef, useCallback, useState } from 'react';
 import DataPointOverlay from './DataPointOverlay';
+import GatewayLayer from './GatewayLayer';
 import * as d3 from 'd3';
 import { GraphContext } from '../contexts/GraphContext';
 import { SelectionContext } from '../contexts/SelectionContext';
 import { useCogcOverlay } from '../contexts/CogcOverlayContext';
-import { addMouseEvents } from '../utils/svgUtils';
+import { useMapMode, MAP_MODES, GATEWAY_STRATEGIES } from '../contexts/MapModeContext';
+import { addMouseEvents, drawGatewayHover } from '../utils/svgUtils'; // Import helper
+import { resetGraphState, renderGatewayVisuals } from '../utils/graphUtils';
+import { calculate3DDistance } from '../utils/distanceUtils';
 import { cogcPrograms } from '../constants/cogcPrograms';
 import './UniverseMap.css';
 import { SearchContext } from '../contexts/SearchContext';
 
-// CX System IDs (Internal IDs)
 const CX_SYSTEMS = [
   '8ecf9670ba070d78cfb5537e8d9f1b6c', // Antares
   '92029ff27c1abe932bd2c61ee4c492c7', // Benten
@@ -4077,25 +4612,64 @@ const CX_SYSTEMS = [
 ];
 
 const UniverseMap = React.memo(() => {
-  const { graph, planetData, materials } = useContext(GraphContext);
+  const { graph, planetData, materials, universeData } = useContext(GraphContext);
   const { highlightSelectedSystem } = useContext(SelectionContext);
   const { overlayProgram } = useCogcOverlay();
   const { searchResults, isRelativeThreshold } = useContext(SearchContext);
+  
+  const { activeMode, gatewayData, setOriginById, addPlannedGateway, resetSelection, hoveredSystemId } = useMapMode();
+
   const svgRef = useRef(null);
   const graphRef = useRef(null);
+  const [mapRenderKey, setMapRenderKey] = useState(0);
 
-  // Derive the actual program value (e.g., ADVERTISING_METALLURGY) from the display name
   const selectedProgramValue = cogcPrograms.find(program => program.display === overlayProgram)?.value;
 
-  // Handle system click
   const handleSystemClick = useCallback((systemId) => {
-    if (systemId === 'rect1') {
-      return;
-    }
-    highlightSelectedSystem(systemId);
-  }, [highlightSelectedSystem]);
+    if (systemId === 'rect1') return;
 
-  // Attach click events
+    if (activeMode === MAP_MODES.STANDARD) {
+        highlightSelectedSystem(systemId);
+    } 
+    else if (activeMode === MAP_MODES.GATEWAY) {
+        if (gatewayData.strategy === GATEWAY_STRATEGIES.SINGLE) {
+            if (!gatewayData.originA) {
+                setOriginById(systemId, 'A');
+            } else {
+                if (gatewayData.originA.SystemId === systemId) {
+                    resetSelection();
+                } else {
+                    const targetSystem = universeData[systemId][0];
+                    const dist = calculate3DDistance(gatewayData.originA, targetSystem);
+                    
+                    addPlannedGateway({
+                        id: Date.now().toString(),
+                        sourceId: gatewayData.originA.SystemId,
+                        targetId: targetSystem.SystemId,
+                        source: gatewayData.originA.Name,
+                        target: targetSystem.Name,
+                        distance: dist.toFixed(2)
+                    });
+                    
+                    resetSelection();
+                }
+            }
+        } 
+        else if (gatewayData.strategy === GATEWAY_STRATEGIES.DUAL) {
+            if (!gatewayData.originA) {
+                setOriginById(systemId, 'A');
+            } else if (!gatewayData.originB) {
+                if (gatewayData.originA.SystemId !== systemId) {
+                    setOriginById(systemId, 'B');
+                }
+            } else {
+                resetSelection(); 
+                // setOriginById(systemId, 'A'); 
+            }
+        }
+    }
+  }, [activeMode, gatewayData, highlightSelectedSystem, setOriginById, addPlannedGateway, resetSelection, universeData]);
+
   const attachClickEvents = useCallback((g) => {
     g.selectAll('rect').on('click', function() {
       const systemId = d3.select(this).attr('id').replace('#', '');
@@ -4103,7 +4677,6 @@ const UniverseMap = React.memo(() => {
     });
   }, [handleSystemClick]);
 
-  // Initialize D3 graph
   useEffect(() => {
     if (!graph || !graph.edges) return;
 
@@ -4111,24 +4684,16 @@ const UniverseMap = React.memo(() => {
       const svgNode = data.documentElement;
       const container = document.getElementById('map-container');
 
-      // Clear any existing SVG to prevent duplicates
-      while (container.firstChild) {
-        container.removeChild(container.firstChild);
-      }
-
-      // Append the SVG node to the container
+      while (container.firstChild) container.removeChild(container.firstChild);
       container.appendChild(svgNode);
 
-      // Select the SVG element and create a group element
       const svg = d3.select(svgNode);
       const g = svg.append('g');
 
-      // Move all children of the SVG to the group
       while (svgNode.firstChild && svgNode.firstChild !== g.node()) {
         g.node().appendChild(svgNode.firstChild);
       }
 
-      // Apply shapes to CX Systems ---
       g.selectAll('rect').each(function() {
         const systemId = d3.select(this).attr('id');
         if (CX_SYSTEMS.includes(systemId)) {
@@ -4146,18 +4711,16 @@ const UniverseMap = React.memo(() => {
 
       svg.call(zoom);
 
-      // Pass selectedProgramValue to addMouseEvents
-      addMouseEvents(g, searchResults, materials, undefined, selectedProgramValue);
+      addMouseEvents(g, searchResults, materials, isRelativeThreshold, selectedProgramValue, activeMode, gatewayData, universeData);
 
-      // Store references for later use
       svgRef.current = svgNode;
       graphRef.current = { svg, g };
 
-      // Attach click events here, after the SVG is fully initialized
       attachClickEvents(g);
+      
+      setMapRenderKey(prev => prev + 1);
     });
 
-    // Cleanup function
     return () => {
       if (svgRef.current) {
         const container = document.getElementById('map-container');
@@ -4166,10 +4729,9 @@ const UniverseMap = React.memo(() => {
         }
       }
     };
-  // eslint-disable-next-line
-  }, [graph]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [graph]); 
 
-  // Update mouse events when search results OR cogc selection changes
   useEffect(() => {
     if (graphRef.current) {
       addMouseEvents(
@@ -4177,17 +4739,40 @@ const UniverseMap = React.memo(() => {
           searchResults, 
           materials, 
           isRelativeThreshold, 
-          selectedProgramValue
+          selectedProgramValue,
+          activeMode, 
+          gatewayData,
+          universeData
       );
+      attachClickEvents(graphRef.current.g);
     }
-  }, [searchResults, materials, isRelativeThreshold, selectedProgramValue]);
+  }, [searchResults, materials, isRelativeThreshold, selectedProgramValue, activeMode, gatewayData, attachClickEvents, universeData]);
 
-  // Apply Cogc overlay
+  useEffect(() => {
+    if (!graphRef.current || !universeData) return;
+    const { svg } = graphRef.current;
+
+    if (activeMode === MAP_MODES.GATEWAY) {
+        renderGatewayVisuals(svg, gatewayData, universeData);
+    } else {
+        resetGraphState(null, activeMode, null, null);
+    }
+  }, [activeMode, gatewayData, universeData]);
+
+  useEffect(() => {
+      if (activeMode === MAP_MODES.GATEWAY && graphRef.current) {
+          const { g } = graphRef.current;
+          if (hoveredSystemId) {
+              drawGatewayHover(g, hoveredSystemId, gatewayData, universeData);
+          } else {
+              g.selectAll('.rubber-band').remove();
+          }
+      }
+  }, [hoveredSystemId, activeMode, gatewayData, universeData]);
+
   const applyCogcOverlay = useCallback(() => {
     if (!graphRef.current || !overlayProgram) return;
-
     const { g } = graphRef.current;
-
     g.selectAll('.cogc-overlay-rect').remove();
 
     g.selectAll('rect').each(function() {
@@ -4207,12 +4792,9 @@ const UniverseMap = React.memo(() => {
         const width = parseFloat(rect.attr('width'));
         const height = parseFloat(rect.attr('height'));
         const scaleUp = 4;
-        
-        // Apply correct shape to overlay ---
         const isCX = CX_SYSTEMS.includes(systemId);
         const borderRadius = isCX ? '4' : '50%';
 
-        // Create a new overlay rect
         const overlayRect = g.append('rect')
           .attr('class', 'cogc-overlay-rect')
           .attr('x', x - scaleUp/2)
@@ -4232,21 +4814,14 @@ const UniverseMap = React.memo(() => {
     });
   }, [overlayProgram, planetData, selectedProgramValue]);
 
-  // Effect to apply Cogc overlay when overlayProgram changes
   useEffect(() => {
     applyCogcOverlay();
   }, [applyCogcOverlay]);
 
-  // Update click events when handleSystemClick changes
-  useEffect(() => {
-    if (graphRef.current) {
-      attachClickEvents(graphRef.current.g);
-    }
-  }, [attachClickEvents]);
-
   return (
     <div id="map-container">
       <DataPointOverlay mapRef={graphRef} />
+      <GatewayLayer mapRef={graphRef} mapRenderKey={mapRenderKey} /> 
     </div>
   );
 });
