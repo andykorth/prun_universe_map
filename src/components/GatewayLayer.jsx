@@ -1,5 +1,4 @@
-import React, { useEffect } from 'react';
-import * as d3 from 'd3';
+import { useEffect } from 'react';
 import { useMapMode } from '../contexts/MapModeContext';
 
 const GatewayLayer = ({ mapRef, mapRenderKey }) => {
@@ -40,7 +39,7 @@ const GatewayLayer = ({ mapRef, mapRenderKey }) => {
             const end = getCoords(gw.targetId);
             
             if (start && end) {
-                layerGroup.append('line') // Append to layerGroup, not g
+                layerGroup.append('line')
                     .attr('class', 'gateway-line')
                     .attr('x1', start.x)
                     .attr('y1', start.y)

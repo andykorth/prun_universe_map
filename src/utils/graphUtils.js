@@ -49,9 +49,13 @@ export const resetGraphState = (nextSelectedSystem, activeMode, gatewayData, uni
         .attr('fill', colors.resetSystemFill)
         .attr('fill-opacity', colors.resetSystemFillOpacity)
         .attr('stroke', colors.resetSystemStroke)
-        .attr('stroke-width', colors.resetSystemStrokeWidth)
-        .attr('rx', node.attr('data-original-rx') || null) 
-        .attr('ry', node.attr('data-original-ry') || null);
+        .attr('stroke-width', colors.resetSystemStrokeWidth);
+
+      const savedRx = node.attr('data-original-rx');
+      const savedRy = node.attr('data-original-ry');
+      
+      if (savedRx !== null) node.attr('rx', savedRx === 'null' ? null : savedRx);
+      if (savedRy !== null) node.attr('ry', savedRy === 'null' ? null : savedRy);
     }
   });
 
@@ -67,11 +71,8 @@ export const renderGatewayVisuals = (svg, gatewayData, universeData) => {
 
     const { originA, originB, strategy } = gatewayData;
 
-    // Define Dual Gradient Scale (Tol Rainbow variant or distinct steps)
-    // Using a sequential scale from Best to Best+50%
     const getDualColor = (val, min, max) => {
         const t = (val - min) / (max - min); 
-        // Simple distinct gradient: Green -> Yellow -> Red
         if (t < 0.2) return colors.tol.green;
         if (t < 0.4) return colors.tol.teal;
         if (t < 0.6) return colors.tol.sand;
@@ -80,7 +81,6 @@ export const renderGatewayVisuals = (svg, gatewayData, universeData) => {
     };
 
     let minTotal = Infinity;
-    // Pre-calc min total for dual strategy to set scale
     if (strategy === GATEWAY_STRATEGIES.DUAL && originA && originB) {
         Object.values(universeData).forEach(sysArr => {
             const sys = sysArr[0];
@@ -97,35 +97,33 @@ export const renderGatewayVisuals = (svg, gatewayData, universeData) => {
         const systemData = universeData[systemId] ? universeData[systemId][0] : null;
         if (!systemData) return;
 
-        // Save original shape if not saved
-        if (!node.attr('data-original-ry')) {
-            node.attr('data-original-rx', node.attr('rx'));
-            node.attr('data-original-ry', node.attr('ry'));
+        if (node.attr('data-original-ry') == null) {
+            const rx = node.attr('rx');
+            const ry = node.attr('ry');
+            node.attr('data-original-rx', rx === null ? 'null' : rx);
+            node.attr('data-original-ry', ry === null ? 'null' : ry);
         }
 
         let fill = colors.resetSystemFill;
         let stroke = colors.resetSystemStroke;
         let strokeWidth = colors.resetSystemStrokeWidth;
-        let ry = node.attr('data-original-ry'); // Default shape
-        let rx = node.attr('data-original-rx');
+        
+        const storedRx = node.attr('data-original-rx');
+        const storedRy = node.attr('data-original-ry');
+        let rx = storedRx === 'null' ? null : storedRx;
+        let ry = storedRy === 'null' ? null : storedRy;
 
-        // SINGLE STRATEGY
         if (strategy === GATEWAY_STRATEGIES.SINGLE) {
             if (originA) {
-                // Highlight Origin
                 if (systemId === originA.SystemId) {
-                    fill = colors.systemFill; // Highlight color
-                    ry = 4; // Special Shape
-                    rx = 4;
-                    strokeWidth = "2px";
+                    fill = colors.systemFill; 
+                    ry = 4; rx = 4; strokeWidth = "2px";
                 } else {
-                    // Heatmap Color
                     const dist = calculate3DDistance(originA, systemData);
                     fill = getDistanceColor(dist);
                 }
             }
         }
-        // DUAL STRATEGY
         else if (strategy === GATEWAY_STRATEGIES.DUAL) {
             if (originA && systemId === originA.SystemId) {
                 fill = colors.systemFill;
@@ -135,12 +133,10 @@ export const renderGatewayVisuals = (svg, gatewayData, universeData) => {
                 ry = 4; rx = 4; strokeWidth = "2px";
             } else if (originA && originB) {
                 const dist = calculate3DDistance(originA, systemData) + calculate3DDistance(originB, systemData);
-                // Range: Best -> Best + 50%
                 fill = getDualColor(dist, minTotal, minTotal * 1.5);
             }
         }
 
-        // Apply
         node.attr('fill', fill)
             .attr('stroke', stroke)
             .attr('stroke-width', strokeWidth)
@@ -160,7 +156,8 @@ export const highlightPath = (path, systemSelected) => {
         .attr('stroke', colors.systemStroke);
     }
   });
-   for (let i = 0; i < path.length - 1; i++) {
+
+  for (let i = 0; i < path.length - 1; i++) {
     const start = path[i];
     const end = path[i + 1];
 
@@ -168,13 +165,20 @@ export const highlightPath = (path, systemSelected) => {
       .attr('stroke', colors.pathStroke)
       .attr('stroke-width', colors.pathStrokeWidth);
   }
+
+  if (path.length >= 2) {
+    const startSystem = path[0];
+    const endSystem = path[path.length - 1];
+    highlightSelectedSystem(null, startSystem, [startSystem, endSystem]);
+    highlightSelectedSystem(null, endSystem, [startSystem, endSystem]);
+  }
 };
 
 export const highlightSelectedSystem = (prevSelectedSystem, nextSelectedSystem, pathfindingSelection, isPathfindingEnabled) => {
   if (pathfindingSelection.length < 2 && isPathfindingEnabled) {
-      resetGraphState(nextSelectedSystem, 'STANDARD', null, null);
+    resetGraphState(nextSelectedSystem, 'STANDARD', null, null);
   }
-  
+
   if (prevSelectedSystem && !pathfindingSelection.includes(prevSelectedSystem)) {
     const prevSystemNode = d3.select(`#${CSS.escape(prevSelectedSystem)}`);
     if (!prevSystemNode.empty() && !prevSystemNode.classed('search-highlight')) {
@@ -183,6 +187,11 @@ export const highlightSelectedSystem = (prevSelectedSystem, nextSelectedSystem, 
         .attr('fill-opacity', colors.resetSystemFillOpacity)
         .attr('stroke', colors.resetSystemStroke)
         .attr('stroke-width', colors.resetSystemStrokeWidth);
+        
+        const savedRx = prevSystemNode.attr('data-original-rx');
+        const savedRy = prevSystemNode.attr('data-original-ry');
+        if (savedRx !== null) prevSystemNode.attr('rx', savedRx === 'null' ? null : savedRx);
+        if (savedRy !== null) prevSystemNode.attr('ry', savedRy === 'null' ? null : savedRy);
     }
   }
 
