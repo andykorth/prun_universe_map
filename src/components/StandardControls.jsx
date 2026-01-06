@@ -9,21 +9,28 @@ const StandardControls = () => {
   const { clearSearch, toggleCompanySearch, isCompanySearch } = useContext(SearchContext);
 
   return (
-    <div className="standard-controls" style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'center' }}>
-      <div className="controls-row top-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', gap: '5px', flexWrap: 'wrap' }}>
+    <div className="standard-controls-container" style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between' }}>
+      
+      {/* Mimics original .header-center */}
+      <div className="std-center-group">
          <button
             className="filter-toggle"
             onClick={() => setShowFilters(!showFilters)}
           >
             {showFilters ? 'Hide Filters' : 'Show Filters'}
           </button>
-          
-          <div className="search-group" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
+          {showFilters && <FilterCategories />}
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+          {/* Mimics original .header-right */}
+          <div className="std-right-group">
             <MaterialSearchField />
             <SearchField />
           </div>
 
-          <div className="button-group" style={{ display: 'flex', alignItems: 'center' }}>
+          {/* Mimics original .header-buttons */}
+          <div className="std-buttons-group">
              <button className="clear-button" onClick={clearSearch}>Clear</button>
              <button
                 onClick={toggleCompanySearch}
@@ -34,12 +41,6 @@ const StandardControls = () => {
              </button>
           </div>
       </div>
-      
-      {showFilters && (
-        <div className="controls-row bottom-row" style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '5px' }}>
-           <FilterCategories />
-        </div>
-      )}
     </div>
   );
 };
