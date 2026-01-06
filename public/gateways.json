@@ -1,8 +1,14 @@
 [
   {
     "id": "mock-gw-1",
-    "sourceId": "239e36f2a61041e0952d9c9741c195c9",
-    "targetId": "92029ff27c1abe932bd2c61ee4c492c7",
+    "sourceId": "49b6615d39ccba05752b3be77b2ebf36",
+    "targetId": "18c4fa43503cca47e7d019e95833b138",
+    "builtBy": "MockCorp"
+  },
+  {
+    "id": "mock-gw-2",
+    "sourceId": "8ecf9670ba070d78cfb5537e8d9f1b6c",
+    "targetId": "95d4975f992a70a802bd2f19553c25d4",
     "builtBy": "MockCorp"
   }
 ]

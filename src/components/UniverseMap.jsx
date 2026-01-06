@@ -70,9 +70,12 @@ const UniverseMap = React.memo(() => {
             if (!gatewayData.originA) {
                 setOriginById(systemId, 'A');
             } else if (!gatewayData.originB) {
-                setOriginById(systemId, 'B');
+                if (gatewayData.originA.SystemId !== systemId) {
+                    setOriginById(systemId, 'B');
+                }
             } else {
-                setOriginById(systemId, 'A');
+                resetSelection(); 
+                // setOriginById(systemId, 'A'); 
             }
         }
     }
