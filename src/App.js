@@ -3,32 +3,29 @@ import UniverseMap from './components/UniverseMap';
 import Sidebar from './components/Sidebar';
 import PathfindingToggle from './components/PathfindingToggle';
 import MeteorDensityToggle from './components/MeteorDensityToggle';
-import SearchField from './components/SearchField';
-import MaterialSearchField from './components/MaterialSearchField';
-import FilterCategories from './components/FilterCategories';
 import InfoTooltip from './components/InfoTooltip';
+import StandardControls from './components/StandardControls';
+import GatewayControls from './components/GatewayControls';
 import { GraphProvider } from './contexts/GraphContext';
 import { SelectionProvider } from './contexts/SelectionContext';
-import { SearchProvider, SearchContext } from './contexts/SearchContext';
+import { SearchProvider } from './contexts/SearchContext';
 import { CogcOverlayProvider } from './contexts/CogcOverlayContext';
 import { DataPointProvider } from './contexts/DataPointContext';
+import { MapModeProvider, useMapMode, MAP_MODES } from './contexts/MapModeContext';
+import logo from './logo.png';
 import './App.css';
 import './components/FilterCategories.css';
-import logo from './logo.png';
 
 const App = () => {
-  const [showFilters, setShowFilters] = useState(window.innerWidth > 768);
-
   return (
     <GraphProvider>
       <SelectionProvider>
         <SearchProvider>
           <CogcOverlayProvider>
             <DataPointProvider>
-              <AppContent
-                showFilters={showFilters}
-                setShowFilters={setShowFilters}
-              />
+              <MapModeProvider>
+                 <AppContent />
+              </MapModeProvider>
             </DataPointProvider>
           </CogcOverlayProvider>
         </SearchProvider>
@@ -37,8 +34,8 @@ const App = () => {
   );
 };
 
-const AppContent = ({ showFilters, setShowFilters }) => {
-  const { clearSearch, isCompanySearch, toggleCompanySearch } = React.useContext(SearchContext);
+const AppContent = () => {
+  const { activeMode, toggleMode } = useMapMode();
 
   return (
     <div className="App">
@@ -47,41 +44,36 @@ const AppContent = ({ showFilters, setShowFilters }) => {
           <img src={logo} alt="Logo" className="App-logo" />
           <h1>Taiyi's Prosperous Universe Map</h1>
         </div>
+        
         <div className="header-center">
-          <button
-            className="filter-toggle"
-            onClick={() => setShowFilters(!showFilters)}
-          >
-            {showFilters ? 'Hide Filters' : 'Show Filters'}
-          </button>
-          {showFilters && <FilterCategories />}
+            {activeMode === MAP_MODES.STANDARD ? <StandardControls /> : <GatewayControls />}
         </div>
+
         <div className="header-right">
-          <MaterialSearchField />
-          <SearchField />
-        </div>
-        <div className="header-buttons">
-          <button className="clear-button" onClick={clearSearch}>Clear</button>
-          <button
-            onClick={toggleCompanySearch}
-            className={`toggle-token company-search-toggle ${isCompanySearch ? 'active' : ''}`}
-            data-tooltip={"Enter company code to search base data using FIO"}
-          >
-          Company
-          </button>
-        </div>
-        <div className="header-info">
-          <InfoTooltip />
-            <div className="toggle-stack-container">
-            <div className="pathfinding-toggle-container">
-              <PathfindingToggle />
-            </div>
-            <div className="pathfinding-toggle-container">
-              <MeteorDensityToggle />
-            </div>
+          <div className="global-tools">
+             <button 
+                className={`toggle-token mode-switch-btn ${activeMode === MAP_MODES.GATEWAY ? 'active' : ''}`}
+                onClick={toggleMode}
+                title="Toggle Gateway Planning Mode"
+             >
+                {activeMode === MAP_MODES.STANDARD ? 'Gateway Planner' : 'Exit Planner'}
+             </button>
+             
+             <div className="tool-separator"></div>
+
+             <InfoTooltip />
+             <div className="mini-stack">
+                <div className="pathfinding-toggle-container">
+                    <PathfindingToggle />
+                </div>
+                <div className="pathfinding-toggle-container">
+                    <MeteorDensityToggle />
+                </div>
+             </div>
           </div>
         </div>
-        </header>
+      </header>
+      
       <div className="main-content">
         <UniverseMap />
         <Sidebar />

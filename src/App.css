@@ -510,3 +510,135 @@ search-container {
     font-size: 14px;
   }
 }
+
+.header-center {
+  flex: 2; /* Allow center to take up available space */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 10px;
+}
+
+.header-right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Standard Controls Styles */
+.standard-controls {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+}
+
+.controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 10px;
+}
+
+.search-group {
+    display: flex;
+}
+
+.button-group {
+    display: flex;
+}
+
+
+/* Gateway Controls Styles */
+.gateway-controls {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.strategy-toggle {
+    display: flex;
+    background: #333;
+    border-radius: 15px;
+    padding: 2px;
+}
+
+/* Global Tools Right Side */
+.global-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mode-switch-btn {
+    font-weight: bold;
+    border: 1px solid #f7a600;
+}
+
+.tool-separator {
+    width: 1px;
+    height: 24px;
+    background: #444;
+    margin: 0 5px;
+}
+
+.mini-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* Sidebar Gateway Styles */
+.gateway-legend .legend-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 11px;
+    color: #ccc;
+}
+
+.color-box {
+    width: 12px;
+    height: 12px;
+    margin-right: 5px;
+    border-radius: 2px;
+}
+
+.planned-gateway-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #333;
+    padding: 5px 8px;
+    margin-bottom: 4px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.delete-gw-btn {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 2px;
+    display: flex;
+}
+
+.delete-gw-btn:hover {
+    color: #f54c4c;
+}
+
+.placeholder-text {
+    color: #666;
+    font-style: italic;
+    font-size: 12px;
+    text-align: center;
+    padding: 20px 0;
+}

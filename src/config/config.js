@@ -18,5 +18,26 @@ export const colors = {
   resetSystemFillOpacity: 0.8,
   resetSystemStrokeWidth: '1px',
   resetPathStroke: '#6e7980',
-  resetPathStrokeWidth: '1px'
+  resetPathStrokeWidth: '1px',
+  
+  // Tol Palette (Vibrant/Muted mix for distinctness)
+  tol: {
+    navy: '#332288',
+    green: '#117733',
+    teal: '#44AA99',
+    lightBlue: '#88CCEE',
+    sand: '#DDCC77',
+    rose: '#CC6677',
+    purple: '#AA4499',
+    wine: '#882255'
+  },
+  
+  // Gateway Distance Mapping
+  gateway: {
+    under10: '#117733', // Green
+    under15: '#44AA99', // Teal
+    under20: '#DDCC77', // Sand
+    under25: '#CC6677', // Rose
+    over25: '#882255'   // Wine
+  }
 };

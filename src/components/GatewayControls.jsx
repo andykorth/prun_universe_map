@@ -1,0 +1,33 @@
+import React from 'react';
+import { useMapMode, GATEWAY_STRATEGIES } from '../contexts/MapModeContext';
+
+const GatewayControls = () => {
+  const { gatewayData, setGatewayStrategy, clearGatewaySelections } = useMapMode();
+
+  return (
+    <div className="gateway-controls" style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+      <div className="strategy-toggle" style={{ display: 'flex', background: '#333', borderRadius: '15px', padding: '2px' }}>
+        <button 
+          className={`toggle-token ${gatewayData.strategy === GATEWAY_STRATEGIES.SINGLE ? 'active' : ''}`}
+          onClick={() => setGatewayStrategy(GATEWAY_STRATEGIES.SINGLE)}
+          style={{ margin: 0, borderRadius: '15px 0 0 15px', borderRight: 'none' }}
+        >
+          Single Origin
+        </button>
+        <button 
+           className={`toggle-token ${gatewayData.strategy === GATEWAY_STRATEGIES.DUAL ? 'active' : ''}`}
+           onClick={() => setGatewayStrategy(GATEWAY_STRATEGIES.DUAL)}
+           style={{ margin: 0, borderRadius: '0 15px 15px 0' }}
+        >
+          Dual Origin (Midpoint)
+        </button>
+      </div>
+      
+      <button className="clear-button" onClick={clearGatewaySelections}>
+        Clear Selection
+      </button>
+    </div>
+  );
+};
+
+export default GatewayControls;
