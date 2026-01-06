@@ -15,7 +15,7 @@ export const calculate3DDistance = (sys1, sys2) => {
   const dy = sys1.PositionY - sys2.PositionY;
   const dz = z1 - z2;
 
-  return Math.sqrt(dx * dx + dy * dy + dz * dz);
+  return Math.sqrt(dx * dx + dy * dy + dz * dz)/12.0;
 };
 
 /**
@@ -33,7 +33,7 @@ export const getDistanceColor = (distance) => {
  * Generates a list of candidate systems sorted by distance from the origin.
  * Filters out systems > maxRange (optional, default 30pc to include the >25pc bucket).
  */
-export const findClosestSystems = (origin, allSystemsMap, maxRange = 35) => {
+export const findClosestSystems = (origin, allSystemsMap, maxRange = 25) => {
   if (!origin) return [];
 
   const candidates = [];

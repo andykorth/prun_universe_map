@@ -50,21 +50,25 @@ const UniverseMap = React.memo(() => {
                 // Set Origin A
                 setOriginById(systemId, 'A');
             } else {
-                // Plan Route (A -> Target)
-                const targetSystem = universeData[systemId][0];
-                const dist = calculate3DDistance(gatewayData.originA, targetSystem);
-                
-                addPlannedGateway({
-                    id: Date.now().toString(),
-                    sourceId: gatewayData.originA.SystemId,
-                    targetId: targetSystem.SystemId,
-                    source: gatewayData.originA.Name,
-                    target: targetSystem.Name,
-                    distance: dist.toFixed(2)
-                });
-                
-                // Reset Origin A (deselect) per instruction
-                clearGatewaySelections();
+                // Prevent self-loop: If clicking the same system, just deselect
+                if (gatewayData.originA.SystemId === systemId) {
+                    clearGatewaySelections();
+                } else {
+                    // Plan Route (A -> Target)
+                    const targetSystem = universeData[systemId][0];
+                    const dist = calculate3DDistance(gatewayData.originA, targetSystem);
+                    
+                    addPlannedGateway({
+                        id: Date.now().toString(),
+                        sourceId: gatewayData.originA.SystemId,
+                        targetId: targetSystem.SystemId,
+                        source: gatewayData.originA.Name,
+                        target: targetSystem.Name,
+                        distance: dist.toFixed(2)
+                    });
+                    
+                    clearGatewaySelections();
+                }
             }
         } 
         else if (gatewayData.strategy === GATEWAY_STRATEGIES.DUAL) {

@@ -238,7 +238,7 @@ const hideInfoPanel = () => {
 export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold, selectedCogcProgram, activeMode, gatewayData) => {
   g.selectAll('rect').each(function() {
     const rect = d3.select(this);
-    const systemId = rect.attr('id').replace('#', ''); // Ensure clean ID
+    const systemId = rect.attr('id').replace('#', '');
     const originalSize = { width: +rect.attr('width'), height: +rect.attr('height') };
     const originalPos = { x: +rect.attr('x'), y: +rect.attr('y') };
     let hoverTimer;
@@ -247,32 +247,41 @@ export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold,
     rect.on('mouseover.system', function(event) {
       if (rect.attr('id') === 'rect1' || d3.select(event.target).classed('data-overlay')) return;
 
-      // 1. Hover Animation (Scale Up) - Apply in all modes
-      rect
-        .attr('fill-opacity', 1)
-        .attr('stroke-opacity', 1)
-        .transition()
-        .duration(200)
-        .attr('width', originalSize.width * 2)
-        .attr('height', originalSize.height * 2)
-        .attr('x', originalPos.x - originalSize.width / 2)
-        .attr('y', originalPos.y - originalSize.height / 2);
+      // 1. Hover Animation (Scale Up) - ONLY IN STANDARD MODE
+      if (activeMode !== MAP_MODES.GATEWAY) {
+          rect
+            .attr('fill-opacity', 1)
+            .attr('stroke-opacity', 1)
+            .transition()
+            .duration(200)
+            .attr('width', originalSize.width * 2)
+            .attr('height', originalSize.height * 2)
+            .attr('x', originalPos.x - originalSize.width / 2)
+            .attr('y', originalPos.y - originalSize.height / 2);
 
-      // Handle Overlay scaling
-      const overlayRect = rect.property('cogcOverlayRect');
-      if (overlayRect) {
-        overlayOriginalSize = { width: +overlayRect.attr('width'), height: +overlayRect.attr('height') };
-        overlayOriginalPos = { x: +overlayRect.attr('x'), y: +overlayRect.attr('y') };
-        overlayRect.transition().duration(200)
-          .attr('width', overlayOriginalSize.width + originalSize.width)
-          .attr('height', overlayOriginalSize.height + originalSize.width)
-          .attr('x', overlayOriginalPos.x - originalSize.width / 2)
-          .attr('y', overlayOriginalPos.y - originalSize.height / 2);
+          // Handle Overlay scaling
+          const overlayRect = rect.property('cogcOverlayRect');
+          if (overlayRect) {
+            overlayOriginalSize = { width: +overlayRect.attr('width'), height: +overlayRect.attr('height') };
+            overlayOriginalPos = { x: +overlayRect.attr('x'), y: +overlayRect.attr('y') };
+            overlayRect.transition().duration(200)
+              .attr('width', overlayOriginalSize.width + originalSize.width)
+              .attr('height', overlayOriginalSize.height + originalSize.width)
+              .attr('x', overlayOriginalPos.x - originalSize.width / 2)
+              .attr('y', overlayOriginalPos.y - originalSize.height / 2);
+          }
       }
 
       // 2. MODE SPECIFIC LOGIC
       if (activeMode === MAP_MODES.GATEWAY) {
           // GATEWAY MODE: Rubber Banding & Mini Tooltip
+          // (Scale up is skipped here)
+          
+          // Ensure we don't proceed if data missing
+          // Note: We need to access universeData. 
+          // Since this function is called from UniverseMap where universeData is available in context,
+          // but strictly speaking 'universeData' variable here relies on the module-level variable set by fetchData().
+          // If fetchData hasn't completed, this might be null.
           if (!gatewayData || !universeData) return;
 
           const hoveredSystem = universeData[systemId] ? universeData[systemId][0] : null;
@@ -284,6 +293,8 @@ export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold,
               if (!originNode.empty()) {
                   const x1 = parseFloat(originNode.attr('x')) + parseFloat(originNode.attr('width'))/2;
                   const y1 = parseFloat(originNode.attr('y')) + parseFloat(originNode.attr('height'))/2;
+                  
+                  // Use original center for hovered node (since we didn't scale it)
                   const x2 = originalPos.x + originalSize.width/2;
                   const y2 = originalPos.y + originalSize.height/2;
 
@@ -322,7 +333,7 @@ export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold,
 
           // Show Mini Tooltip
           if (tooltipText) {
-              const [mouseX, mouseY] = d3.pointer(event, document.body); // Relative to body for fixed pos
+              const [mouseX, mouseY] = d3.pointer(event, document.body); 
               d3.select('body').append('div')
                 .attr('class', 'gateway-tooltip')
                 .style('position', 'absolute')
@@ -342,7 +353,7 @@ export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold,
       } else {
           // STANDARD MODE: Info Panel
           hoverTimer = setTimeout(() => {
-            const [x, y] = d3.pointer(event, document.body); // Use body for absolute positioning
+            const [x, y] = d3.pointer(event, document.body); 
             showInfoPanel(rect, x, y, searchResults, materials, isRelativeThreshold, selectedCogcProgram);
           }, 400);
       }
@@ -350,22 +361,26 @@ export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold,
     }).on('mouseout.system', function(event) {
       if (rect.attr('id') === 'rect1') return;
 
-      // Reset Size
-      rect.transition().duration(200)
+      // Always reset size/opacity (safe to do even if we didn't scale up)
+      rect.transition()
+        .duration(200)
         .attr('width', originalSize.width)
         .attr('height', originalSize.height)
         .attr('x', originalPos.x)
         .attr('y', originalPos.y)
         .attr('fill-opacity', rect.classed('search-highlight') ? 1 : colors.resetSystemFillOpacity);
 
-      // Reset Overlay
+      // Reset Overlay if it exists
       if (rect.property('cogcOverlayRect')) {
         const overlayRect = rect.property('cogcOverlayRect');
-        overlayRect.transition().duration(200)
-          .attr('width', overlayOriginalSize.width)
-          .attr('height', overlayOriginalSize.height)
-          .attr('x', overlayOriginalPos.x)
-          .attr('y', overlayOriginalPos.y);
+        // We only scaled overlay in Standard mode, but resetting is safe
+        if (overlayOriginalSize) { 
+            overlayRect.transition().duration(200)
+            .attr('width', overlayOriginalSize.width)
+            .attr('height', overlayOriginalSize.height)
+            .attr('x', overlayOriginalPos.x)
+            .attr('y', overlayOriginalPos.y);
+        }
       }
 
       // Cleanup Gateway Visuals
