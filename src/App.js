@@ -50,27 +50,29 @@ const AppContent = () => {
         </div>
 
         <div className="header-right">
-          <div className="global-tools">
-             <button 
-                className={`toggle-token mode-switch-btn ${activeMode === MAP_MODES.GATEWAY ? 'active' : ''}`}
-                onClick={toggleMode}
-                title="Toggle Gateway Planning Mode"
-             >
-                {activeMode === MAP_MODES.STANDARD ? 'Gateway Planner' : 'Exit Planner'}
-             </button>
-             
-             <div className="tool-separator"></div>
-
              <InfoTooltip />
-             <div className="mini-stack">
+             <div className="toggle-stack-container">
+                {/* Gateway Toggle (Top) */}
+                <div className="pathfinding-toggle-container">
+                    <button 
+                        className={`toggle-token gateway-toggle-btn ${activeMode === MAP_MODES.GATEWAY ? 'active' : ''}`}
+                        onClick={toggleMode}
+                        data-tooltip="Toggle Gateway Planning Mode"
+                    >
+                        Gateway
+                    </button>
+                </div>
+
+                {/* Pathfinding Toggle (Middle) */}
                 <div className="pathfinding-toggle-container">
                     <PathfindingToggle />
                 </div>
+
+                {/* Data Toggle (Bottom) */}
                 <div className="pathfinding-toggle-container">
                     <MeteorDensityToggle />
                 </div>
              </div>
-          </div>
         </div>
       </header>
       
