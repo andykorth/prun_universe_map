@@ -71,7 +71,7 @@ body {
   flex-direction: column;
   gap: 0px;
   position: relative;
-  align-items: flex-end; 
+  align-items: flex-start; 
 }
 
 .gateway-toggle-btn {
@@ -455,6 +455,15 @@ search-container {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    font-size: 14px; 
+}
+
+.gateway-sidebar-content h4 {
+    margin: 0 0 10px 0;
+    font-size: 18px; 
+    font-weight: bold;
+    border-bottom: 1px solid #444;
+    padding-bottom: 5px;
 }
 
 .gateway-legend .legend-items {
@@ -467,15 +476,15 @@ search-container {
 .legend-item {
     display: flex;
     align-items: center;
-    font-size: 11px;
-    color: #ccc;
+    font-size: 13px;
+    color: #ddd;
 }
 
 .color-box {
-    width: 12px;
-    height: 12px;
-    margin-right: 5px;
-    border-radius: 2px;
+    width: 14px;  
+    height: 14px;
+    margin-right: 8px;
+    border-radius: 3px;
 }
 
 .results-list {
@@ -485,39 +494,51 @@ search-container {
     padding: 10px;
     max-height: 300px;
     overflow-y: auto;
+    border: 1px solid #444; 
 }
 
 .planned-gateway-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #2a2a2a;
-    padding: 5px 8px;
-    margin-bottom: 4px;
+    background: #333; 
+    padding: 8px 10px;
+    margin-bottom: 6px; 
     border-radius: 4px;
-    font-size: 12px;
+    font-size: 13px; 
     border: 1px solid #444;
+}
+
+.planned-gateway-item .dist {
+    color: #aaa;
+    margin-left: auto;
+    margin-right: 15px;
+    font-size: 12px;
 }
 
 .delete-gw-btn {
     background: none;
     border: none;
-    color: #666;
+    color: #888;
     cursor: pointer;
-    padding: 2px;
+    padding: 4px; 
     display: flex;
+    align-items: center;
+    transition: color 0.2s;
+    border-radius: 4px;
 }
 
 .delete-gw-btn:hover {
-    color: #f54c4c;
+    color: #fff;
+    background-color: #f54c4c;
 }
 
 .placeholder-text {
-    color: #666;
+    color: #888;
     font-style: italic;
-    font-size: 12px;
+    font-size: 13px; 
     text-align: center;
-    padding: 20px 0;
+    padding: 30px 10px;
 }
 
 /* Toggle Tokens (Shared) */
