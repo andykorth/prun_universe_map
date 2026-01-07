@@ -9,20 +9,28 @@ const GatewayLayer = ({ mapRef, mapRenderKey }) => {
     
     const { g } = mapRef.current;
 
-    let layerGroup = g.select('.gateway-layer-group');
+    let bgGroup = g.select('.gateway-background-layer');
     
-    if (layerGroup.empty()) {
+    if (bgGroup.empty()) {
         const firstSystemNode = g.select('rect:not(#rect1)').node();
         
         if (firstSystemNode) {
-            layerGroup = g.insert('g', () => firstSystemNode)
-                          .attr('class', 'gateway-layer-group');
+            bgGroup = g.insert('g', () => firstSystemNode)
+                          .attr('class', 'gateway-background-layer');
         } else {
-            layerGroup = g.append('g').attr('class', 'gateway-layer-group');
+            bgGroup = g.append('g').attr('class', 'gateway-background-layer');
         }
     }
+    bgGroup.selectAll('*').remove();
 
-    layerGroup.selectAll('*').remove();
+    let fgGroup = g.select('.gateway-foreground-layer');
+    
+    if (fgGroup.empty()) {
+        fgGroup = g.append('g').attr('class', 'gateway-foreground-layer');
+    } else {
+        fgGroup.raise(); 
+    }
+    fgGroup.selectAll('*').remove();
 
     const getCoords = (systemId) => {
         const node = g.select(`#${CSS.escape(systemId)}`);
@@ -39,7 +47,7 @@ const GatewayLayer = ({ mapRef, mapRenderKey }) => {
             const end = getCoords(gw.targetId);
             
             if (start && end) {
-                layerGroup.append('line')
+                bgGroup.append('line')
                     .attr('class', 'gateway-line')
                     .attr('x1', start.x)
                     .attr('y1', start.y)
@@ -59,7 +67,7 @@ const GatewayLayer = ({ mapRef, mapRenderKey }) => {
              const end = getCoords(gw.targetId);
 
              if (start && end) {
-                 layerGroup.append('line')
+                 bgGroup.append('line')
                     .attr('class', 'planned-gateway-line')
                     .attr('x1', start.x)
                     .attr('y1', start.y)
@@ -69,6 +77,24 @@ const GatewayLayer = ({ mapRef, mapRenderKey }) => {
                     .attr('stroke-width', 2)
                     .attr('stroke-dasharray', '6,3')
                     .attr('pointer-events', 'none');
+
+                 const midX = (start.x + end.x) / 2;
+                 const midY = (start.y + end.y) / 2;
+
+                 fgGroup.append('text')
+                    .attr('class', 'planned-gateway-label')
+                    .attr('x', midX)
+                    .attr('y', midY)
+                    .attr('text-anchor', 'middle') 
+                    .attr('dominant-baseline', 'middle') 
+                    .attr('fill', '#f7a600') 
+                    .attr('stroke', '#000000') 
+                    .attr('stroke-width', '3px') 
+                    .attr('paint-order', 'stroke')
+                    .attr('font-size', '10px')
+                    .attr('font-weight', 'bold')
+                    .style('pointer-events', 'none')
+                    .text(`${gw.distance} pc`);
              }
         });
     }

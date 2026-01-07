@@ -275,7 +275,9 @@ export const drawGatewayHover = (g, systemId, gatewayData, universeData) => {
 export const addMouseEvents = (g, searchResults, materials, isRelativeThreshold, selectedCogcProgram, activeMode, gatewayData, universeData) => {
   g.selectAll('rect').each(function() {
     const rect = d3.select(this);
-    const systemId = rect.attr('id').replace('#', '');
+    const rawId = rect.attr('id');
+    if (!rawId) return;
+    const systemId = rawId.replace('#', '');
     const originalSize = { width: +rect.attr('width'), height: +rect.attr('height') };
     const originalPos = { x: +rect.attr('x'), y: +rect.attr('y') };
     let hoverTimer;

@@ -71,7 +71,21 @@ body {
   flex-direction: column;
   gap: 0px;
   position: relative;
-  align-items: flex-start; 
+  align-items: stretch;
+  min-width: 90px;     
+}
+
+.toggle-stack-container .pathfinding-toggle-container {
+    margin: 1px 0; 
+    width: 100%;
+}
+
+.toggle-stack-container .toggle-token {
+    width: 100%;
+    padding: 3px 5px;
+    font-size: 12px;
+    text-align: center;
+    box-sizing: border-box;
 }
 
 .gateway-toggle-btn {
@@ -263,15 +277,23 @@ body {
   align-items: center;
   cursor: pointer;
   font-size: 12px;
+  width: 100%;
+  justify-content: center;
 }
 
 .pathfinding-toggle .toggle-token {
   margin: 0px;
-  margin-right: 8px;
+  /* margin-right: 8px; Removed to center in stack */
 }
 
 .pathfinding-toggle .toggle-token::before {
   content: "Pathfinding";
+}
+
+.meteor-density-toggle {
+    width: 100%;
+    display: flex;
+    justify-content: center;
 }
 
 .meteor-density-toggle .toggle-token::before {
