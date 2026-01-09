@@ -12,7 +12,7 @@ export const DataPointProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   // Visibility toggle for the overlay
-  const [isOverlayVisible, setIsOverlayVisible] = useState(false);
+  const [isOverlayVisible, setIsOverlayVisible] = useState(true);
 
   // Scale setting (absolute vs relative)
   const [useRelativeScale, setUseRelativeScale] = useState(false);

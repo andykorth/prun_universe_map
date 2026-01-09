@@ -5,7 +5,7 @@ import SearchField from './SearchField';
 import { SearchContext } from '../contexts/SearchContext';
 
 const StandardControls = () => {
-  const [showFilters, setShowFilters] = useState(window.innerWidth > 768);
+  const [showFilters, setShowFilters] = useState(false);
   const { clearSearch, toggleCompanySearch, isCompanySearch } = useContext(SearchContext);
 
   return (
