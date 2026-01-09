@@ -67,7 +67,7 @@ export const GraphProvider = ({ children }) => {
       });
 
     // Fetch Population Data
-    fetch('population_data.json')
+    fetch(`${process.env.PUBLIC_URL}/population_data.json`)
       .then(response => response.json())
       .then(data => {
         setPopulationData(data);
