@@ -42,7 +42,10 @@ const AppContent = () => {
       <header className="App-header">
         <div className="header-left">
           <img src={logo} alt="Logo" className="App-logo" />
-          <h1>Taiyi's Prosperous Universe Map</h1>
+          <div style={{margin: 0}}>
+          <h2 style={{margin: 3}}>OOG Capital Management</h2>
+          <h5 style={{margin: 3}}>Original Map is by Taiyi (<a href="https://universemap.taiyibureau.de/">official</a>) (<a href="https://github.com/andykorth/prun_universe_map">src</a></h5>
+          </div>
         </div>
         
         <div className="header-center">
