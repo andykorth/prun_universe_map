@@ -17,9 +17,11 @@ Prosperous Universe game world. Contributions welcome!
 
 * Replace `public/prun_universe_data.json` with the contents from the FIO endpoint: https://rest.fnar.net/systemstars
 * Replace `public/planet_data.json` with the contents of: https://rest.fnar.net/planet/allplanets/full
-* `public/systemstars.json` is an edited version of `prun_universe_data` that has star luminosity 
+* `public/systemstars.json` is an edited version of `prun_universe_data` that has star luminosity - not clear where that comes from, but the data is in FIO for individual stars, like https://rest.fnar.net/systemstars/star/HM-223
 * At the moment the PrUn_Universe_map svg files need to be hand edited in inkscape with new data.
-* Run the python script 
+* `public/gateways.json` is hand created.
+* `public/population_data.json` - ??
+* Run the python script  `parse_svg.py` to extract positions in the SVG into `graph_data.json`
 
 
 ### Tech Stack:
@@ -59,6 +61,10 @@ The build is minified and the filenames include the hashes.\
 Your app is ready to be deployed!
 
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+
+#### Changing the homepage:
+
+By default this will assume you are hosting the map at the root of your webserver. To change that, adjust the homepage field in your package.json file before building.
 
 #### `npm run eject`
 
