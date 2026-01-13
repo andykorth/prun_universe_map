@@ -17,10 +17,10 @@ Prosperous Universe game world. Contributions welcome!
 
 * Replace `public/prun_universe_data.json` with the contents from the FIO endpoint: https://rest.fnar.net/systemstars
 * Replace `public/planet_data.json` with the contents of: https://rest.fnar.net/planet/allplanets/full
-* `public/systemstars.json` is an edited version of `prun_universe_data` that has star luminosity - not clear where that comes from, but the data is in FIO for individual stars, like https://rest.fnar.net/systemstars/star/HM-223
+* `public/systemstars.json` is an edited version of `prun_universe_data` that has star luminosity - this is manually added, the data is in FIO for individual stars, like https://rest.fnar.net/systemstars/star/HM-223. This is not expected to change very often therefore this file can remain static unless new systems are added to the game.
 * At the moment the PrUn_Universe_map svg files need to be hand edited in inkscape with new data.
-* `public/gateways.json` is hand created.
-* `public/population_data.json` - ??
+* `public/gateways.json` is hand created until an endpoint becomes available.
+* `public/population_data.json` - Server side script which regularly calls "https://rest.fnar.net/csv/infrastructure/allreports" and saves only the last, relevant entry and saves it to the population_data.json
 * Run the python script  `parse_svg.py` to extract positions in the SVG into `graph_data.json`
 
 
