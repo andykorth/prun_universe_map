@@ -2,7 +2,7 @@ import React, { useEffect, useCallback } from 'react';
 import * as d3 from 'd3';
 import { useDataPoints } from '../contexts/DataPointContext';
 
-const DataPointOverlay = ({ mapRef }) => {
+const DataPointOverlay = ({ mapRef, mapRenderKey }) => {
   const {
     meteorDensityData,
     luminosityData,
@@ -171,7 +171,7 @@ const DataPointOverlay = ({ mapRef }) => {
       addBarHoverEffects(densityBar, 'Density', density, densityColorScale);
       addBarHoverEffects(luminosityBar, 'Luminosity', luminosity, luminosityColorScale);
     });
-  }, [mapRef, isOverlayVisible, isLoading, error, meteorDensityData, luminosityData, systemNames, maxValues]);
+  }, [mapRef, mapRenderKey, isOverlayVisible, isLoading, error, meteorDensityData, luminosityData, systemNames, maxValues]);
 
   useEffect(() => {
     renderOverlay();
