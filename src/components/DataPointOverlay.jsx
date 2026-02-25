@@ -2,6 +2,7 @@ import React, { useEffect, useCallback } from 'react';
 import * as d3 from 'd3';
 import { useDataPoints } from '../contexts/DataPointContext';
 
+
 const DataPointOverlay = ({ mapRef, mapRenderKey }) => {
   const {
     meteorDensityData,
@@ -171,6 +172,10 @@ const DataPointOverlay = ({ mapRef, mapRenderKey }) => {
       addBarHoverEffects(densityBar, 'Density', density, densityColorScale);
       addBarHoverEffects(luminosityBar, 'Luminosity', luminosity, luminosityColorScale);
     });
+// The mapRenderKey is used to trigger a re-render of the overlay when the map updates, otherwise
+// the overlay can render without a map.current.g, and it won't display anything, and it won't
+// re-render once it actually has a mapRef
+// eslint-disable-next-line
   }, [mapRef, mapRenderKey, isOverlayVisible, isLoading, error, meteorDensityData, luminosityData, systemNames, maxValues]);
 
   useEffect(() => {
