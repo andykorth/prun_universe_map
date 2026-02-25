@@ -4,12 +4,7 @@ import { colors } from '../config/config';
 import { calculate3DDistance, getDistanceColor } from './distanceUtils';
 import { MAP_MODES, GATEWAY_STRATEGIES } from '../contexts/MapModeContext';
 
-export const findShortestPath = (graph, system1, system2, highlightPath) => {
-  if (system1 === 'rect1' || system2 === 'rect1') {
-    console.error('Invalid system selection for pathfinding:', system1, system2);
-    return;
-  }
-
+const buildGraphNodes = (graph) => {
   const graphNodes = {};
   graph.edges.forEach(edge => {
     if (!graphNodes[edge.start]) graphNodes[edge.start] = {};
@@ -17,11 +12,45 @@ export const findShortestPath = (graph, system1, system2, highlightPath) => {
     graphNodes[edge.start][edge.end] = edge.distance;
     graphNodes[edge.end][edge.start] = edge.distance;
   });
+  return graphNodes;
+};
+
+export const calculatePathDistance = (graph, system1, system2, universeData) => {
+  if (!graph?.edges || !universeData) return null;
+  try {
+    const path = find_path(buildGraphNodes(graph), system1, system2);
+    let total = 0;
+    for (let i = 0; i < path.length - 1; i++) {
+      const s1 = universeData[path[i]]?.[0];
+      const s2 = universeData[path[i + 1]]?.[0];
+      if (s1 && s2) total += calculate3DDistance(s1, s2);
+    }
+    return total;
+  } catch {
+    return null;
+  }
+};
+
+export const findShortestPath = (graph, system1, system2, highlightPath, universeData) => {
+  if (system1 === 'rect1' || system2 === 'rect1') {
+    console.error('Invalid system selection for pathfinding:', system1, system2);
+    return;
+  }
 
   try {
-    const path = find_path(graphNodes, system1, system2);
-    console.log('Found Path:', path)
-    highlightPath(path, system2);
+    const path = find_path(buildGraphNodes(graph), system1, system2);
+    console.log('Found Path:', path);
+
+    let totalDistance = 0;
+    if (universeData) {
+      for (let i = 0; i < path.length - 1; i++) {
+        const sys1 = universeData[path[i]]?.[0];
+        const sys2 = universeData[path[i + 1]]?.[0];
+        if (sys1 && sys2) totalDistance += calculate3DDistance(sys1, sys2);
+      }
+    }
+
+    highlightPath(path, system2, totalDistance);
   } catch (error) {
     console.error('Error finding path:', error);
   }
@@ -64,6 +93,8 @@ export const resetGraphState = (nextSelectedSystem, activeMode, gatewayData, uni
       .attr('stroke', colors.resetPathStroke)
       .attr('stroke-width', colors.resetPathStrokeWidth);
   });
+
+  svg.select('g').selectAll('.path-distance-label').remove();
 };
 
 export const renderGatewayVisuals = (svg, gatewayData, universeData) => {
@@ -145,8 +176,8 @@ export const renderGatewayVisuals = (svg, gatewayData, universeData) => {
     });
 };
 
-export const highlightPath = (path, systemSelected) => {
-  resetGraphState(systemSelected, 'STANDARD', null, null); 
+export const highlightPath = (path, systemSelected, totalDistance = 0) => {
+  resetGraphState(systemSelected, 'STANDARD', null, null);
 
   path.forEach(system => {
     const systemNode = d3.select(`#${CSS.escape(system)}`);
@@ -171,6 +202,35 @@ export const highlightPath = (path, systemSelected) => {
     const endSystem = path[path.length - 1];
     highlightSelectedSystem(null, startSystem, [startSystem, endSystem]);
     highlightSelectedSystem(null, endSystem, [startSystem, endSystem]);
+  }
+
+  if (path.length >= 2 && totalDistance > 0) {
+    const midSystem = path[Math.floor(path.length / 2)];
+    const midNode = d3.select(`#${CSS.escape(midSystem)}`);
+
+    if (!midNode.empty()) {
+      const x = parseFloat(midNode.attr('x'));
+      const y = parseFloat(midNode.attr('y'));
+      const width = parseFloat(midNode.attr('width'));
+      const height = parseFloat(midNode.attr('height'));
+      const jumps = path.length - 1;
+
+      d3.select('#map-container svg').select('g')
+        .append('text')
+        .attr('class', 'path-distance-label')
+        .attr('x', x + width / 2)
+        .attr('y', y - height)
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'auto')
+        .attr('fill', colors.pathStroke)
+        .attr('stroke', '#000000')
+        .attr('stroke-width', '3px')
+        .attr('paint-order', 'stroke')
+        .attr('font-size', '10px')
+        .attr('font-weight', 'bold')
+        .style('pointer-events', 'none')
+        .text(`${totalDistance.toFixed(1)} pc · ${jumps}j`);
+    }
   }
 };
 

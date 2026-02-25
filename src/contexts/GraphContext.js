@@ -79,8 +79,8 @@ export const GraphProvider = ({ children }) => {
   }, []);
 
   const findShortestPath = useCallback((system1, system2) => {
-    findShortestPathUtil(graph, system1, system2, highlightPath);
-  }, [graph]);
+    findShortestPathUtil(graph, system1, system2, highlightPath, universeData);
+  }, [graph, universeData]);
 
 
   return (

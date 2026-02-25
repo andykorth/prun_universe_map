@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useCallback, useEffect } from 'react';
 import { GraphContext } from './GraphContext';
 import { calculate3DDistance, findClosestSystems, findBestMidpoints } from '../utils/distanceUtils';
+import { calculatePathDistance } from '../utils/graphUtils';
 
 export const MAP_MODES = {
   STANDARD: 'STANDARD',
@@ -15,7 +16,7 @@ export const GATEWAY_STRATEGIES = {
 const MapModeContext = createContext();
 
 export const MapModeProvider = ({ children }) => {
-  const { universeData } = useContext(GraphContext); 
+  const { universeData, graph } = useContext(GraphContext);
   
   const [activeMode, setActiveMode] = useState(MAP_MODES.STANDARD);
   const [existingGateways, setExistingGateways] = useState([]);
@@ -87,21 +88,18 @@ export const MapModeProvider = ({ children }) => {
 
   // Updated: Check for duplicates before adding
   const addPlannedGateway = useCallback((gateway) => {
-    setGatewayData(prev => {
-        // Simple check: same source/target IDs (order independent)
-        const exists = prev.plannedGateways.some(g => 
-            (g.sourceId === gateway.sourceId && g.targetId === gateway.targetId) ||
-            (g.sourceId === gateway.targetId && g.targetId === gateway.sourceId)
-        );
-        
-        if (exists) return prev; // Do nothing if exists
+    const pathDistance = calculatePathDistance(graph, gateway.sourceId, gateway.targetId, universeData);
+    const enriched = { ...gateway, pathDistance };
 
-        return {
-            ...prev,
-            plannedGateways: [...prev.plannedGateways, gateway]
-        };
+    setGatewayData(prev => {
+        const exists = prev.plannedGateways.some(g =>
+            (g.sourceId === enriched.sourceId && g.targetId === enriched.targetId) ||
+            (g.sourceId === enriched.targetId && g.targetId === enriched.sourceId)
+        );
+        if (exists) return prev;
+        return { ...prev, plannedGateways: [...prev.plannedGateways, enriched] };
     });
-  }, []);
+  }, [graph, universeData]);
 
   // New: Add Dual Route (A->Mid + Mid->B)
   const addDualRoute = useCallback((originA, originB, midpoint) => {
@@ -111,16 +109,18 @@ export const MapModeProvider = ({ children }) => {
           targetId: midpoint.SystemId,
           source: originA.Name,
           target: midpoint.Name,
-          distance: calculate3DDistance(originA, midpoint).toFixed(2)
+          distance: calculate3DDistance(originA, midpoint).toFixed(2),
+          pathDistance: calculatePathDistance(graph, originA.SystemId, midpoint.SystemId, universeData)
       };
-      
+
       const route2 = {
           id: Date.now().toString() + "_2",
           sourceId: midpoint.SystemId,
           targetId: originB.SystemId,
           source: midpoint.Name,
           target: originB.Name,
-          distance: calculate3DDistance(midpoint, originB).toFixed(2)
+          distance: calculate3DDistance(midpoint, originB).toFixed(2),
+          pathDistance: calculatePathDistance(graph, midpoint.SystemId, originB.SystemId, universeData)
       };
 
       // Add both using functional update to ensure state consistency
@@ -135,7 +135,7 @@ export const MapModeProvider = ({ children }) => {
 
           return { ...prev, plannedGateways: nextList };
       });
-  }, []);
+  }, [graph, universeData]);
 
   const removePlannedGateway = useCallback((gatewayId) => {
     setGatewayData(prev => ({

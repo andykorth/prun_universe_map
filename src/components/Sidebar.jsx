@@ -546,15 +546,25 @@ const Sidebar = () => {
               <p className="placeholder-text">No gateways planned yet.</p>
           ) : (
               <ul className="planned-list" style={{listStyle:'none', padding:0}}>
-                  {gatewayData.plannedGateways.map(gw => (
-                      <li key={gw.id} className="planned-gateway-item">
-                          <span>{gw.source} ↔ {gw.target}</span>
-                          <span className="dist">({gw.distance}pc)</span>
-                          <button className="delete-gw-btn" onClick={() => removePlannedGateway(gw.id)}>
-                              <X size={14} />
-                          </button>
+                  {gatewayData.plannedGateways.map(gw => {
+                      const gwDist = parseFloat(gw.distance);
+                      const savings = gw.pathDistance ? ((gw.pathDistance - gwDist) / gw.pathDistance * 100) : null;
+                      return (
+                      <li key={gw.id} className="planned-gateway-item" style={{flexDirection:'column', alignItems:'stretch'}}>
+                          <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                              <span>{gw.source} ↔ {gw.target}</span>
+                              <button className="delete-gw-btn" onClick={() => removePlannedGateway(gw.id)}>
+                                  <X size={14} />
+                              </button>
+                          </div>
+                          <div style={{display:'flex', justifyContent:'space-between', fontSize:'11px', marginTop:'2px', color:'#aaa'}}>
+                              <span>Direct: {gw.distance} pc</span>
+                              {gw.pathDistance != null && <span>FTL Path: {gw.pathDistance.toFixed(1)} pc</span>}
+                              {savings != null && savings > 0 && <span style={{color:'#66ff66', fontWeight:'bold'}}>Saves {savings.toFixed(0)}%</span>}
+                          </div>
                       </li>
-                  ))}
+                      );
+                  })}
               </ul>
           )}
       </div>
